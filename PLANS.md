@@ -48,7 +48,7 @@ Effort ranges are initial engineering estimates. They exclude release administra
 - **Activities/contracts:** make requirements traceable to use cases, OpenSpec capabilities, WPs, Issues, PRs, and checks; document what is verified versus proposed.
 - **Acceptance:** repository instructions and templates are present; OpenSpec validates; README and native app icon use maintainer branding; CI definitions cover frontend checks on supported hosted OS runners; each OpenSpec task maps to a native sub-issue under its WP; GitHub setup script is idempotent; no editor feature behavior is added.
 - **Tests/DoD:** validate Markdown/OpenSpec/workflow syntax, shell syntax, and run only scaffold checks that can execute locally; CI check names are recorded before protection requires them; all linked documents resolve.
-- **Risk:** empty Git history prevents branch creation and protection. The maintainer must create the first commit and push **main** and **dev** before the setup script can protect them.
+- **Risk:** a mismatch between required check names and CI jobs could block merges. Verify the exact Actions names on a passing PR before running the setup script; the current `main` and `dev` protections were API-verified on 2026-11-07.
 - **Issue / PR:** WP-00 Engineering foundation; one PR to **dev**, then promotion with the sprint batch.
 
 ### WP-01: Tauri and Weave compatibility spike

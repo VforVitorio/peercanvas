@@ -11,13 +11,14 @@ The app remains a minimal engineering shell. No editor behavior, persistence, co
 ## Current repository state
 
 - Public repository: [VforVitorio/peercanvas](https://github.com/VforVitorio/peercanvas).
-- `main` is the default stable branch; `dev` is the integration branch. Both contain the first skeletal commit `360b4a9`, whose author and committer resolve to `VforVitorio`.
-- The current setup changes are on `feature/weave-shadcn-foundation` in [PR #61](https://github.com/VforVitorio/peercanvas/pull/61), targeting `dev`. The PR is open and awaits maintainer review/merge.
+- `main` is the default stable branch; `dev` is the integration branch. The first skeletal commit was `360b4a9`, whose author and committer resolve to `VforVitorio`.
+- The repository setup changes entered `dev` through [PR #61](https://github.com/VforVitorio/peercanvas/pull/61). Use the protected `dev` → `main` promotion flow for stable updates; GitHub branch refs and PRs are authoritative for live state.
 - The public [PeerCanvas Workflow Board](https://github.com/users/VforVitorio/projects/4/views/2) tracks 13 WP parent issues, 41 task sub-issues, and eight sprint milestones.
 - Issue descriptions for WP-01/#3 and WP-09/#9, plus child issues #15 and #44, now state the planned Weave/shadcn reuse boundaries.
 - GitHub branch protection is active and API-verified on `main` and `dev`: pull requests required, strict checks `lint`, `format`, `typecheck`, `test`, `frontend-build`, `native-linux`, `native-macos`, `native-windows`, conversation resolution, admin enforcement, and no force pushes or branch deletion. Approval count is zero for the solo-maintainer workflow.
-- CI run [42410320910](https://github.com/VforVitorio/peercanvas/actions/runs/42410320910) passed the eight required checks, including Tauri shell builds on Linux, macOS, and Windows. Every new commit must pass its own required checks before merge.
-- Seven Dependabot alerts are open on the default branch: one high, five moderate, and one low. The high alert concerns Vite. They are tracked under WP-11.3, issue #50; dependency remediation is not part of PR #61.
+- CI run [42411023720](https://github.com/VforVitorio/peercanvas/actions/runs/42411023720) passed all 14 reported checks, including the eight required checks and Tauri shell builds on Linux, macOS, and Windows. Every new commit must pass its own required checks before merge.
+- Child issue #17 is closed after native CI and branch protection were verified.
+- GitHub reported seven Dependabot alerts on the default branch on 2026-11-07: one high, five moderate, and one low. The high alert concerns Vite. They are tracked under WP-11.3, issue #50; dependency remediation is a release-hardening task.
 
 ## Architecture and reuse decisions
 
@@ -54,6 +55,6 @@ The app remains a minimal engineering shell. No editor behavior, persistence, co
 
 ## Next steps
 
-1. Review and merge PR #61 as maintainer. Its merge will close child issue #17. The repository policy keeps merges maintainer-owned.
+1. Follow the protected `dev` → `main` PR flow for stable promotions; the live PR state is recorded on GitHub.
 2. Keep the first product implementation narrowly scoped to WP-01/#3: mount/adapt the Weave frontend and record platform compatibility evidence. Start only after explicit implementation approval; do not apply the entire foundation plan as one change.
-3. Resolve the seven open dependency alerts under WP-11.3/#50 before release.
+3. Resolve the dependency alerts tracked under WP-11.3/#50 before release.
