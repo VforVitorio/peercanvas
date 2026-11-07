@@ -15,10 +15,11 @@ The logo, symbol, and app icon PNGs are first-party brand assets supplied by the
 
 ## Project references
 
-- [Weave.js](https://github.com/InditexTech/weavejs) is the planned canvas foundation. PeerCanvas is independent and does not imply endorsement by InditexTech.
+- [Weave.js](https://github.com/InditexTech/weavejs) and [weavejs-frontend](https://github.com/InditexTech/weavejs-frontend) are planned sources for the canvas engine and selected frontend components. Both upstream repositories declare Apache-2.0: [Weave.js license](https://github.com/InditexTech/weavejs/blob/main/LICENSE) and [frontend license](https://github.com/InditexTech/weavejs-frontend/blob/main/LICENSE). PeerCanvas is independent and does not imply endorsement by InditexTech.
+- [shadcn chatbot template](https://github.com/shadcn-ui/chatbot-template) is the planned source for adapted chat UI components and interaction patterns; its upstream repository declares [MIT](https://github.com/shadcn-ui/chatbot-template/blob/main/LICENSE). PeerCanvas will not adopt its Next.js application routes or Vercel AI SDK backend.
 - [OpenPencil](https://github.com/open-pencil/open-pencil) is an architectural reference for peer collaboration, not a code dependency.
 - [draw.io](https://github.com/jgraph/drawio) is an interchange target, not an affiliation.
 - [OpenSpec](https://github.com/Fission-AI/OpenSpec) supplies the specification workflow.
 - Public Codex client repositories listed in [Codex integration research](docs/architecture/codex-integration.md) are implementation references, not official SDKs.
 
-Each distributed dependency and asset remains under its own license. Required notices will be added before redistribution.
+No source code from these three planned reuse projects is in the current scaffold. Before adapting code, record the upstream commit, retain the applicable license and copyright notices, and review notices for any copied component dependencies or assets. Each distributed dependency and asset remains under its own license.
