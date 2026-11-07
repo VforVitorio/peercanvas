@@ -4,14 +4,14 @@ set -euo pipefail
 REPO="${GITHUB_REPOSITORY:-VforVitorio/peercanvas}"
 BRANCHES=(main dev)
 REQUIRED_CONTEXTS=(
-  "CI / lint"
-  "CI / format"
-  "CI / typecheck"
-  "CI / test"
-  "CI / frontend-build"
-  "CI / native-linux"
-  "CI / native-macos"
-  "CI / native-windows"
+  "lint"
+  "format"
+  "typecheck"
+  "test"
+  "frontend-build"
+  "native-linux"
+  "native-macos"
+  "native-windows"
 )
 LABELS=(
   "bug|d73a4a|Something is not working"
@@ -51,6 +51,17 @@ gh auth status >/dev/null
 gh repo view "$REPO" --json name >/dev/null
 
 printf 'Configuring GitHub repository %s\n' "$REPO"
+
+for context in "${REQUIRED_CONTEXTS[@]}"; do
+  explicit_job="  $context:"
+  matrix_job="check: $context"
+  if ! grep -Fq "$explicit_job" .github/workflows/ci.yml || ! grep -Fq "name: $context" .github/workflows/ci.yml; then
+    if [[ "$context" != native-* ]] || ! grep -Fq "  native-build:" .github/workflows/ci.yml || ! grep -Fq "$matrix_job" .github/workflows/ci.yml; then
+      printf 'Required check %s must match a named job in .github/workflows/ci.yml.\n' "$context" >&2
+      exit 1
+    fi
+  fi
+done
 
 if "$DRY_RUN"; then
   printf '[dry-run] repository merge and issue settings\n'
@@ -104,39 +115,15 @@ for branch in "${BRANCHES[@]}"; do
     continue
   fi
 
-  sha="$(gh api "repos/$REPO/branches/$branch" --jq .commit.sha)"
-  checks="$(gh api "repos/$REPO/commits/$sha/check-runs" --jq '.check_runs[] | "\(.name)\t\(.conclusion // "")"')"
-  missing=()
-  for context in "${REQUIRED_CONTEXTS[@]}"; do
-    status="$(printf '%s\n' "$checks" | awk -F '\t' -v name="$context" '$1 == name { result=$2 } END { print result }')"
-    if [[ "$status" != "success" ]]; then
-      missing+=("$context")
-    fi
-  done
-  if [[ "${#missing[@]}" -gt 0 ]]; then
-    printf 'Skipping protection for %s: required CI contexts are missing or not successful on %s: %s\n' "$branch" "$sha" "${missing[*]}"
-    continue
-  fi
-
   if "$DRY_RUN"; then
     printf '[dry-run] apply strict PR protection to %s\n' "$branch"
   else
-    gh api -X PUT "repos/$REPO/branches/$branch/protection" --input - >/dev/null <<'JSON'
+    contexts_json="$(printf '"%s",' "${REQUIRED_CONTEXTS[@]}")"
+    contexts_json="[${contexts_json%,}]"
+    payload="$(cat <<JSON
 {
-  "required_status_checks": {
-    "strict": true,
-    "contexts": [
-      "CI / lint",
-      "CI / format",
-      "CI / typecheck",
-      "CI / test",
-      "CI / frontend-build",
-      "CI / native-linux",
-      "CI / native-macos",
-      "CI / native-windows"
-    ]
-  },
-  "enforce_admins": false,
+  "required_status_checks": {"strict": true, "contexts": $contexts_json},
+  "enforce_admins": true,
   "required_pull_request_reviews": {
     "required_approving_review_count": 0,
     "dismiss_stale_reviews": true,
@@ -149,6 +136,8 @@ for branch in "${BRANCHES[@]}"; do
   "allow_deletions": false
 }
 JSON
+    )"
+    printf '%s\n' "$payload" | gh api -X PUT "repos/$REPO/branches/$branch/protection" --input - >/dev/null
   fi
 done
 

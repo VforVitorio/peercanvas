@@ -1,13 +1,13 @@
 # Tasks
 
-All tasks below are future implementation work. The current request creates the plan only; do not mark a task complete or start product implementation without explicit maintainer approval. Estimates, sprint placement, and Issues are tracked in PLANS.md and GitHub.
+Unchecked tasks below are future implementation work. Repository setup tasks may be marked complete when their acceptance checks pass; this does not authorize product feature implementation. Estimates, sprint placement, and Issues are tracked in PLANS.md and GitHub.
 
 ## 1. Engineering foundation and compatibility gate (WP-00, WP-01)
 
 - [ ] 1.1 Confirm the proposal, all capability specs, architecture, ADRs, and work-package links agree; verify with openspec validate and a traceability review. — GitHub Issue [#14](https://github.com/VforVitorio/peercanvas/issues/14)
-- [ ] 1.2 Build and run the Tauri shell on Windows, macOS, and Linux with the pinned Weave renderer; verify each platform with a recorded canvas smoke test for render, selection, and one edit. — GitHub Issue [#15](https://github.com/VforVitorio/peercanvas/issues/15)
+- [ ] 1.2 Adapt the required components from the official weavejs-frontend and build/run the Tauri shell with the pinned Weave renderer on Windows, macOS, and Linux; verify each platform with a recorded canvas smoke test for render, selection, and one edit. — GitHub Issue [#15](https://github.com/VforVitorio/peercanvas/issues/15)
 - [ ] 1.3 Record the actual OS, WebView, Rust, React, and Weave compatibility matrix; verify it is linked from the support documentation and ADR-0001. — GitHub Issue [#16](https://github.com/VforVitorio/peercanvas/issues/16)
-- [ ] 1.4 Review native CI, required check names, GitHub branch flow, and security settings; verify CI check runs are successful before applying branch protection. — GitHub Issue [#17](https://github.com/VforVitorio/peercanvas/issues/17)
+- [x] 1.4 Review native CI, required check names, GitHub branch flow, and security settings; verify CI check runs are successful before applying branch protection. — GitHub Issue [#17](https://github.com/VforVitorio/peercanvas/issues/17)
 - [ ] 1.5 Prepare the branded editor-shell direction from the maintainer-supplied assets; verify brand provenance, Weave.js canvas hierarchy, accessibility constraints, and the honest placeholder state in a reviewable design brief without implementing editor controls. — GitHub Issue [#18](https://github.com/VforVitorio/peercanvas/issues/18)
 
 ## 2. Canonical document and local persistence (WP-02, WP-03)
@@ -49,7 +49,7 @@ All tasks below are future implementation work. The current request creates the 
 
 - [ ] 6.1 Recheck current Sign in with ChatGPT eligibility, registration, terms, supported models, preview limits, callback flow, and token refresh; verify the decision with official docs and a documented auth test plan. — GitHub Issue [#42](https://github.com/VforVitorio/peercanvas/issues/42)
 - [ ] 6.2 Implement native credential storage and Codex app-server lifecycle only if the auth gate passes; verify token redaction, refresh, sign-out, and child-process isolation without exposing credentials to the renderer. — GitHub Issue [#43](https://github.com/VforVitorio/peercanvas/issues/43)
-- [ ] 6.3 Implement optional chat streaming, cancellation, local conversation history, and explicit context selection; verify with a mock provider and disabled/offline flows. — GitHub Issue [#44](https://github.com/VforVitorio/peercanvas/issues/44)
+- [ ] 6.3 Adapt the shadcn chatbot template's UI and interaction patterns for PeerCanvas, then implement optional chat streaming, cancellation, local conversation history, and explicit context selection without importing its Next.js routes or Vercel AI SDK backend; verify with a mock provider and disabled/offline flows. — GitHub Issue [#44](https://github.com/VforVitorio/peercanvas/issues/44)
 - [ ] 6.4 Implement validated MCP read/search tools scoped to an explicitly selected document; verify schema, scope, and bounded-output tests. — GitHub Issue [#45](https://github.com/VforVitorio/peercanvas/issues/45)
 - [ ] 6.5 Implement MCP mutation proposals with preview, approval, denial, cancellation, and audit outcomes; verify approval and rejection do not bypass the command boundary. — GitHub Issue [#46](https://github.com/VforVitorio/peercanvas/issues/46)
 - [ ] 6.6 Document provider data flow, limits, permissions, and alternatives; verify the user-facing privacy notice agrees with the current auth behavior. — GitHub Issue [#47](https://github.com/VforVitorio/peercanvas/issues/47)

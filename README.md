@@ -20,20 +20,22 @@ PeerCanvas is not an official project of Weave.js, InditexTech, OpenPencil, draw
 
 PeerCanvas is in its engineering-foundation stage. The current application is a minimal Tauri/React shell. Diagram editing, durable document storage, collaboration, import/export, and AI tools are not implemented.
 
-| Capability | Status |
-|---|---|
-| Tauri desktop shell | Minimal shell builds on macOS; Windows and Linux CI builds are configured |
-| Weave.js canvas | Selected candidate; native compatibility spike is planned |
-| Local diagram editing and persistence | Specified; not implemented |
-| draw.io import/export | Compatibility subset planned; no support claimed yet |
-| Peer-to-peer sessions | Yjs and Trystero/WebRTC proposed; network behavior not verified |
-| Codex and MCP | Optional integration researched; not implemented |
+| Capability                            | Status                                                                                                     |
+| ------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
+| Tauri desktop shell                   | Minimal shell builds on macOS; native CI builds are configured for Ubuntu, macOS, and Windows              |
+| Weave.js canvas                       | The official renderer and frontend are the planned starting point; native compatibility remains unverified |
+| Local diagram editing and persistence | Specified; not implemented                                                                                 |
+| draw.io import/export                 | Compatibility subset planned; no support claimed yet                                                       |
+| Peer-to-peer sessions                 | Yjs and Trystero/WebRTC proposed; network behavior not verified                                            |
+| Codex and MCP                         | Optional integration researched; not implemented                                                           |
 
 The project plan tracks 13 working-package parent issues, 41 task sub-issues, and eight sprint milestones on the [PeerCanvas Workflow Board](https://github.com/users/VforVitorio/projects/4/views/2). No product feature should be treated as complete until its issue acceptance criteria and verification evidence are recorded.
 
 ## Architecture direction
 
-The planned desktop stack is Tauri 2, React 18, TypeScript, Vite, and Weave.js. Weave.js is the proposed canvas engine; its integration with the Tauri webviews still needs a Windows/macOS/Linux compatibility check.
+The planned desktop stack is Tauri 2, React 18, TypeScript, Vite, and Weave.js. The implementation will reuse the official [Weave.js renderer](https://github.com/InditexTech/weavejs) and selectively adapt UI components from [weavejs-frontend](https://github.com/InditexTech/weavejs-frontend). It will keep the Tauri/Vite application structure instead of importing the example app's TanStack Start runtime. Compatibility with each Tauri WebView still needs to be proven.
+
+The optional assistant will adapt the [shadcn chatbot template](https://github.com/shadcn-ui/chatbot-template) for PeerCanvas conversations. Its chat components and interaction patterns are a starting point; its Next.js routes and Vercel AI SDK backend are not part of the planned stack.
 
 The document model will be local-first. Optional collaboration is planned around Yjs with a replaceable Trystero/WebRTC transport. Connections may require signaling relays or TURN depending on network conditions; direct connectivity is not guaranteed.
 
@@ -43,26 +45,26 @@ The Codex assistant is optional. OpenAI documents a Sign in with ChatGPT OAuth p
 
 Use Node.js 24 and the stable Rust toolchain. Native development also requires the platform dependencies in the [Tauri prerequisites](https://v2.tauri.app/start/prerequisites/).
 
-~~~sh
+```sh
 npm ci
 npm run dev
-~~~
+```
 
 Run the desktop shell:
 
-~~~sh
+```sh
 npm run tauri -- dev
-~~~
+```
 
 Build the native shell without creating an installer:
 
-~~~sh
+```sh
 npm run tauri -- build --no-bundle
-~~~
+```
 
 ## Checks
 
-~~~sh
+```sh
 npm run format:check
 npm run lint
 npm run typecheck
@@ -71,7 +73,7 @@ npm run build
 cargo fmt --manifest-path src-tauri/Cargo.toml --check
 cargo test --manifest-path src-tauri/Cargo.toml
 cargo clippy --manifest-path src-tauri/Cargo.toml --all-targets -- -D warnings
-~~~
+```
 
 The GitHub Actions workflows run frontend checks and native builds on Ubuntu, macOS, and Windows. A successful frontend build does not prove that a native webview, deep link, or peer network path works.
 
@@ -98,19 +100,20 @@ The GitHub Actions workflows run frontend checks and native builds on Ubuntu, ma
 
 ## Acknowledgments and references
 
-PeerCanvas is independently developed. These projects informed the proposed technology choices, format support, workflows, or interface research; they do not endorse PeerCanvas. No source code has been copied from the listed reference applications.
+PeerCanvas is independently developed. These projects informed the proposed technology choices, format support, workflows, or interface research; they do not endorse PeerCanvas. No third-party application source has been copied into the current scaffold. The plan is to reuse selected Weave.js frontend code and adapt the shadcn chatbot template; their licenses and notices will be preserved when that work begins.
 
-| Project or documentation | How it informed the plan |
-|---|---|
-| [Tauri](https://v2.tauri.app/) | Cross-platform desktop shell and native integration |
-| [Weave.js](https://github.com/InditexTech/weavejs) | Proposed diagram rendering and editing engine |
-| [OpenPencil](https://github.com/open-pencil/open-pencil) | Peer-collaboration architecture reference |
-| [Yjs](https://docs.yjs.dev/) and [Trystero](https://trystero.dev/) | Proposed document synchronization and WebRTC transport |
-| [draw.io](https://github.com/jgraph/drawio) | Document interchange target and file-format reference |
-| [OpenSpec](https://github.com/Fission-AI/OpenSpec) | Spec-driven change workflow |
-| [shadcn chatbot template](https://github.com/shadcn-ui/chatbot-template) | Chat interaction and visual-pattern reference; its Next.js architecture is not adopted |
-| [OpenAI Sign in with ChatGPT and Codex app-server docs](https://developers.openai.com/siwc/token-sharing-open-source) | Optional subscription-authentication research |
-| [t3code](https://github.com/pingdotgg/t3code), [CodexMonitor](https://github.com/Dimillian/CodexMonitor), and [CodexGui](https://github.com/wieslawsoltes/CodexGui) | Public examples reviewed for Codex app-server integration patterns |
+| Project or documentation                                                                                                                                            | How it informed the plan                                                                                           |
+| ------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
+| [Tauri](https://v2.tauri.app/)                                                                                                                                      | Cross-platform desktop shell and native integration                                                                |
+| [Weave.js](https://github.com/InditexTech/weavejs)                                                                                                                  | Planned canvas renderer and editing foundation (Apache-2.0)                                                        |
+| [weavejs-frontend](https://github.com/InditexTech/weavejs-frontend)                                                                                                 | Planned source for selectively adapted canvas UI components (Apache-2.0); the example app runtime is not adopted   |
+| [OpenPencil](https://github.com/open-pencil/open-pencil)                                                                                                            | Peer-collaboration architecture reference                                                                          |
+| [Yjs](https://docs.yjs.dev/) and [Trystero](https://trystero.dev/)                                                                                                  | Proposed document synchronization and WebRTC transport                                                             |
+| [draw.io](https://github.com/jgraph/drawio)                                                                                                                         | Document interchange target and file-format reference                                                              |
+| [OpenSpec](https://github.com/Fission-AI/OpenSpec)                                                                                                                  | Spec-driven change workflow                                                                                        |
+| [shadcn chatbot template](https://github.com/shadcn-ui/chatbot-template)                                                                                            | Planned chat UI and interaction starting point (MIT); its Next.js routes and Vercel AI SDK backend are not adopted |
+| [OpenAI Sign in with ChatGPT and Codex app-server docs](https://developers.openai.com/siwc/token-sharing-open-source)                                               | Optional subscription-authentication research                                                                      |
+| [t3code](https://github.com/pingdotgg/t3code), [CodexMonitor](https://github.com/Dimillian/CodexMonitor), and [CodexGui](https://github.com/wieslawsoltes/CodexGui) | Public examples reviewed for Codex app-server integration patterns                                                 |
 
 ## License
 
