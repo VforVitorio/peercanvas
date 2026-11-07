@@ -6,10 +6,11 @@ Status: proposed architecture baseline, 2026-11-07. This is a design, not eviden
 
 - Desktop shell: Tauri 2.12.x candidate with Rust.
 - UI: React 18.3.1, TypeScript, and Vite 8. React 18 is retained because the selected Weave renderer's published peer dependency range excludes React 19.
-- Canvas engine: Weave.js 5.7.1 candidate, including its React renderer and Konva integration.
+- Canvas engine: Weave.js 5.7.1 with its React renderer and Konva integration; selectively reuse canvas UI components from the official `weavejs-frontend` example.
 - Document collaboration candidate: Yjs state; an adapter tentatively named WeaveStoreP2P; Trystero over WebRTC.
 - Platforms: Windows, macOS, Linux. Tauri uses each platform's WebView; exact minimum versions and native behavior must be measured.
 - AI candidate: optional Codex app-server process using Sign in with ChatGPT for eligible open-source/local-app plan usage, subject to preview terms and registration.
+- Chat UI: adapt the shadcn chatbot template's React components and interaction patterns while retaining the Tauri/Vite shell and PeerCanvas provider boundary; do not adopt its Next.js routes or Vercel AI SDK backend.
 
 The compatibility spike in WP-01 is a gate. A package version in this list is not proof that the integrated app works.
 
@@ -122,6 +123,8 @@ The provider returns a proposed operation list. The MCP/assistant adapter parses
 
 - Tauri owns native integration; React runs inside the system WebView. Do not assume Chromium behavior on every OS.
 - The renderer is a replaceable adapter around the canonical model. Reuse Weave capabilities where verified rather than rebuilding them.
+- The official `weavejs-frontend` is a source for selective UI adaptation, not an application runtime dependency. Preserve Apache-2.0 notices for any code reused.
+- The shadcn chatbot template is a source for chat UI adaptation, not a provider/backend choice. Preserve its MIT notice for any code reused.
 - Local-only functionality has no network dependency. Collaboration and AI are optional adapters.
 - P2P does not mean zero infrastructure. Signaling may use public or configured relays; NAT/firewall conditions may require TURN.
 - The invitation secret is a bearer capability. A link alone does not establish a person's identity or guarantee that an admitted peer cannot copy data.
@@ -145,6 +148,8 @@ The provider returns a proposed operation list. The MCP/assistant adapter parses
 - [Weave.js 5.7.1 release](https://github.com/InditexTech/weavejs/releases/tag/5.7.1)
 - [Weave React package metadata](https://github.com/InditexTech/weavejs/blob/5.7.1/code/packages/react/package.json)
 - [Weave setup guide](https://github.com/InditexTech/weavejs/blob/5.7.1/docs/src/modules/sdk/pages/setup.adoc)
+- [weavejs-frontend](https://github.com/InditexTech/weavejs-frontend)
+- [shadcn chatbot template](https://github.com/shadcn-ui/chatbot-template)
 - [Tauri WebView versions](https://v2.tauri.app/reference/webview-versions/)
 - [Tauri Vite setup](https://v2.tauri.app/start/frontend/vite/)
 - [Yjs document updates](https://docs.yjs.dev/api/document-updates)

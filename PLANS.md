@@ -10,7 +10,7 @@ This file is the canonical roadmap and work-package ledger. Product behavior and
 - Use merge commits. Disable squash and rebase merges. Delete a merged feature branch.
 - Do not create **test** as a long-lived branch.
 - One parent issue per work package. Each OpenSpec task is a native child issue under that parent; implementation PRs close the relevant child issue and reference the parent WP. The parent closes only when all children and parent acceptance criteria are complete. Do not open placeholder PRs.
-- Codex does not commit, push, merge, or add AI attribution. The maintainer owns commits and merges.
+- Agents commit and push only when the user explicitly authorizes those actions for the task; the maintainer owns merges. Never add AI attribution.
 - OpenSpec describes one coherent behavior change at a time. It does not replace this roadmap, sprint tracking, or GitHub Issues.
 - A planning estimate is person-days, not elapsed calendar time. Two-week sprint boxes are an initial cadence only; capacity and velocity are unknown.
 - Requirements and architecture marked provisional are not implementation authorization. A material change to scope or externally visible behavior returns for review.
@@ -48,14 +48,14 @@ Effort ranges are initial engineering estimates. They exclude release administra
 - **Activities/contracts:** make requirements traceable to use cases, OpenSpec capabilities, WPs, Issues, PRs, and checks; document what is verified versus proposed.
 - **Acceptance:** repository instructions and templates are present; OpenSpec validates; README and native app icon use maintainer branding; CI definitions cover frontend checks on supported hosted OS runners; each OpenSpec task maps to a native sub-issue under its WP; GitHub setup script is idempotent; no editor feature behavior is added.
 - **Tests/DoD:** validate Markdown/OpenSpec/workflow syntax, shell syntax, and run only scaffold checks that can execute locally; CI check names are recorded before protection requires them; all linked documents resolve.
-- **Risk:** empty Git history prevents branch creation and protection. The maintainer must create the first commit and push **main** and **dev** before the setup script can protect them.
+- **Risk:** a mismatch between required check names and CI jobs could block merges. Verify the exact Actions names on a passing PR before running the setup script; the current `main` and `dev` protections were API-verified on 2026-11-07.
 - **Issue / PR:** WP-00 Engineering foundation; one PR to **dev**, then promotion with the sprint batch.
 
 ### WP-01: Tauri and Weave compatibility spike
 
-- **Scope:** prove the pinned Weave React renderer mounts in the Tauri WebView on Windows, macOS, and Linux; confirm core selection, transforms, connector rendering, and one persisted Yjs update.
-- **Dependencies/components:** WP-00; frontend, Tauri shell, one isolated Weave adapter.
-- **Activities/contracts:** compare WeaveStoreStandalone and renderer packages; pin a compatible React/ReactDOM range; record platform WebView differences and native prerequisites.
+- **Scope:** adapt the official `weavejs-frontend` as the starting point for canvas UI components and prove the Weave renderer mounts in the Tauri WebView on Windows, macOS, and Linux; confirm core selection, transforms, connector rendering, and one persisted Yjs update.
+- **Dependencies/components:** WP-00; frontend, Tauri shell, one isolated Weave adapter, selected components from the official frontend example.
+- **Activities/contracts:** compare WeaveStoreStandalone and renderer packages; selectively port required React components while retaining Tauri/Vite and excluding the example's TanStack Start application runtime; pin a compatible React/ReactDOM range; record platform WebView differences and native prerequisites.
 - **Acceptance:** a minimal canvas renders and edits one node on all three OS runners or the unsupported behavior is captured with a blocking issue and fallback option; no broader editor UI is part of this spike.
 - **Tests/DoD:** smoke test each native runner; preserve the dependency and runtime matrix; update ADR-0001 and the compatibility table.
 - **Effort/risk:** 4-7 PD; WebView variance and renderer dependencies are the critical technical gate.
@@ -137,7 +137,7 @@ Effort ranges are initial engineering estimates. They exclude release administra
 
 ### WP-09: Optional Codex assistant
 
-- **Scope:** provider interface, opt-in embedded chat, persistent conversation metadata, streaming, cancellation, diagram/selection context, preview and approval.
+- **Scope:** adapt the shadcn chatbot template as the starting point for an opt-in embedded chat; provide a provider interface, persistent conversation metadata, streaming, cancellation, diagram/selection context, preview and approval. Keep PeerCanvas's Tauri/Vite structure and provider boundary; do not adopt the template's Next.js routes or Vercel AI SDK backend.
 - **Requirements/spec:** FR-035..040; Codex Embedded Chat.
 - **Dependencies/components:** WP-02 and WP-04; assistant UI, app-server process, secure token storage.
 - **Acceptance:** editor works without AI credentials; user can inspect and approve a proposed model change before it is applied; token and diagram content do not enter logs.
