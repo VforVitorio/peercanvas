@@ -28,6 +28,8 @@ The reproducible source of truth is scripts/setup-github.sh. Its exact policy fo
 
 The script skips branch protection when a branch does not exist and checks that every required context matches a named job in `.github/workflows/ci.yml`. Verify the exact check names on a pull request before applying the policy; status checks are enforced on subsequent pull requests, even when the initial scaffold predates the native build jobs.
 
+As of 2026-11-07, GitHub API readback confirms that the policy is active on both **main** and **dev**. PR #61 verified all eight required check names with successful Linux, macOS, and Windows native builds.
+
 ## Repository and Actions settings
 
 The setup script enables Issues, disables the wiki, allows merge commits, disables squash/rebase, and deletes merged head branches. It sets workflow default permissions to read-only; individual workflows request only the writes they need.

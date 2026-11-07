@@ -1,13 +1,13 @@
 # Tasks
 
-All tasks below are future implementation work. The current request creates the plan only; do not mark a task complete or start product implementation without explicit maintainer approval. Estimates, sprint placement, and Issues are tracked in PLANS.md and GitHub.
+Unchecked tasks below are future implementation work. Repository setup tasks may be marked complete when their acceptance checks pass; this does not authorize product feature implementation. Estimates, sprint placement, and Issues are tracked in PLANS.md and GitHub.
 
 ## 1. Engineering foundation and compatibility gate (WP-00, WP-01)
 
 - [ ] 1.1 Confirm the proposal, all capability specs, architecture, ADRs, and work-package links agree; verify with openspec validate and a traceability review. — GitHub Issue [#14](https://github.com/VforVitorio/peercanvas/issues/14)
 - [ ] 1.2 Adapt the required components from the official weavejs-frontend and build/run the Tauri shell with the pinned Weave renderer on Windows, macOS, and Linux; verify each platform with a recorded canvas smoke test for render, selection, and one edit. — GitHub Issue [#15](https://github.com/VforVitorio/peercanvas/issues/15)
 - [ ] 1.3 Record the actual OS, WebView, Rust, React, and Weave compatibility matrix; verify it is linked from the support documentation and ADR-0001. — GitHub Issue [#16](https://github.com/VforVitorio/peercanvas/issues/16)
-- [ ] 1.4 Review native CI, required check names, GitHub branch flow, and security settings; verify CI check runs are successful before applying branch protection. — GitHub Issue [#17](https://github.com/VforVitorio/peercanvas/issues/17)
+- [x] 1.4 Review native CI, required check names, GitHub branch flow, and security settings; verify CI check runs are successful before applying branch protection. — GitHub Issue [#17](https://github.com/VforVitorio/peercanvas/issues/17)
 - [ ] 1.5 Prepare the branded editor-shell direction from the maintainer-supplied assets; verify brand provenance, Weave.js canvas hierarchy, accessibility constraints, and the honest placeholder state in a reviewable design brief without implementing editor controls. — GitHub Issue [#18](https://github.com/VforVitorio/peercanvas/issues/18)
 
 ## 2. Canonical document and local persistence (WP-02, WP-03)
