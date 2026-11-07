@@ -1,0 +1,36 @@
+name: Work package
+description: Track a non-trivial planned implementation or engineering task.
+title: "WP-xx: "
+labels: ["epic"]
+body:
+  - type: input
+    id: package
+    attributes:
+      label: Work package
+      placeholder: WP-00
+    validations:
+      required: true
+  - type: textarea
+    id: goal
+    attributes:
+      label: Objective and scope
+    validations:
+      required: true
+  - type: textarea
+    id: traceability
+    attributes:
+      label: Requirements and OpenSpec capabilities
+    validations:
+      required: true
+  - type: textarea
+    id: dependencies
+    attributes:
+      label: Dependencies and risks
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance criteria and verification
+    validations:
+      required: true

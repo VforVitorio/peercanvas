@@ -1,0 +1,39 @@
+name: Bug report
+description: Report a reproducible problem in an implemented feature.
+title: "bug: "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: Check the current product status first. Do not include private diagrams, tokens, or invitation links.
+  - type: input
+    id: version
+    attributes:
+      label: Version or commit
+      placeholder: Release version or commit SHA
+    validations:
+      required: true
+  - type: dropdown
+    id: os
+    attributes:
+      label: Operating system
+      options:
+        - Windows
+        - macOS
+        - Linux
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Reproduction steps
+      description: Include expected and actual behavior.
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Logs or screenshots
+      description: Redact personal data, file contents, OAuth tokens, and invite secrets.
+    validations:
+      required: false

@@ -1,0 +1,23 @@
+name: Product proposal
+description: Propose a user-facing behavior change for maintainer triage.
+title: "proposal: "
+labels: ["enhancement"]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: User problem and goal
+    validations:
+      required: true
+  - type: textarea
+    id: workflow
+    attributes:
+      label: Expected workflow and alternatives
+    validations:
+      required: true
+  - type: textarea
+    id: requirements
+    attributes:
+      label: Related requirements or OpenSpec capability
+    validations:
+      required: false
