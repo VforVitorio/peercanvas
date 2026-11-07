@@ -1,0 +1,38 @@
+name: Work-package subtask
+description: Track one implementation task under a WP parent issue.
+title: "WP-xx.x: "
+labels: ["task"]
+body:
+  - type: input
+    id: parent
+    attributes:
+      label: Parent work-package issue
+      placeholder: "#3"
+    validations:
+      required: true
+  - type: input
+    id: openspec_task
+    attributes:
+      label: OpenSpec task ID
+      placeholder: "1.2"
+    validations:
+      required: true
+  - type: textarea
+    id: objective
+    attributes:
+      label: Task objective and scope
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Verification and acceptance
+      description: State exact tests, commands, or observable behavior that will prove completion.
+    validations:
+      required: true
+  - type: textarea
+    id: dependencies
+    attributes:
+      label: Dependencies and risk
+    validations:
+      required: false
