@@ -1,0 +1,28 @@
+{
+  "build": {
+    "beforeBuildCommand": "npm run build:native-smoke"
+  },
+  "app": {
+    "windows": [
+      {
+        "label": "main",
+        "title": "PeerCanvas native compatibility probe",
+        "width": 1000,
+        "height": 720,
+        "resizable": false
+      }
+    ],
+    "security": {
+      "csp": {
+        "connect-src": "'none'"
+      },
+      "capabilities": [
+        {
+          "identifier": "native-smoke",
+          "windows": ["main"],
+          "permissions": ["wdio-webdriver:default"]
+        }
+      ]
+    }
+  }
+}

@@ -1,7 +1,8 @@
 # ADR-0001: Desktop shell and rendering baseline
 
-- **Status:** Proposed, gated on WP-01.
+- **Status:** Accepted for the bounded S0 renderer baseline; product integration and minimum OS support floors remain open.
 - **Date:** 2026-11-07.
+- **Acceptance review:** 2026-11-10.
 
 ## Context
 
@@ -19,11 +20,17 @@ Use Tauri 2 + React 18.3.1 + TypeScript + Vite 8 as the foundation, with Weave.j
 
 ## Rationale and consequences
 
-This honors the specified stack and reuses the upstream renderer and frontend capabilities rather than rebuilding them. The example frontend is an adaptation source, not a second application shell. The existing app does not yet include that source or prove Weave works in each Tauri WebView. OS WebViews differ, so browser compatibility must be verified against actual runner/runtime versions. Preserve Apache-2.0 notices for any upstream code that is adopted.
+This honors the specified stack and reuses the upstream renderer and frontend capabilities rather than rebuilding them. The example frontend is an adaptation source, not a second application shell. The isolated S0 probe confirmed native rendering, selection, transforms, connector rendering, and one in-memory Weave-store-backed edit on the current Linux, macOS, and Windows runner images. The normal app remains the scaffold; the probe does not establish product editing or a minimum OS support floor. Preserve Apache-2.0 notices for any upstream code that is adopted.
 
 ## Risks and validation
 
-WP-01 must adapt only the required frontend components, mount the renderer, exercise selection/transforms/connectors, and check React peer dependencies on Windows, macOS, and Linux. If integration fails, record a fallback decision before replacing the selected engine.
+WP-01 is the bounded compatibility gate in S0. Use a separately invoked test-only Tauri/WebView probe, adapt only the required frontend composition, and exercise one controlled fixture to verify native launch, renderer mounting, selection, transforms, connector rendering, and one in-memory Weave-store-backed node edit on Windows, macOS, and Linux. Exclude the probe and its instrumentation from normal production builds; the normal app retains the engineering scaffold.
+
+Follow the [S0 evidence procedure](../../quality/TEST_STRATEGY.md#s0-compatibility-gate). The [platform compatibility matrix](../../support/platform-matrix.md) records the exact runner OS, WebView, Rust, React, and Weave versions, the tested commit, and links to the CI artifacts and upstream notices.
+
+Report frontend compilation, native compilation, and native interaction evidence separately. A successful build is not a passed canvas smoke test. If a required native behavior fails or cannot be verified, record a blocking issue and explicit fallback decision before claiming the gate passed or replacing the selected engine.
+
+The fixture uses temporary state only. WP-01 does not choose a durable store, persist Yjs updates, or implement user save/open/recovery workflows; those decisions and tests remain in WP-03.
 
 ## Sources
 
