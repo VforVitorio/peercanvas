@@ -181,7 +181,7 @@ Each box is an initial two-week iteration, not a delivery date. If the package e
 
 S0 contains the full bounded WP-01 compatibility gate through a test-only probe. Its in-memory fixture does not implement the canonical document model, durable storage, or the useful local editor planned for WP-02, WP-03, and WP-04. The normal app remains the engineering scaffold.
 
-S0 implementation and native evidence are complete; this final reconciliation records the matrix and closes the remaining S0 traceability task.
+S0 implementation and native evidence are complete. Promotion PR #74 (`d84cfce`) merged the sprint to `main`; all eight S0 issues and milestone #1 are closed, and the Project Board marks them Done.
 
 | Sprint | Goal                                   | Packages     | Exit evidence                                                                                                                             |
 | ------ | -------------------------------------- | ------------ | ----------------------------------------------------------------------------------------------------------------------------------------- |
