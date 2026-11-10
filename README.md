@@ -9,6 +9,8 @@
   ·
   <a href="docs/branding/brand-guide.md">Brand guide</a>
   ·
+  <a href="docs/support/platform-matrix.md">Platform matrix</a>
+  ·
   <a href="docs/handoff/START_HERE.md">Project handoff</a>
 </p>
 
@@ -18,22 +20,22 @@ PeerCanvas is not an official project of Weave.js, InditexTech, OpenPencil, draw
 
 ## Project status
 
-PeerCanvas is in its engineering-foundation stage. The current application is a minimal Tauri/React shell. Diagram editing, durable document storage, collaboration, import/export, and AI tools are not implemented.
+PeerCanvas has completed its S0 engineering foundation and renderer compatibility gate. The normal application is still a minimal Tauri/React shell. Diagram editing, durable document storage, collaboration, import/export, and AI tools are not implemented.
 
-| Capability                            | Status                                                                                                     |
-| ------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
-| Tauri desktop shell                   | Minimal shell builds on macOS; native CI builds are configured for Ubuntu, macOS, and Windows              |
-| Weave.js canvas                       | The official renderer and frontend are the planned starting point; native compatibility remains unverified |
-| Local diagram editing and persistence | Specified; not implemented                                                                                 |
-| draw.io import/export                 | Compatibility subset planned; no support claimed yet                                                       |
-| Peer-to-peer sessions                 | Yjs and Trystero/WebRTC proposed; network behavior not verified                                            |
-| Codex and MCP                         | Optional integration researched; not implemented                                                           |
+| Capability                            | Status                                                                                                                                                 |
+| ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Tauri desktop shell                   | The normal shell builds; CI checks native builds and a test-only WebView probe on Ubuntu, macOS, and Windows                                           |
+| Weave.js canvas                       | The test-only renderer probe passed on the runner images in the [platform matrix](docs/support/platform-matrix.md); product editing is not implemented |
+| Local diagram editing and persistence | Specified; not implemented                                                                                                                             |
+| draw.io import/export                 | Compatibility subset planned; no support claimed yet                                                                                                   |
+| Peer-to-peer sessions                 | Yjs and Trystero/WebRTC proposed; network behavior not verified                                                                                        |
+| Codex and MCP                         | Optional integration researched; not implemented                                                                                                       |
 
 The project plan tracks 13 working-package parent issues, 41 task sub-issues, and eight sprint milestones on the [PeerCanvas Workflow Board](https://github.com/users/VforVitorio/projects/4/views/2). No product feature should be treated as complete until its issue acceptance criteria and verification evidence are recorded.
 
 ## Architecture direction
 
-The planned desktop stack is Tauri 2, React 18, TypeScript, Vite, and Weave.js. The implementation will reuse the official [Weave.js renderer](https://github.com/InditexTech/weavejs) and selectively adapt UI components from [weavejs-frontend](https://github.com/InditexTech/weavejs-frontend). It will keep the Tauri/Vite application structure instead of importing the example app's TanStack Start runtime. Compatibility with each Tauri WebView still needs to be proven.
+The planned desktop stack is Tauri 2, React 18, TypeScript, Vite, and Weave.js. The product implementation will reuse the official [Weave.js renderer](https://github.com/InditexTech/weavejs) and selectively adapt UI components from [weavejs-frontend](https://github.com/InditexTech/weavejs-frontend). It will keep the Tauri/Vite application structure instead of importing the example app's TanStack Start runtime. The isolated probe verifies the renderer on the current hosted runner images; it does not set minimum OS versions or prove the product editor integration.
 
 The optional assistant will adapt the [shadcn chatbot template](https://github.com/shadcn-ui/chatbot-template) for PeerCanvas conversations. Its chat components and interaction patterns are a starting point; its Next.js routes and Vercel AI SDK backend are not part of the planned stack.
 
@@ -75,7 +77,16 @@ cargo test --manifest-path src-tauri/Cargo.toml
 cargo clippy --manifest-path src-tauri/Cargo.toml --all-targets -- -D warnings
 ```
 
-The GitHub Actions workflows run frontend checks and native builds on Ubuntu, macOS, and Windows. A successful frontend build does not prove that a native webview, deep link, or peer network path works.
+The GitHub Actions workflows run frontend checks, native builds, and the test-only renderer probe on Ubuntu, macOS, and Windows. The probe does not prove product editor workflows, deep links, or peer network behavior.
+
+Run the test-only native compatibility probe on a desktop runner:
+
+```sh
+npm run native-smoke:build
+npm run native-smoke
+```
+
+The probe uses a temporary in-memory fixture and does not change the normal application's scaffold or store a document.
 
 ## Project workflow
 
@@ -95,18 +106,19 @@ The GitHub Actions workflows run frontend checks and native builds on Ubuntu, ma
 - [GitHub branch, CI, and security workflow](docs/planning/github-workflow.md)
 - [Risk register](docs/security/RISK_REGISTER.md)
 - [Quality and verification plan](docs/quality/TEST_STRATEGY.md)
+- [S0 native WebView and renderer results](docs/support/platform-matrix.md)
 - [Brand assets and visual direction](docs/branding/brand-guide.md)
 - [Next-session handoff](docs/handoff/START_HERE.md)
 
 ## Acknowledgments and references
 
-PeerCanvas is independently developed. These projects informed the proposed technology choices, format support, workflows, or interface research; they do not endorse PeerCanvas. No third-party application source has been copied into the current scaffold. The plan is to reuse selected Weave.js frontend code and adapt the shadcn chatbot template; their licenses and notices will be preserved when that work begins.
+PeerCanvas is independently developed. These projects informed the proposed technology choices, format support, workflows, or interface research; they do not endorse PeerCanvas. The normal application remains the scaffold. The test-only S0 probe adapts selected Weave.js frontend composition under Apache-2.0; it does not import the example runtime. The shadcn chatbot template remains a future UI reference, and no template source has been copied. See [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) for the adapted Weave files and commits.
 
 | Project or documentation                                                                                                                                            | How it informed the plan                                                                                           |
 | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
 | [Tauri](https://v2.tauri.app/)                                                                                                                                      | Cross-platform desktop shell and native integration                                                                |
-| [Weave.js](https://github.com/InditexTech/weavejs)                                                                                                                  | Planned canvas renderer and editing foundation (Apache-2.0)                                                        |
-| [weavejs-frontend](https://github.com/InditexTech/weavejs-frontend)                                                                                                 | Planned source for selectively adapted canvas UI components (Apache-2.0); the example app runtime is not adopted   |
+| [Weave.js](https://github.com/InditexTech/weavejs)                                                                                                                  | Test-only S0 renderer probe and planned product canvas foundation (Apache-2.0)                                     |
+| [weavejs-frontend](https://github.com/InditexTech/weavejs-frontend)                                                                                                 | Selected composition adapted in the probe (Apache-2.0); the example app runtime is not adopted                     |
 | [OpenPencil](https://github.com/open-pencil/open-pencil)                                                                                                            | Peer-collaboration architecture reference                                                                          |
 | [Yjs](https://docs.yjs.dev/) and [Trystero](https://trystero.dev/)                                                                                                  | Proposed document synchronization and WebRTC transport                                                             |
 | [draw.io](https://github.com/jgraph/drawio)                                                                                                                         | Document interchange target and file-format reference                                                              |
