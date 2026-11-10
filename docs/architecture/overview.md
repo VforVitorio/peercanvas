@@ -8,7 +8,7 @@ Status: architecture baseline with bounded S0 compatibility evidence, 2026-11-10
 - UI: React 18.3.1, TypeScript, and Vite 8. React 18 is retained because the selected Weave renderer's published peer dependency range excludes React 19.
 - Canvas engine: Weave.js 5.7.1 with its React renderer and Konva integration; selectively reuse canvas UI components from the official `weavejs-frontend` example.
 - Document collaboration candidate: Yjs state; an adapter tentatively named WeaveStoreP2P; Trystero over WebRTC.
-- Platforms: Windows, macOS, Linux. Tauri uses each platform's WebView; exact minimum versions and native behavior must be measured.
+- Platforms: Windows, macOS, Linux. The S0 probe measured the native WebViews on the runner images in the [platform matrix](../support/platform-matrix.md); minimum OS support floors and full product behavior remain open.
 - AI candidate: optional Codex app-server process using Sign in with ChatGPT for eligible open-source/local-app plan usage, subject to preview terms and registration.
 - Chat UI: adapt the shadcn chatbot template's React components and interaction patterns while retaining the Tauri/Vite shell and PeerCanvas provider boundary; do not adopt its Next.js routes or Vercel AI SDK backend.
 

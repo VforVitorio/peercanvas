@@ -66,7 +66,7 @@ S0 comprises tasks 1.1–1.5 and 8.2. Its compatibility probe is test-only and e
 ## 8. Integration and release review
 
 - [ ] 8.1 Run the full CI suite and cross-capability acceptance matrix; verify every released requirement has automated or documented manual evidence. — GitHub Issue [#52](https://github.com/VforVitorio/peercanvas/issues/52)
-- [ ] 8.2 Reconcile OpenSpec specs, FR/UC traceability, ADRs, risks, PLANS.md, and GitHub Issues; verify there are no stale or contradictory contracts. — GitHub Issue [#53](https://github.com/VforVitorio/peercanvas/issues/53)
+- [x] 8.2 Reconcile OpenSpec specs, FR/UC traceability, ADRs, risks, PLANS.md, and GitHub Issues; verify there are no stale or contradictory contracts. — GitHub Issue [#53](https://github.com/VforVitorio/peercanvas/issues/53)
 - [ ] 8.3 Prepare release notes and support limitations; verify all platform, interoperability, networking, AI, security, and asset claims are backed by recorded evidence. — GitHub Issue [#54](https://github.com/VforVitorio/peercanvas/issues/54)
 
 ## Workflow follow-up

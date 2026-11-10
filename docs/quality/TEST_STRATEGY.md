@@ -13,8 +13,8 @@ Distinguish planned, automated, manual, and not-yet-tested evidence. A frontend 
 | Unit              | Model invariants, commands, migrations, serializers, permission checks    | Vitest for TypeScript; Rust unit tests where native logic exists          |
 | Property/fuzz     | IDs, serialization, XML/SVG parser bounds, Yjs updates                    | Property tests and bounded fuzz corpus chosen in relevant WP              |
 | Integration       | Weave adapter, persistence adapter, MCP boundary, app-server protocol     | Real package boundaries with deterministic fixtures and mock providers    |
-| Native smoke      | Launch, dialogs, file association/deep link, WebView, child process       | Windows/macOS/Linux runner plus manual release smoke matrix               |
-| E2E               | Create/edit/save/reopen, import/export, invite approval, Codex proposal   | Tauri-aware browser automation or app driver selected in WP-01            |
+| Native smoke      | Launch, dialogs, file association/deep link, WebView, child process       | Windows/macOS/Linux runner; S0 renderer probe plus manual release checks  |
+| E2E               | Create/edit/save/reopen, import/export, invite approval, Codex proposal   | Embedded WebDriver for S0 probe; product workflow tests in their WPs      |
 | Visual regression | Canvas rendering and key accessible states                                | Stable diagram fixtures and OS/browser snapshots; review platform diffs   |
 | Network           | Yjs convergence, LAN, STUN/TURN, reconnection, host loss                  | Controlled multi-peer fixtures, not a unit-test substitute                |
 | Security          | XML/SVG, links, OAuth token boundary, MCP authorization, dependency risks | Malicious fixtures, secret scanning, static analysis, threat-model review |

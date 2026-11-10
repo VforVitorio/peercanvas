@@ -4,7 +4,7 @@
 
 See proposal.md for the motivation and capability list. The normal application contains an empty Tauri/React shell; none of the product capabilities in the specifications are implemented. S0 plans a separately invoked test-only Tauri/WebView probe for the rendering compatibility gate, with its fixture excluded from normal production builds. The product definition, architecture overview, ADRs, risk register, test strategy, and PLANS.md provide the surrounding contracts and execution plan.
 
-The selected research baseline is Tauri 2, React 18.3.1, TypeScript, Vite 8, and Weave.js 5.7.1. React 18 is retained because the chosen Weave React package's peer range excludes React 19. This version matrix is a research snapshot, not proof that the renderer works in each native webview.
+The selected baseline is Tauri 2, React 18.3.1, TypeScript, Vite 8, and Weave.js 5.7.1. React 18 is retained because the selected Weave React package's peer range excludes React 19. The S0 probe verifies a bounded fixture on the hosted runner images in `docs/support/platform-matrix.md`; package versions alone remain research facts, and this result does not set minimum OS support floors or establish product editor integration.
 
 ## Goals / Non-Goals
 
