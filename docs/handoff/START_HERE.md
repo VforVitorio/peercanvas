@@ -1,6 +1,6 @@
 # PeerCanvas session handoff
 
-Last updated: 2026-11-07.
+Last updated: 2026-11-10.
 
 ## Project goal and boundary
 
@@ -8,11 +8,13 @@ PeerCanvas is a personal, open-source, local-first desktop diagram editor planne
 
 The app remains a minimal engineering shell. No editor behavior, persistence, collaboration, import/export, AI, or MCP feature has been implemented. The visible “Engineering scaffold” placeholder remains until a separate visual implementation is authorized.
 
+S0 completion is in progress. A separate test-only Tauri/WebView compatibility probe is being prepared; native probe results have not been recorded yet. The normal app remains the scaffold while that evidence is collected.
+
 ## Current repository state
 
 - Public repository: [VforVitorio/peercanvas](https://github.com/VforVitorio/peercanvas).
 - `main` is the default stable branch; `dev` is the integration branch. The first skeletal commit was `360b4a9`, whose author and committer resolve to `VforVitorio`.
-- The repository setup changes entered `dev` through [PR #61](https://github.com/VforVitorio/peercanvas/pull/61). Use the protected `dev` → `main` promotion flow for stable updates; GitHub branch refs and PRs are authoritative for live state.
+- The repository setup changes entered `dev` through [PR #61](https://github.com/VforVitorio/peercanvas/pull/61), and the initial foundation was promoted to `main` through [PR #63](https://github.com/VforVitorio/peercanvas/pull/63). Use the protected `dev` → `main` promotion flow for stable updates; GitHub branch refs and PRs are authoritative for live state.
 - The public [PeerCanvas Workflow Board](https://github.com/users/VforVitorio/projects/4/views/2) tracks 13 WP parent issues, 41 task sub-issues, and eight sprint milestones.
 - Issue descriptions for WP-01/#3 and WP-09/#9, plus child issues #15 and #44, now state the planned Weave/shadcn reuse boundaries.
 - GitHub branch protection is active and API-verified on `main` and `dev`: pull requests required, strict checks `lint`, `format`, `typecheck`, `test`, `frontend-build`, `native-linux`, `native-macos`, `native-windows`, conversation resolution, admin enforcement, and no force pushes or branch deletion. Approval count is zero for the solo-maintainer workflow.
@@ -40,6 +42,7 @@ The app remains a minimal engineering shell. No editor behavior, persistence, co
 - Security and risk register: `docs/security/`.
 - Quality and verification plan: `docs/quality/TEST_STRATEGY.md`.
 - Maintainer-supplied brand assets and usage: `docs/branding/brand-guide.md`.
+- Reviewable editor-shell direction and its placeholder/accessibility boundary: `docs/branding/editor-shell-direction.md`.
 - Third-party license notes: `THIRD_PARTY_NOTICES.md`.
 - Agent workflow and skill routing: `AGENTS.md`.
 
@@ -56,5 +59,5 @@ The app remains a minimal engineering shell. No editor behavior, persistence, co
 ## Next steps
 
 1. Follow the protected `dev` → `main` PR flow for stable promotions; the live PR state is recorded on GitHub.
-2. Keep the first product implementation narrowly scoped to WP-01/#3: mount/adapt the Weave frontend and record platform compatibility evidence. Start only after explicit implementation approval; do not apply the entire foundation plan as one change.
+2. The current authorized task is S0 completion: finish WP-00 and the bounded WP-01/#3 compatibility gate through a test-only Tauri/WebView probe. Use one controlled in-memory fixture to verify native launch, rendering, selection, transforms, connector rendering, and one store-backed edit; record actual OS/WebView/dependency evidence. Exclude the probe from normal production builds and retain the normal app's scaffold. Durable persistence and S1+ product work require their own approval.
 3. Resolve the dependency alerts tracked under WP-11.3/#50 before release.

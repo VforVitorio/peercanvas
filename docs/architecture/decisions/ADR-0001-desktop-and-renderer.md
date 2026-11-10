@@ -2,6 +2,7 @@
 
 - **Status:** Proposed, gated on WP-01.
 - **Date:** 2026-11-07.
+- **Acceptance review:** 2026-11-10.
 
 ## Context
 
@@ -23,7 +24,13 @@ This honors the specified stack and reuses the upstream renderer and frontend ca
 
 ## Risks and validation
 
-WP-01 must adapt only the required frontend components, mount the renderer, exercise selection/transforms/connectors, and check React peer dependencies on Windows, macOS, and Linux. If integration fails, record a fallback decision before replacing the selected engine.
+WP-01 is the bounded compatibility gate in S0. Use a separately invoked test-only Tauri/WebView probe, adapt only the required frontend composition, and exercise one controlled fixture to verify native launch, renderer mounting, selection, transforms, connector rendering, and one in-memory Weave-store-backed node edit on Windows, macOS, and Linux. Exclude the probe and its instrumentation from normal production builds; the normal app retains the engineering scaffold.
+
+Follow the [S0 evidence procedure](../../quality/TEST_STRATEGY.md#s0-compatibility-gate). Record the exact OS, WebView, Rust, React, and Weave versions, the source commit and files adopted from upstream, and their license notices. The completed record will live in `docs/support/platform-matrix.md`; add its links only when actual evidence exists.
+
+Report frontend compilation, native compilation, and native interaction evidence separately. A successful build is not a passed canvas smoke test. If a required native behavior fails or cannot be verified, record a blocking issue and explicit fallback decision before claiming the gate passed or replacing the selected engine.
+
+The fixture uses temporary state only. WP-01 does not choose a durable store, persist Yjs updates, or implement user save/open/recovery workflows; those decisions and tests remain in WP-03.
 
 ## Sources
 

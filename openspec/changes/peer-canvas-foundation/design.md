@@ -2,7 +2,7 @@
 
 ## Context
 
-See proposal.md for the motivation and capability list. The repository currently contains an empty Tauri/React shell; none of the product capabilities in the specifications are implemented. The product definition, architecture overview, ADRs, risk register, test strategy, and PLANS.md provide the surrounding contracts and execution plan.
+See proposal.md for the motivation and capability list. The normal application contains an empty Tauri/React shell; none of the product capabilities in the specifications are implemented. S0 plans a separately invoked test-only Tauri/WebView probe for the rendering compatibility gate, with its fixture excluded from normal production builds. The product definition, architecture overview, ADRs, risk register, test strategy, and PLANS.md provide the surrounding contracts and execution plan.
 
 The selected research baseline is Tauri 2, React 18.3.1, TypeScript, Vite 8, and Weave.js 5.7.1. React 18 is retained because the chosen Weave React package's peer range excludes React 19. This version matrix is a research snapshot, not proof that the renderer works in each native webview.
 
@@ -16,11 +16,13 @@ The selected research baseline is Tauri 2, React 18.3.1, TypeScript, Vite 8, and
 - Keep local editing independent from peer networking and AI.
 - Define security, privacy, errors, loss reporting, and failure recovery before implementation.
 - Link requirements to the roadmap, ADRs, risk register, and later GitHub Issues.
+- Validate the selected rendering stack through a bounded native test probe and report its fixture evidence per platform.
 
 **Non-Goals:**
 
-- Implement any product feature or commit application code.
-- Claim that Weave, Tauri WebViews, Yjs transport, draw.io, OpenAI auth, or MCP have passed integration tests.
+- Implement product workflows or replace the normal scaffold with editor controls.
+- Include the compatibility probe or its instrumentation in normal production builds.
+- Infer product-level Weave, Tauri WebView, Yjs transport, draw.io, OpenAI auth, or MCP readiness from the bounded probe.
 - Select a persistence engine, TURN provider, installer format, supported OS floor, or external shape license without the planned evidence.
 - Promise full draw.io parity, universal direct WebRTC connectivity, or unconditional ChatGPT-plan inference.
 
@@ -43,6 +45,12 @@ Treat pages, layers, nodes, connections, styles, and supported metadata as one s
 Use Weave.js as the renderer candidate behind an adapter. Keep local persistence and peer transport behind separate adapters. Yjs with a Trystero/WebRTC adapter is the proposed collaboration path, but network connectivity and participant validation require experiments.
 
 **Alternative considered:** bind the document contracts directly to a particular transport or storage API. Rejected until compatibility, recovery, and failure tests establish the contract.
+
+### Keep the S0 compatibility probe isolated from the product
+
+Use the pinned Weave renderer and only the required frontend composition in a separately invoked Tauri/WebView test probe. One controlled fixture exercises native launch, rendering, selection, transforms, connector rendering, and one in-memory store-backed edit. Record exact OS/WebView/dependency versions and adopted source notices; report native compilation separately from interaction results. A blocked required behavior needs a blocking issue and explicit fallback decision.
+
+The probe does not introduce a second product document model, durable storage, persisted Yjs updates, or user save/open/recovery workflows. The normal application retains its honest scaffold state. This test instrumentation is excluded from normal production builds.
 
 ### Keep local storage choice behind a recovery experiment
 
@@ -90,7 +98,7 @@ User-facing Codex skills remain a later capability. They can be distributed only
 
 ## Migration Plan
 
-This change has no runtime or stored-data migration. Review the proposal, 18 specs, design, and task list as one product-contract baseline. After maintainer approval, future product changes will use new OpenSpec changes, implementation branches from dev, PRs to dev, and sprint promotion PRs to main. Any change to an approved requirement must update the relevant spec and traceability before implementation continues.
+This change has no normal-app runtime or stored-data migration. The compatibility probe operates only on temporary fixture data. Review the proposal, 18 specs, design, and task list as one product-contract baseline with a bounded S0 validation harness. After maintainer approval, product behavior changes will use new OpenSpec changes, implementation branches from dev, PRs to dev, and sprint promotion PRs to main. Any change to an approved requirement must update the relevant spec and traceability before implementation continues.
 
 ## Open Questions
 
