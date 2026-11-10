@@ -115,6 +115,36 @@ jobs:
             libssl-dev \
             libwebkit2gtk-4.1-dev \
             libxdo-dev \
-            wget
+            wget \
+            xvfb
       - run: npm ci
-      - run: npm run tauri -- build --no-bundle
+      - name: Build normal production shell
+        run: npm run tauri -- build --no-bundle
+      - name: Verify production frontend isolation
+        run: npm run native-smoke -- --check-production
+      - name: Build test-only native compatibility probe
+        run: npm run native-smoke:build
+      - name: Run native canvas smoke (Linux)
+        if: runner.os == 'Linux'
+        run: xvfb-run -a -s "-screen 0 1280x800x24" npm run native-smoke
+      - name: Run native canvas smoke (macOS and Windows)
+        if: runner.os != 'Linux'
+        run: npm run native-smoke
+      - name: Reject native-smoke feature in release builds
+        if: runner.os == 'Linux'
+        shell: bash
+        run: |
+          set +e
+          cargo check --manifest-path src-tauri/Cargo.toml --release --features native-smoke > src-tauri/target/native-smoke/release-guard.log 2>&1
+          result=$?
+          set -e
+          cat src-tauri/target/native-smoke/release-guard.log
+          test "$result" -ne 0
+          grep -F "native-smoke feature cannot be used in a release build" src-tauri/target/native-smoke/release-guard.log
+      - name: Upload native compatibility evidence
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: native-smoke-${{ runner.os }}
+          path: src-tauri/target/native-smoke/
+          retention-days: 14

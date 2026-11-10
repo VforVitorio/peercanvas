@@ -4,7 +4,8 @@ import { defineConfig } from "vitest/config";
 
 const host = env.TAURI_DEV_HOST;
 
-export default defineConfig({
+export default defineConfig(({ mode }) => ({
+  root: mode === "native-smoke" ? "src/native-smoke" : undefined,
   plugins: [react()],
   clearScreen: false,
   server: {
@@ -23,6 +24,8 @@ export default defineConfig({
     },
   },
   build: {
+    outDir: mode === "native-smoke" ? "../../dist" : "dist",
+    emptyOutDir: true,
     target: env.TAURI_ENV_PLATFORM === "windows" ? "chrome105" : "safari13",
     minify: !env.TAURI_ENV_DEBUG,
     sourcemap: Boolean(env.TAURI_ENV_DEBUG),
@@ -30,4 +33,4 @@ export default defineConfig({
   test: {
     environment: "jsdom",
   },
-});
+}));
