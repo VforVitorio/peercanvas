@@ -1,6 +1,6 @@
 # Quality and verification strategy
 
-Status: acceptance plan. Scaffold checks exist; the isolated S0 compatibility probe is planned and has no recorded native result yet. Later capability checks require their product behavior to exist.
+Status: acceptance plan. The isolated S0 compatibility probe passed on the hosted runner images in the [platform matrix](../support/platform-matrix.md). Later capability checks require their product behavior to exist.
 
 ## Evidence rule
 
@@ -34,7 +34,7 @@ For each declared Windows, macOS, and Linux target, record:
 - Logs, screenshots or other retained artifacts sufficient to review the result, plus whether the check was automated or manual.
 - Any blocked or failed behavior, its blocking issue, and an explicit fallback decision. Do not turn a missing native interaction result into a passing build result.
 
-The actual compatibility record for issue #16 will be added at `docs/support/platform-matrix.md` when evidence exists, then linked from ADR-0001 and support documentation. A proposed target or an unrun procedure is not a verified support claim. Passing this fixture closes only the bounded S0 gate; product workflows and release accessibility, recovery, performance, and networking acceptance remain in their work packages.
+The compatibility record for issue #16 is in the [platform matrix](../support/platform-matrix.md) and linked from ADR-0001. A proposed target or an unrun procedure is not a verified support claim. Passing this fixture closes only the bounded S0 gate; product workflows and release accessibility, recovery, performance, and networking acceptance remain in their work packages.
 
 ## Required test scenarios by capability
 
