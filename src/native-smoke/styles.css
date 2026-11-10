@@ -1,0 +1,36 @@
+:root {
+  font-family: system-ui, sans-serif;
+  color: #172033;
+  background: #f8fafc;
+}
+
+body {
+  margin: 0;
+}
+
+header {
+  box-sizing: border-box;
+  height: 120px;
+  padding: 16px 24px;
+}
+
+h1 {
+  margin: 0 0 8px;
+  font-size: 20px;
+}
+
+p {
+  margin: 4px 0;
+  font-size: 14px;
+}
+
+#weave {
+  width: 100vw;
+  height: calc(100vh - 120px);
+  background: #fff;
+}
+
+#weave:focus-visible {
+  outline: 3px solid #1d4ed8;
+  outline-offset: -3px;
+}

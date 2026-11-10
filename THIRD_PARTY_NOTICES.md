@@ -13,13 +13,26 @@ This is not a complete transitive dependency or binary-content audit. Cargo/Rust
 
 The logo, symbol, and app icon PNGs are first-party brand assets supplied by the maintainer and recorded in [the brand guide](docs/branding/brand-guide.md). Their rights are separate from the Apache-2.0 project-code license. No third-party stencil or shape catalog assets are bundled in the current scaffold; the future catalog must keep per-asset provenance and license records.
 
+## S0 native compatibility probe
+
+The separately invoked native probe uses Weave.js 5.7.1 (Apache-2.0), Konva 10.0.2 (MIT), and Yjs 13.6.27 (MIT). Its fixture and instrumentation are excluded from the normal application entrypoint and production builds. No upstream artwork, font, stencil, or service integration is copied.
+
+`src/native-smoke/NativeSmokeCanvas.tsx` adapts the provider/container composition and a minimal node/plugin selection from these Apache-2.0 sources. It retains the Inditex copyright and SPDX notice and identifies the modification for PeerCanvas:
+
+| Upstream                                                            | Revision                                                       | Source files                                                                                                                                                                                                                                                 |
+| ------------------------------------------------------------------- | -------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| [weavejs-frontend](https://github.com/InditexTech/weavejs-frontend) | `ce3c4b663de1297daa37241a0be9b14a2469bc0c`                     | `code/components/use-cases/standalone/components/image-canvas/image-canvas.weave.tsx`, `code/components/room-components/hooks/use-get-renderer-konva-base.ts`, and the required node/plugin composition from `code/components/use-cases/standalone/weave.ts` |
+| [Weave.js](https://github.com/InditexTech/weavejs)                  | tag `5.7.1`, commit `92a8f87917706e31db3ca7bb19b6762df1da170a` | lifecycle composition from `code/packages/react/src/components/provider.tsx`                                                                                                                                                                                 |
+
+The optional test-only Rust dependency [tauri-plugin-wdio-webdriver 1.5.1](https://github.com/webdriverio/desktop-mobile/tree/ba733f664e034976499fd3d43cf940f357f904c4/packages/tauri-plugin-webdriver) is MIT-licensed. Its embedded loopback server is enabled only by the `native-smoke` Cargo feature in debug builds; a release build with that feature is rejected at compile time. The probe does not use the separate WDIO API/mocking plugin or require a paid driver service.
+
 ## Project references
 
-- [Weave.js](https://github.com/InditexTech/weavejs) and [weavejs-frontend](https://github.com/InditexTech/weavejs-frontend) are planned sources for the canvas engine and selected frontend components. Both upstream repositories declare Apache-2.0: [Weave.js license](https://github.com/InditexTech/weavejs/blob/main/LICENSE) and [frontend license](https://github.com/InditexTech/weavejs-frontend/blob/main/LICENSE). PeerCanvas is independent and does not imply endorsement by InditexTech.
+- [Weave.js](https://github.com/InditexTech/weavejs) and [weavejs-frontend](https://github.com/InditexTech/weavejs-frontend) supply the bounded test probe described above and remain the planned sources for the product canvas. Both upstream repositories declare Apache-2.0: [Weave.js license](https://github.com/InditexTech/weavejs/blob/5.7.1/LICENSE) and [frontend license](https://github.com/InditexTech/weavejs-frontend/blob/ce3c4b663de1297daa37241a0be9b14a2469bc0c/LICENSE). PeerCanvas is independent and does not imply endorsement by InditexTech.
 - [shadcn chatbot template](https://github.com/shadcn-ui/chatbot-template) is the planned source for adapted chat UI components and interaction patterns; its upstream repository declares [MIT](https://github.com/shadcn-ui/chatbot-template/blob/main/LICENSE). PeerCanvas will not adopt its Next.js application routes or Vercel AI SDK backend.
 - [OpenPencil](https://github.com/open-pencil/open-pencil) is an architectural reference for peer collaboration, not a code dependency.
 - [draw.io](https://github.com/jgraph/drawio) is an interchange target, not an affiliation.
 - [OpenSpec](https://github.com/Fission-AI/OpenSpec) supplies the specification workflow.
 - Public Codex client repositories listed in [Codex integration research](docs/architecture/codex-integration.md) are implementation references, not official SDKs.
 
-No source code from these three planned reuse projects is in the current scaffold. Before adapting code, record the upstream commit, retain the applicable license and copyright notices, and review notices for any copied component dependencies or assets. Each distributed dependency and asset remains under its own license.
+No source code from the shadcn chatbot template or OpenPencil is in the current scaffold. Before adapting further code, record the upstream commit, retain the applicable license and copyright notices, and review notices for any copied component dependencies or assets. Each distributed dependency and asset remains under its own license.

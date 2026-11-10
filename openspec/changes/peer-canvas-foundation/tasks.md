@@ -2,13 +2,15 @@
 
 Unchecked tasks below are future implementation work. Repository setup tasks may be marked complete when their acceptance checks pass; this does not authorize product feature implementation. Estimates, sprint placement, and Issues are tracked in PLANS.md and GitHub.
 
+S0 comprises tasks 1.1–1.5 and 8.2. Its compatibility probe is test-only and excluded from normal production builds; the normal app retains the scaffold. The fixture uses temporary in-memory state; durable persistence remains in WP-03.
+
 ## 1. Engineering foundation and compatibility gate (WP-00, WP-01)
 
-- [ ] 1.1 Confirm the proposal, all capability specs, architecture, ADRs, and work-package links agree; verify with openspec validate and a traceability review. — GitHub Issue [#14](https://github.com/VforVitorio/peercanvas/issues/14)
-- [ ] 1.2 Adapt the required components from the official weavejs-frontend and build/run the Tauri shell with the pinned Weave renderer on Windows, macOS, and Linux; verify each platform with a recorded canvas smoke test for render, selection, and one edit. — GitHub Issue [#15](https://github.com/VforVitorio/peercanvas/issues/15)
-- [ ] 1.3 Record the actual OS, WebView, Rust, React, and Weave compatibility matrix; verify it is linked from the support documentation and ADR-0001. — GitHub Issue [#16](https://github.com/VforVitorio/peercanvas/issues/16)
+- [x] 1.1 Confirm the proposal, all capability specs, architecture, ADRs, and work-package links agree; verify with openspec validate and a traceability review. — GitHub Issue [#14](https://github.com/VforVitorio/peercanvas/issues/14)
+- [x] 1.2 Adapt the required composition from the official weavejs-frontend into an isolated test-only Tauri/WebView probe with the pinned Weave renderer on Windows, macOS, and Linux; verify each platform with a recorded native canvas smoke test for render, selection, transforms, connector rendering, and one in-memory Weave-store-backed node edit. Exclude probe instrumentation from normal production builds. Record adopted source and notices; document any blocked behavior with an explicit fallback decision. — GitHub Issue [#15](https://github.com/VforVitorio/peercanvas/issues/15)
+- [x] 1.3 Record the actual OS, WebView, Rust, React, and Weave compatibility matrix; verify it is linked from the support documentation and ADR-0001. — GitHub Issue [#16](https://github.com/VforVitorio/peercanvas/issues/16)
 - [x] 1.4 Review native CI, required check names, GitHub branch flow, and security settings; verify CI check runs are successful before applying branch protection. — GitHub Issue [#17](https://github.com/VforVitorio/peercanvas/issues/17)
-- [ ] 1.5 Prepare the branded editor-shell direction from the maintainer-supplied assets; verify brand provenance, Weave.js canvas hierarchy, accessibility constraints, and the honest placeholder state in a reviewable design brief without implementing editor controls. — GitHub Issue [#18](https://github.com/VforVitorio/peercanvas/issues/18)
+- [x] 1.5 Prepare the branded editor-shell direction from the maintainer-supplied assets; verify brand provenance, Weave.js canvas hierarchy, accessibility constraints, and the honest placeholder state in docs/branding/editor-shell-direction.md without implementing editor controls. — GitHub Issue [#18](https://github.com/VforVitorio/peercanvas/issues/18)
 
 ## 2. Canonical document and local persistence (WP-02, WP-03)
 
@@ -64,7 +66,7 @@ Unchecked tasks below are future implementation work. Repository setup tasks may
 ## 8. Integration and release review
 
 - [ ] 8.1 Run the full CI suite and cross-capability acceptance matrix; verify every released requirement has automated or documented manual evidence. — GitHub Issue [#52](https://github.com/VforVitorio/peercanvas/issues/52)
-- [ ] 8.2 Reconcile OpenSpec specs, FR/UC traceability, ADRs, risks, PLANS.md, and GitHub Issues; verify there are no stale or contradictory contracts.
+- [x] 8.2 Reconcile OpenSpec specs, FR/UC traceability, ADRs, risks, PLANS.md, and GitHub Issues; verify there are no stale or contradictory contracts. — GitHub Issue [#53](https://github.com/VforVitorio/peercanvas/issues/53)
 - [ ] 8.3 Prepare release notes and support limitations; verify all platform, interoperability, networking, AI, security, and asset claims are backed by recorded evidence. — GitHub Issue [#54](https://github.com/VforVitorio/peercanvas/issues/54)
 
 ## Workflow follow-up

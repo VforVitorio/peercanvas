@@ -4,12 +4,15 @@
 
 PeerCanvas has a product vision and a minimal desktop shell, but no versioned behavioral contracts linking requirements, architecture, security, work packages, and future GitHub work. Establishing one reviewable product baseline now prevents implementation from making incompatible choices about the document model, persistence, collaboration, imports, and AI authority.
 
+The selected rendering stack also needs a bounded native compatibility gate before product editing work starts. S0 uses an isolated test-only Tauri/Weave probe to collect that evidence while the normal app remains the engineering scaffold.
+
 ## What Changes
 
 - Add versioned baseline specifications for the product's 18 requested capabilities.
 - Define user-facing behavior, acceptance scenarios, and security boundaries without implementing product features.
 - Record proposed architecture decisions, validation experiments, and cross-capability dependencies.
 - Link the specifications to the repository's product definition and work-package plan.
+- Add a separately invoked S0 compatibility probe for native rendering, selection, transforms, connector rendering, and one in-memory Weave-store-backed edit; exclude its fixture and instrumentation from normal production builds.
 - Require explicit maintainer review before any implementation of these capabilities.
 
 ## Capabilities
@@ -41,4 +44,4 @@ None. The repository has no existing OpenSpec baseline specifications.
 
 ## Impact
 
-This change creates only OpenSpec planning artifacts and references the existing product definition, architecture, ADRs, risk register, and delivery plan. It affects no application behavior, data format, external API, or released package. Future implementation will affect the React/Tauri shell, Weave adapter, document/persistence model, peer transport, import/export, and optional Codex/MCP process boundary; each remains out of scope for this proposal.
+This change establishes OpenSpec planning artifacts and an isolated test-only compatibility probe, with references to the product definition, architecture, ADRs, risk register, and delivery plan. The normal application remains the engineering scaffold. The probe uses temporary fixture data and does not introduce a user document format, durable store, external API, or released editor capability. Product implementation of the React/Tauri editor, canonical document/persistence model, peer transport, import/export, and optional Codex/MCP process boundary remains outside this S0 scope.
