@@ -1,6 +1,6 @@
 # Quality and verification strategy
 
-Status: acceptance plan; only scaffold-level checks may be run before product behavior exists.
+Status: acceptance plan. Scaffold checks exist; the isolated S0 compatibility probe is planned and has no recorded native result yet. Later capability checks require their product behavior to exist.
 
 ## Evidence rule
 
@@ -20,6 +20,21 @@ Distinguish planned, automated, manual, and not-yet-tested evidence. A frontend 
 | Security          | XML/SVG, links, OAuth token boundary, MCP authorization, dependency risks | Malicious fixtures, secret scanning, static analysis, threat-model review |
 | Accessibility     | Keyboard flows, focus, dialogs, contrast, screen reader semantics         | Automated checks plus manual keyboard/screen-reader review                |
 | Performance       | Startup, open/save, pan/zoom and large-document behavior                  | NFR fixtures and reference machine agreed in WP-01                        |
+
+## S0 compatibility gate
+
+WP-01 uses a separately invoked test-only Tauri/WebView probe. The normal app keeps the engineering scaffold, and normal production builds must exclude the probe entrypoint, fixture, and test instrumentation. Verify that separation as part of the frontend/native build review.
+
+Use one controlled fixture containing the nodes and connector needed to exercise native launch, renderer mounting, selection, transforms, connector rendering, and one in-memory Weave-store-backed node edit. The probe tests the integrated rendering packages in the native WebView; it does not implement the canonical product model, durable storage, persisted Yjs updates, or user document workflows.
+
+For each declared Windows, macOS, and Linux target, record:
+
+- The tested commit, exact OS and architecture, WebView/runtime version, Rust version, React version, and pinned Weave package versions.
+- The commands, fixture revision, and separate results for frontend compilation, native compilation, native launch, and each canvas interaction.
+- Logs, screenshots or other retained artifacts sufficient to review the result, plus whether the check was automated or manual.
+- Any blocked or failed behavior, its blocking issue, and an explicit fallback decision. Do not turn a missing native interaction result into a passing build result.
+
+The actual compatibility record for issue #16 will be added at `docs/support/platform-matrix.md` when evidence exists, then linked from ADR-0001 and support documentation. A proposed target or an unrun procedure is not a verified support claim. Passing this fixture closes only the bounded S0 gate; product workflows and release accessibility, recovery, performance, and networking acceptance remain in their work packages.
 
 ## Required test scenarios by capability
 

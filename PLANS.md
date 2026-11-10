@@ -1,6 +1,6 @@
 # PeerCanvas delivery plan
 
-Status: planning baseline, 2026-11-07. No product feature work is authorized by this plan.
+Status: planning baseline, 2026-11-07; S0 acceptance clarified on 2026-11-10. This plan records scope and does not itself authorize implementation.
 
 This file is the canonical roadmap and work-package ledger. Product behavior and acceptance requirements live in the [product definition](docs/requirements/product-definition.md); versioned capability contracts live in OpenSpec; GitHub Issues track execution. Update this file when scope, dependencies, estimates, sprint assignments, or risks change.
 
@@ -27,7 +27,7 @@ Effort ranges are initial engineering estimates. They exclude release administra
 
 | ID    | Package and objective                                                                              | Requirements / OpenSpec                                                           | Dependencies        | Estimate |
 | ----- | -------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------- | ------------------- | -------: |
-| WP-00 | Engineering foundation: repository, policies, CI, OpenSpec, traceability, local developer workflow | NFR-10..13; Desktop Application, Quality & Testing, Security & Privacy            | None                |   3-5 PD |
+| WP-00 | Engineering foundation: repository, policies, CI, OpenSpec, traceability, local developer workflow | NFR-010..013; Desktop Application, Quality & Testing, Security & Privacy          | None                |   3-5 PD |
 | WP-01 | Tauri + Weave compatibility spike and minimal canvas integration                                   | FR-001..004; Desktop Application, Canvas Editing, Cross-Platform Compatibility    | WP-00               |   4-7 PD |
 | WP-02 | Canonical document model, command boundary, IDs, pages, layers, nodes, edges                       | FR-005..011; Document Model                                                       | WP-01               |  6-10 PD |
 | WP-03 | Local save/open, SQLite or platform-store decision, snapshots and crash recovery                   | FR-012..016; Local Persistence, History & Recovery                                | WP-02               |  6-10 PD |
@@ -43,7 +43,7 @@ Effort ranges are initial engineering estimates. They exclude release administra
 
 ### WP-00: Engineering foundation
 
-- **Scope:** versioned product definition, initial architecture and ADRs, OpenSpec, maintainer-supplied branding assets and visual direction brief, contributor policies, CI/security workflows, GitHub labels/milestones/parent-subissue hierarchy, PR templates, and maintainer handoff.
+- **Scope:** versioned product definition, initial architecture and ADRs, OpenSpec, maintainer-supplied branding assets and [editor-shell direction brief](docs/branding/editor-shell-direction.md), contributor policies, CI/security workflows, GitHub labels/milestones/parent-subissue hierarchy, PR templates, and maintainer handoff.
 - **Components:** repository root, docs, OpenSpec, GitHub configuration, scripts.
 - **Activities/contracts:** make requirements traceable to use cases, OpenSpec capabilities, WPs, Issues, PRs, and checks; document what is verified versus proposed.
 - **Acceptance:** repository instructions and templates are present; OpenSpec validates; README and native app icon use maintainer branding; CI definitions cover frontend checks on supported hosted OS runners; each OpenSpec task maps to a native sub-issue under its WP; GitHub setup script is idempotent; no editor feature behavior is added.
@@ -53,11 +53,11 @@ Effort ranges are initial engineering estimates. They exclude release administra
 
 ### WP-01: Tauri and Weave compatibility spike
 
-- **Scope:** adapt the official `weavejs-frontend` as the starting point for canvas UI components and prove the Weave renderer mounts in the Tauri WebView on Windows, macOS, and Linux; confirm core selection, transforms, connector rendering, and one persisted Yjs update.
+- **Scope:** use an isolated test-only Tauri/WebView probe to adapt the required components from the official `weavejs-frontend` and mount the pinned Weave renderer on Windows, macOS, and Linux; confirm selection, transforms, connector rendering, and one in-memory Weave-store-backed edit using a controlled fixture.
 - **Dependencies/components:** WP-00; frontend, Tauri shell, one isolated Weave adapter, selected components from the official frontend example.
-- **Activities/contracts:** compare WeaveStoreStandalone and renderer packages; selectively port required React components while retaining Tauri/Vite and excluding the example's TanStack Start application runtime; pin a compatible React/ReactDOM range; record platform WebView differences and native prerequisites.
-- **Acceptance:** a minimal canvas renders and edits one node on all three OS runners or the unsupported behavior is captured with a blocking issue and fallback option; no broader editor UI is part of this spike.
-- **Tests/DoD:** smoke test each native runner; preserve the dependency and runtime matrix; update ADR-0001 and the compatibility table.
+- **Activities/contracts:** compare WeaveStoreStandalone and renderer packages; selectively port required React composition into the test probe while retaining Tauri/Vite and excluding the example's TanStack Start application runtime; pin a compatible React/ReactDOM range; record the adopted upstream commit, source files, notices, platform WebView differences, and native prerequisites. Exclude the probe and its instrumentation from normal production builds, which retain the engineering scaffold. The fixture's temporary store does not select or implement durable local persistence; that decision remains in WP-03.
+- **Acceptance:** record native launch, rendering, selection, transforms, connector rendering, and one in-memory store-backed node edit on each declared OS, or capture the unsupported behavior in a blocking issue with an explicit fallback decision. A build alone does not satisfy the native interaction checks. No broader editor UI is part of this spike.
+- **Tests/DoD:** use the same controlled fixture and smoke procedure on each native platform; preserve the exact OS/WebView/dependency matrix and separate compilation from native interaction evidence; update ADR-0001 and the compatibility table.
 - **Effort/risk:** 4-7 PD; WebView variance and renderer dependencies are the critical technical gate.
 - **Issue / PR:** WP-01 Validate Tauri and Weave.js compatibility; PR to **dev**.
 
@@ -179,16 +179,18 @@ Effort ranges are initial engineering estimates. They exclude release administra
 
 Each box is an initial two-week iteration, not a delivery date. If the package estimate exceeds available capacity, split it into acceptance-complete slices and carry the remainder. No velocity is assumed.
 
-| Sprint | Goal                                   | Packages                | Exit evidence                                                                                           |
-| ------ | -------------------------------------- | ----------------------- | ------------------------------------------------------------------------------------------------------- |
-| S0     | Foundation and feasibility gates       | WP-00, first half WP-01 | OpenSpec and CI baseline; verified native build/run matrix or documented blockers; approved ADR updates |
-| S1     | Canonical data and durable local files | WP-02, WP-03            | versioned model; save/open/recovery acceptance evidence                                                 |
-| S2     | Useful local editor                    | WP-04                   | create, edit, connect, undo and reopen a small diagram                                                  |
-| S3     | Reusable assets and interoperability   | WP-05, WP-06            | licensed fixture catalog and declared draw.io subset with round-trip evidence                           |
-| S4     | Collaboration foundation               | WP-07                   | Yjs convergence and recorded LAN/NAT outcomes                                                           |
-| S5     | Safe peer sessions                     | WP-08                   | invite approval, permission enforcement, expiry and revocation evidence                                 |
-| S6     | Optional AI and model tools            | WP-09, WP-10            | provider fallback, preview/approval, MCP protocol and security tests                                    |
-| S7     | Hardening and ecosystem                | WP-11, WP-12            | release checklist, supported OS evidence, verified skill package                                        |
+S0 contains the full bounded WP-01 compatibility gate through a test-only probe. Its in-memory fixture does not implement the canonical document model, durable storage, or the useful local editor planned for WP-02, WP-03, and WP-04. The normal app remains the engineering scaffold.
+
+| Sprint | Goal                                   | Packages     | Exit evidence                                                                                                                             |
+| ------ | -------------------------------------- | ------------ | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| S0     | Foundation and feasibility gates       | WP-00, WP-01 | OpenSpec/CI baseline and branded shell brief; native canvas smoke matrix or blocking issues with fallback decisions; approved ADR updates |
+| S1     | Canonical data and durable local files | WP-02, WP-03 | versioned model; save/open/recovery acceptance evidence                                                                                   |
+| S2     | Useful local editor                    | WP-04        | create, edit, connect, undo and reopen a small diagram                                                                                    |
+| S3     | Reusable assets and interoperability   | WP-05, WP-06 | licensed fixture catalog and declared draw.io subset with round-trip evidence                                                             |
+| S4     | Collaboration foundation               | WP-07        | Yjs convergence and recorded LAN/NAT outcomes                                                                                             |
+| S5     | Safe peer sessions                     | WP-08        | invite approval, permission enforcement, expiry and revocation evidence                                                                   |
+| S6     | Optional AI and model tools            | WP-09, WP-10 | provider fallback, preview/approval, MCP protocol and security tests                                                                      |
+| S7     | Hardening and ecosystem                | WP-11, WP-12 | release checklist, supported OS evidence, verified skill package                                                                          |
 
 ### Critical path and parallel work
 

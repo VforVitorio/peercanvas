@@ -12,7 +12,7 @@ Status: proposed architecture baseline, 2026-11-07. This is a design, not eviden
 - AI candidate: optional Codex app-server process using Sign in with ChatGPT for eligible open-source/local-app plan usage, subject to preview terms and registration.
 - Chat UI: adapt the shadcn chatbot template's React components and interaction patterns while retaining the Tauri/Vite shell and PeerCanvas provider boundary; do not adopt its Next.js routes or Vercel AI SDK backend.
 
-The compatibility spike in WP-01 is a gate. A package version in this list is not proof that the integrated app works.
+The compatibility spike in WP-01 is the S0 gate. A package version in this list is not proof that the integrated app works. A separately invoked test-only Tauri/WebView probe must prove native launch, rendering, selection, transforms, connector rendering, and one in-memory Weave-store-backed edit on the declared platforms, with exact OS/WebView versions and upstream source notices. Exclude the probe from normal production builds, which retain the engineering scaffold. Durable persistence remains a separate WP-03 decision.
 
 ## Logical component view
 
@@ -133,15 +133,15 @@ The provider returns a proposed operation list. The MCP/assistant adapter parses
 
 ## Validation gates
 
-| Gate                | Required evidence                                                                              | Owner package |
-| ------------------- | ---------------------------------------------------------------------------------------------- | ------------- |
-| Tauri/Weave         | renderer mounts, edit operations work, native smoke matrix on the declared OS targets          | WP-01         |
-| Persistence         | save/open, migration, interrupted write and recovery experiments on each OS                    | WP-03         |
-| draw.io             | safe parser, golden fixtures, round-trip subset, loss report                                   | WP-06         |
-| P2P                 | LAN/NAT/TURN matrix, sync convergence, host disconnect and reconnect                           | WP-07/WP-08   |
-| Invitation security | entropy, deep-link handling, logs, expiry, admission, role enforcement and revocation tests    | WP-08         |
-| Codex/MCP           | current auth eligibility/terms, app-server protocol, token boundary, approval and denial tests | WP-09/WP-10   |
-| Release             | CI plus real OS/WebView smoke checklist, licenses, accessibility and recovery                  | WP-11         |
+| Gate                | Required evidence                                                                                       | Owner package |
+| ------------------- | ------------------------------------------------------------------------------------------------------- | ------------- |
+| Tauri/Weave         | native render/select/transform/connector/edit smoke evidence, exact OS/WebView matrix, upstream notices | WP-01         |
+| Persistence         | save/open, migration, interrupted write and recovery experiments on each OS                             | WP-03         |
+| draw.io             | safe parser, golden fixtures, round-trip subset, loss report                                            | WP-06         |
+| P2P                 | LAN/NAT/TURN matrix, sync convergence, host disconnect and reconnect                                    | WP-07/WP-08   |
+| Invitation security | entropy, deep-link handling, logs, expiry, admission, role enforcement and revocation tests             | WP-08         |
+| Codex/MCP           | current auth eligibility/terms, app-server protocol, token boundary, approval and denial tests          | WP-09/WP-10   |
+| Release             | CI plus real OS/WebView smoke checklist, licenses, accessibility and recovery                           | WP-11         |
 
 ## Sources
 
