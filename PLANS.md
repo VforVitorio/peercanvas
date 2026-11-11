@@ -19,7 +19,7 @@ This file is the canonical roadmap and work-package ledger. Product behavior and
 
 The first product milestone is a local-first desktop diagram editor for Windows, macOS, and Linux, using Tauri 2, React, TypeScript, Vite, and Weave.js. Planned capabilities include a document model, editing, local persistence and recovery, a searchable shape catalog, draw.io import/export, optional P2P collaboration and secure invitations, and optional Codex/MCP tools.
 
-The current shell is not a diagram editor. No feature in that list is implemented. Native packaging format, persistence engine, invitation authorization protocol, relay/TURN policy, shape asset licensing, exact draw.io parity, and OpenAI client registration remain open pending experiments or review.
+The current S2 implementation adds the first in-memory editing slice under WP-04.1; it does not add durable storage or establish native WebView interaction support. Native packaging format, persistence engine, invitation authorization protocol, relay/TURN policy, shape asset licensing, exact draw.io parity, and OpenAI client registration remain open pending experiments or review.
 
 ## Work packages
 
@@ -181,7 +181,7 @@ The separate [UI demonstration](docs/development/ui-mock.md), tracked locally by
 
 Each box is an initial two-week iteration, not a delivery date. If the package estimate exceeds available capacity, split it into acceptance-complete slices and carry the remainder. No velocity is assumed.
 
-S0 contains the full bounded WP-01 compatibility gate through a test-only probe. Its in-memory fixture does not implement the canonical document model, durable storage, or the useful local editor planned for WP-02, WP-03, and WP-04. The normal app remains the engineering scaffold.
+S0 delivered the bounded WP-01 compatibility gate through a test-only probe. Its in-memory fixture did not implement the canonical document model, durable storage, or the useful local editor planned for WP-02, WP-03, and WP-04. The current WP-04.1 implementation is separate from that S0 probe.
 
 S0 implementation and native evidence are complete. Promotion PR #74 (`d84cfce`) merged the sprint to `main`; all eight S0 issues and milestone #1 are closed, and the Project Board marks them Done.
 
@@ -195,6 +195,8 @@ S0 implementation and native evidence are complete. Promotion PR #74 (`d84cfce`)
 | S5     | Safe peer sessions                     | WP-08        | invite approval, permission enforcement, expiry and revocation evidence                                                                   |
 | S6     | Optional AI and model tools            | WP-09, WP-10 | provider fallback, preview/approval, MCP protocol and security tests                                                                      |
 | S7     | Hardening and ecosystem                | WP-11, WP-12 | release checklist, supported OS evidence, verified skill package                                                                          |
+
+S2 is in progress. Issue #25 is implemented and browser-verified; [PR #86](https://github.com/furancho-labs/Peer2Canvas/pull/86) is open from `feature/s2-selection-editing` to `dev`. Issue #26 remains Todo. The S1 milestone still has eight open issues in GitHub. Do not close WP-04 or claim S2 exit: parent issue #6 requires a saved, closed, and reopened diagram, and durable persistence remains unfinished.
 
 ### Critical path and parallel work
 
