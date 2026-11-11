@@ -38,6 +38,8 @@ The compatibility record for issue #16 is in the [platform matrix](../support/pl
 
 ## Required test scenarios by capability
 
+The isolated UI demonstration has shared-core and simulated-service tests, Claude-authored UI tests, and separate browser/visual review. Record their exact results in [demo evidence](../development/ui-mock.md). These checks exercise in-memory commands and fictional outcomes only; they do not replace any production/native/file/network/provider scenario below. The normal build must exclude the demo entry/fixtures/instrumentation, and the demo uses its own output directory.
+
 - Document: schema migration, invalid command, stable serialization, undo/redo, partial mutation rollback.
 - Persistence: interrupted save, disk-full/permission error, corrupt snapshot, recovery, old schema migration.
 - Catalog: deterministic search, invalid manifest, malicious SVG, attribution display, offline behavior.

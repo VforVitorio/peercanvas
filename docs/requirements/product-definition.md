@@ -4,6 +4,8 @@ Status: proposed baseline, 2026-11-07. Requirements are derived from the project
 
 ## Product context
 
+The [isolated UI demonstration](../development/ui-mock.md) is a review surface for the requirements below. It uses fictional outcomes and the shared pure command core; it does not satisfy durable persistence, transport, real-provider, or native workflow acceptance. Stable requirement IDs and production acceptance criteria remain unchanged.
+
 PeerCanvas is an open-source desktop diagram editor for creating architecture, UML, BPMN, network, cloud, database, process, and workflow diagrams. It is local-first and must work as an editor without a network connection or AI account. Optional capabilities add peer-to-peer collaboration, private session invitations, draw.io interchange, and an embedded Codex assistant with model-level MCP tools.
 
 The first product goal is a useful local editor. Collaboration and AI must not be prerequisites for opening, editing, saving, or exporting a local document. PeerCanvas is an independent community project and must not imply endorsement by Weave.js, InditexTech, OpenPencil, draw.io, or OpenAI.

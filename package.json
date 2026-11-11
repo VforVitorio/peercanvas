@@ -9,6 +9,8 @@
   },
   "scripts": {
     "dev": "vite",
+    "ui:mock": "vite --config vite.ui-mock.config.ts",
+    "build:ui-mock": "vite build --config vite.ui-mock.config.ts",
     "build": "vite build",
     "build:native-smoke": "vite build --mode native-smoke",
     "native-smoke:build": "tauri build --debug --no-bundle --features native-smoke --config src-tauri/tauri.native-smoke.conf.json",
