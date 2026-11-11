@@ -17,9 +17,9 @@ S0 comprises tasks 1.1–1.5 and 8.2. Its compatibility probe is test-only and e
 - [x] 2.1 Define the versioned document schema and typed command outcomes; verify schema, stable IDs, and invalid-command behavior with unit/property tests. — GitHub Issue [#19](https://github.com/furancho-labs/Peer2Canvas/issues/19)
 - [x] 2.2 Implement node, connection, page, and layer invariants at one command boundary; verify rejected mutations leave the document unchanged. — GitHub Issue [#20](https://github.com/furancho-labs/Peer2Canvas/issues/20)
 - [x] 2.3 Compare SQLite, Tauri storage, and browser/Yjs persistence using representative documents and failure cases; record the selected single source of truth in ADR-0003. — GitHub Issue [#21](https://github.com/furancho-labs/Peer2Canvas/issues/21)
-- [ ] 2.4 Implement local create/open/save/rename/close against the selected store; verify supported document fields survive round trips. — GitHub Issue [#22](https://github.com/furancho-labs/Peer2Canvas/issues/22)
-- [ ] 2.5 Implement migrations and non-destructive recovery; verify interrupted writes, disk errors, corrupt snapshots, and unsupported versions with integration tests. — GitHub Issue [#23](https://github.com/furancho-labs/Peer2Canvas/issues/23)
-- [ ] 2.6 Document the stored schema and recovery behavior; verify examples and migration policy match the implemented model. — GitHub Issue [#24](https://github.com/furancho-labs/Peer2Canvas/issues/24)
+- [x] 2.4 Implement local create/open/save/rename/close against the selected store; verify supported document fields survive round trips. — GitHub Issue [#22](https://github.com/furancho-labs/Peer2Canvas/issues/22)
+- [x] 2.5 Implement migrations and non-destructive recovery; verify interrupted writes, disk errors, corrupt snapshots, and unsupported versions with integration tests. — GitHub Issue [#23](https://github.com/furancho-labs/Peer2Canvas/issues/23)
+- [x] 2.6 Document the stored schema and recovery behavior; verify examples and migration policy match the implemented model. — GitHub Issue [#24](https://github.com/furancho-labs/Peer2Canvas/issues/24)
 
 ## 3. Canvas editing and shape catalog (WP-04, WP-05)
 
@@ -62,6 +62,7 @@ S0 comprises tasks 1.1–1.5 and 8.2. Its compatibility probe is test-only and e
 - [ ] 7.2 Complete native smoke checks and release evidence for Windows, macOS, and Linux; verify the release matrix distinguishes automated builds from manual tests. — GitHub Issue [#49](https://github.com/furancho-labs/Peer2Canvas/issues/49)
 - [ ] 7.3 Resolve critical/high dependency and secret findings and review third-party notices; verify the release record contains maintainer dispositions for remaining risks. — GitHub Issue [#50](https://github.com/furancho-labs/Peer2Canvas/issues/50)
 - [ ] 7.4 Create user-facing Codex skills only for verified MCP tools; validate manifests, examples, installation/removal, and permission disclosures with current official OpenAI tooling. — GitHub Issue [#51](https://github.com/furancho-labs/Peer2Canvas/issues/51)
+- [ ] 7.5 Package and verify the authorized native application icon on each declared platform; inspect the packaged resources and launch the clean-checkout build. — GitHub Issue [#90](https://github.com/furancho-labs/Peer2Canvas/issues/90)
 
 ## 8. Integration and release review
 

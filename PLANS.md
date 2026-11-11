@@ -1,6 +1,6 @@
 # PeerCanvas delivery plan
 
-Status: planning baseline, 2026-11-07; S0 is complete and S2 persistence work is in progress as of 2026-11-11. This plan records scope and does not itself authorize product implementation.
+Status: planning baseline, 2026-11-07; S0 is complete, S2 is in progress, and the S7–S10 roadmap additions were recorded on 2026-11-11. This plan does not authorize product implementation by itself.
 
 This file is the canonical roadmap and work-package ledger. Product behavior and acceptance requirements live in the [product definition](docs/requirements/product-definition.md); versioned capability contracts live in OpenSpec; GitHub Issues track execution. Update this file when scope, dependencies, estimates, sprint assignments, or risks change.
 
@@ -19,27 +19,30 @@ This file is the canonical roadmap and work-package ledger. Product behavior and
 
 The first product milestone is a local-first desktop diagram editor for Windows, macOS, and Linux, using Tauri 2, React, TypeScript, Vite, and Weave.js. Planned capabilities include a document model, editing, local persistence and recovery, a searchable shape catalog, draw.io import/export, optional P2P collaboration and secure invitations, and optional Codex/MCP tools.
 
-WP-04.1 and WP-04.2 provide the in-memory editor. The current S2 branch adds `.peercanvas` save/open/recovery through the WP-03 decision in [ADR-0003](docs/architecture/decisions/ADR-0003-local-persistence.md); WP-03 and parent #6 remain open until cross-platform CI and the complete native acceptance pass. Native packaging format, invitation authorization protocol, relay/TURN policy, shape asset licensing, exact draw.io parity, and OpenAI client registration remain open pending experiments or review.
+WP-04.1 and WP-04.2 provide in-memory editing. S2 adds `.peercanvas` save/open/recovery under WP-03 and is merged to `dev` in PR #104; keep WP-03 and WP-04 issues open through the `dev`→`main` promotion. Cross-platform CI passes; the recorded native save/close/reopen flow is macOS, while other native UI smoke remains release evidence. The S7 icon-packaging, S8 preferences, S9 grouping, and S10 PMV-onboarding work remain planned and are not implementation approvals. Invitation authorization, relay/TURN policy, shape asset licensing, exact draw.io parity, and OpenAI client registration remain open pending experiments or review.
 
 ## Work packages
 
 Effort ranges are initial engineering estimates. They exclude release administration and external review time.
 
-| ID    | Package and objective                                                                              | Requirements / OpenSpec                                                           | Dependencies        | Estimate |
-| ----- | -------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------- | ------------------- | -------: |
-| WP-00 | Engineering foundation: repository, policies, CI, OpenSpec, traceability, local developer workflow | NFR-010..013; Desktop Application, Quality & Testing, Security & Privacy          | None                |   3-5 PD |
-| WP-01 | Tauri + Weave compatibility spike and minimal canvas integration                                   | FR-001..004; Desktop Application, Canvas Editing, Cross-Platform Compatibility    | WP-00               |   4-7 PD |
-| WP-02 | Canonical document model, command boundary, IDs, pages, layers, nodes, edges                       | FR-005..011; Document Model                                                       | WP-01               |  6-10 PD |
-| WP-03 | Versioned local files, save/open, recovery and migration                                           | FR-012..016; Local Persistence, History & Recovery                                | WP-02               |  6-10 PD |
-| WP-04 | Core canvas editing, selection, transforms, connectors, properties and undo/redo                   | FR-004..011; Canvas Editing                                                       | WP-02, WP-03        | 10-16 PD |
-| WP-05 | Shape catalog manifest, search, categories, provenance and safe SVG rendering                      | FR-017..020; Diagram Shapes, Shape Catalog, Security & Privacy                    | WP-02               |  6-10 PD |
-| WP-06 | draw.io import/export adapter and compatibility fixtures                                           | FR-021..024; draw.io Compatibility, Import & Export                               | WP-02, WP-05        |  8-14 PD |
-| WP-07 | Yjs synchronization contract and WeaveStoreP2P adapter                                             | FR-025..028; P2P Collaboration, Presence & Awareness                              | WP-01, WP-02, WP-03 |  8-14 PD |
-| WP-08 | Peer session lifecycle, invitations, participant approval, roles and revocation                    | FR-029..034; Secure Session Invitations, Security & Privacy                       | WP-07               |  8-14 PD |
-| WP-09 | Optional Codex conversation UI and provider boundary                                               | FR-035..040; Codex Embedded Chat                                                  | WP-02, WP-04        |  8-13 PD |
-| WP-10 | MCP document tools, proposal/approval workflow and audit events                                    | FR-041..046; MCP Integration                                                      | WP-02, WP-04, WP-09 |  8-14 PD |
-| WP-11 | Cross-platform, security, accessibility, performance and recovery hardening                        | NFR-001..014; Cross-Platform Compatibility, Quality & Testing, Security & Privacy | WP-03..WP-10        | 10-18 PD |
-| WP-12 | User-facing Codex skills and community integration guide                                           | FR-047..049; User-Facing Codex Skills                                             | WP-10, WP-11        |   4-7 PD |
+| ID    | Package and objective                                                                              | Requirements / OpenSpec                                                           | Dependencies         | Estimate |
+| ----- | -------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------- | -------------------- | -------: |
+| WP-00 | Engineering foundation: repository, policies, CI, OpenSpec, traceability, local developer workflow | NFR-010..013; Desktop Application, Quality & Testing, Security & Privacy          | None                 |   3-5 PD |
+| WP-01 | Tauri + Weave compatibility spike and minimal canvas integration                                   | FR-001..004; Desktop Application, Canvas Editing, Cross-Platform Compatibility    | WP-00                |   4-7 PD |
+| WP-02 | Canonical document model, command boundary, IDs, pages, layers, nodes, edges                       | FR-005..011; Document Model                                                       | WP-01                |  6-10 PD |
+| WP-03 | Versioned `.peercanvas` save/open, snapshots, recovery and migration                               | FR-012..016; Local Persistence, History & Recovery                                | WP-02                |  6-10 PD |
+| WP-04 | Core canvas editing, selection, transforms, connectors, properties and undo/redo                   | FR-004..011; Canvas Editing                                                       | WP-02, WP-03         | 10-16 PD |
+| WP-05 | Shape catalog manifest, search, categories, provenance and safe SVG rendering                      | FR-017..020; Diagram Shapes, Shape Catalog, Security & Privacy                    | WP-02                |  6-10 PD |
+| WP-06 | draw.io import/export adapter and compatibility fixtures                                           | FR-021..024; draw.io Compatibility, Import & Export                               | WP-02, WP-05         |  8-14 PD |
+| WP-07 | Yjs synchronization contract and WeaveStoreP2P adapter                                             | FR-025..028; P2P Collaboration, Presence & Awareness                              | WP-01, WP-02, WP-03  |  8-14 PD |
+| WP-08 | Peer session lifecycle, invitations, participant approval, roles and revocation                    | FR-029..034; Secure Session Invitations, Security & Privacy                       | WP-07                |  8-14 PD |
+| WP-09 | Optional Codex conversation UI and provider boundary                                               | FR-035..040; Codex Embedded Chat                                                  | WP-02, WP-04         |  8-13 PD |
+| WP-10 | MCP document tools, proposal/approval workflow and audit events                                    | FR-041..046; MCP Integration                                                      | WP-02, WP-04, WP-09  |  8-14 PD |
+| WP-11 | Cross-platform, security, accessibility, performance, recovery and icon-packaging hardening        | NFR-001..015; Cross-Platform Compatibility, Quality & Testing, Security & Privacy | WP-03..WP-10         | 10-18 PD |
+| WP-12 | User-facing Codex skills and community integration guide                                           | FR-047..049; User-Facing Codex Skills                                             | WP-10, WP-11         |   4-7 PD |
+| WP-13 | Local appearance and language preferences                                                          | FR-050..051; User Preferences, Localization                                       | WP-03                |   5-8 PD |
+| WP-14 | Validated diagram grouping and ungrouping; exact scope follows discovery                           | Proposed FR-053/UC-13; OpenSpec after discovery                                   | WP-02, WP-04         |      TBD |
+| WP-15 | Accessible onboarding for reviewed PMV workflows                                                   | FR-052/UC-12; Guided Onboarding                                                   | WP-13, PMV workflows |      TBD |
 
 ### WP-00: Engineering foundation
 
@@ -77,10 +80,10 @@ Effort ranges are initial engineering estimates. They exclude release administra
 - **Scope:** implement save/open, atomic replacement, snapshots, crash recovery, and user-visible errors for one durable local source of truth.
 - **Requirements/spec:** FR-012..016; Local Persistence, History & Recovery.
 - **Dependencies/components:** WP-02; persistence adapter, Tauri filesystem or database integration.
-- **Activities/contracts:** compare SQLite, Tauri-native files, and browser IndexedDB for representative documents; define file ownership, checkpoint/backup policy, migration, and recovery. ADR-0003 selects the versioned `.peercanvas` JSON file as the sole durable document.
-- **Acceptance:** a document survives normal close/reopen and injected interruption; recovered content is either complete or the user receives a non-destructive recovery option. The user explicitly chooses Reopen last; startup does not auto-open a file.
-- **Tests/DoD:** integration tests with representative fixtures, migration tests, corruption handling, and OS-specific path tests on Windows, macOS, and Linux; decision recorded in ADR-0003.
-- **Effort/risk:** 6-10 PD; Windows and Linux replacement/recovery behavior must pass the same native storage tests before acceptance.
+- **Activities/contracts:** ADR-0003 selects user-managed versioned `.peercanvas` JSON as the only durable document; preferences remain separate. The S2 PR #104 implements the native adapter and recovery policy.
+- **Acceptance:** a document survives normal close/reopen and injected interruption; recovered content is complete or the user receives a non-destructive recovery option. The user chooses Reopen last; startup does not auto-open a file.
+- **Tests/DoD:** integration tests with representative fixtures, migration tests, corruption handling, and OS-specific storage tests on Windows, macOS, and Linux.
+- **Effort/risk:** 6-10 PD; storage tests pass in cross-platform CI. Additional Windows/Linux native editor UI smoke is release evidence under WP-11.
 - **Issue / PR:** WP-03 Implement local persistence and recovery; PR to **dev**.
 
 ### WP-04: Core canvas editing
@@ -157,13 +160,13 @@ Effort ranges are initial engineering estimates. They exclude release administra
 
 ### WP-11: Quality and product hardening
 
-- **Scope:** multiplatform validation, accessibility, performance baselines, dependency/security scanning, fault recovery, and release readiness.
-- **Requirements/spec:** NFR-001..014; Cross-Platform Compatibility, Quality & Testing, Security & Privacy.
+- **Scope:** multiplatform validation, accessibility, performance baselines, dependency/security scanning, fault recovery, reproducible native icon packaging, and release readiness.
+- **Requirements/spec:** NFR-001..015; Cross-Platform Compatibility, Quality & Testing, Security & Privacy, Desktop Application.
 - **Dependencies/components:** WP-03..WP-10; all supported desktop targets.
-- **Acceptance:** no open critical/high security issue without maintainer disposition; all declared support platforms pass CI and a recorded manual smoke matrix; no performance claim lacks a named fixture and machine.
+- **Acceptance:** no open critical/high security issue without maintainer disposition; all declared support platforms pass CI and a recorded manual smoke matrix; native bundles contain the authorized PeerCanvas icon; no performance claim lacks a named fixture and machine.
 - **Tests/DoD:** full CI plus manual release checklist, dependency and asset license review, vulnerability and recovery exercises.
 - **Effort/risk:** 10-18 PD; automated runners do not prove all real WebView, deep-link, or network behavior.
-- **Issue / PR:** WP-11 Harden cross-platform quality and security; PR to **dev**.
+- **Issue / PR:** WP-11 Harden cross-platform quality and security; [icon package task #90](https://github.com/furancho-labs/Peer2Canvas/issues/90); PR to **dev**.
 
 ### WP-12: User-facing Codex skills and ecosystem
 
@@ -175,9 +178,39 @@ Effort ranges are initial engineering estimates. They exclude release administra
 - **Effort/risk:** 4-7 PD; skill distribution and packaging compatibility may change.
 - **Issue / PR:** WP-12 Publish Codex skills and integration guide; PR to **dev**.
 
+### WP-13: Desktop appearance and language preferences
+
+- **Scope:** add persistent light/dark application appearance and English/Spanish interface language, separate from document content and history.
+- **Requirements/spec:** FR-050..051 and UC-11; OpenSpec `desktop-preferences` (`user-preferences`, `localization`).
+- **Dependencies/components:** WP-03/#4; app preferences, theme tokens, language resources, accessibility labels.
+- **Acceptance:** appearance and language survive restart; theme switching leaves diagram paper, explicit styles, document revision, dirty state, and history unchanged; EN/ES resources are complete and Spanish copy is reviewed; transitions respect reduced motion.
+- **Tests/DoD:** preference migration, key/parameter parity, localized errors and labels, theme/locale checks on supported platforms.
+- **Effort/risk:** 5-8 PD; preserve `last_document` in the existing preference record and keep the canvas paper independent from theme.
+- **Issue / PR:** parent [#93](https://github.com/furancho-labs/Peer2Canvas/issues/93), children #95, #96, #100, and #101; milestone S8.
+
+### WP-14: Diagram grouping
+
+- **Scope:** discover and then deliver validated grouping and ungrouping through the document command boundary. Exact behavior remains open until the discovery child is reviewed.
+- **Requirements/spec:** proposed FR-053 and UC-13; create the grouping OpenSpec change after discovery.
+- **Dependencies/components:** WP-02/#2 and WP-04/#6; document model, selection, history, persistence, and connector semantics.
+- **Acceptance:** discovery resolves supported membership, nesting, page/layer restrictions, selection, connector behavior, serialization, migration, and undo/redo; reviewed implementation and verification children are then added to S9.
+- **Tests/DoD:** after discovery, test valid/invalid groups, persistence round trips, and history recovery against the approved contract.
+- **Effort/risk:** TBD after discovery; #89 is planning only and does not authorize implementation.
+- **Issue / PR:** parent [#91](https://github.com/furancho-labs/Peer2Canvas/issues/91), discovery child [#89](https://github.com/furancho-labs/Peer2Canvas/issues/89); milestone S9.
+
+### WP-15: PMV guided onboarding
+
+- **Scope:** audit the finished PMV, choose the useful tour count, and deliver localized accessible tours only for implemented workflows.
+- **Requirements/spec:** FR-052 and UC-12; OpenSpec `guided-onboarding`.
+- **Dependencies/components:** stable PMV journeys, WP-13 localization/theme; isolated local preview and spotlight/callout shell.
+- **Acceptance:** the final tour inventory is reviewed; tours can be restarted, navigated by keyboard, closed with focus restored, and do not change the user's active document, route, draft, or history.
+- **Tests/DoD:** verify unique/repositioned targets, fallback states, small windows, both themes/languages, reduced motion, and absence of file/network/provider calls.
+- **Effort/risk:** TBD after the journey audit; UC-01..UC-10 are candidates, not a promise of ten tours.
+- **Issue / PR:** parent [#92](https://github.com/furancho-labs/Peer2Canvas/issues/92), children #94, #97, #102, and #103; milestone S10.
+
 ## Sprint sequence
 
-The separate [UI demonstration](docs/development/ui-mock.md), tracked locally by OpenSpec `ui-mock`, supports UI review across the planned packages. Its shared pure-core implementation was explicitly authorized in the UI session; simulated workflows do not close S1–S7 tasks or advance package acceptance. A dedicated public issue is pending separate publication authorization. Keep production sprint sequencing below unchanged.
+The separate [UI demonstration](docs/development/ui-mock.md), tracked locally by OpenSpec `ui-mock` and supplementary issue #81, supports review with simulated outcomes. It is not the production editor and does not satisfy product-WP acceptance.
 
 Each box is an initial two-week iteration, not a delivery date. If the package estimate exceeds available capacity, split it into acceptance-complete slices and carry the remainder. No velocity is assumed.
 
@@ -194,9 +227,12 @@ S0 implementation and native evidence are complete. Promotion PR #74 (`d84cfce`)
 | S4     | Collaboration foundation               | WP-07        | Yjs convergence and recorded LAN/NAT outcomes                                                                                             |
 | S5     | Safe peer sessions                     | WP-08        | invite approval, permission enforcement, expiry and revocation evidence                                                                   |
 | S6     | Optional AI and model tools            | WP-09, WP-10 | provider fallback, preview/approval, MCP protocol and security tests                                                                      |
-| S7     | Hardening and ecosystem                | WP-11, WP-12 | release checklist, supported OS evidence, verified skill package                                                                          |
+| S7     | Hardening and ecosystem                | WP-11, WP-12 | release checklist, supported OS evidence, verified skill package, reproducible native app icons                                           |
+| S8     | Desktop experience preferences         | WP-13        | persistent light/dark theme, English/Spanish resources, cross-platform preference evidence                                                |
+| S9     | Diagram grouping                       | WP-14        | reviewed grouping contract, validated group operations, persistence and undo/redo evidence                                                |
+| S10    | PMV onboarding                         | WP-15        | audited journey inventory and localized, accessible tours for verified PMV workflows                                                      |
 
-S2 remains in progress. WP-04.1/#25 and WP-04.2/#26 are merged; the current branch adds the save/close/reopen flow and native recovery. Keep #6 and the S2 milestone open until platform CI and acceptance evidence pass. Grouping is outside S2 and has its own S9/WP-14 parent #91, with discovery child #89; it does not block S2 closure.
+S2 implementation is merged into `dev` through PR #104 as `aa646e2`. WP-04.1/#25 and WP-04.2/#26 provide the editor; WP-03 supplies local persistence. The eight required CI checks pass, and a macOS Tauri flow has saved, closed, and reopened an edited diagram. Keep #6 and the S2 milestone open until the promotion PR reaches `main` and issue closeout completes. Grouping is outside S2 and belongs to S9/WP-14, with discovery child #89; it does not block S2 closure.
 
 ### Critical path and parallel work
 
@@ -208,42 +244,45 @@ The remaining external decisions include the minimum supported OS/WebView floor,
 
 ## Issue and PR map
 
-Create one parent GitHub Issue for each WP-00..WP-12, linked to the requirements and OpenSpec capabilities above. Every checkbox in the OpenSpec task list has one native child issue under its WP parent, with the same sprint milestone. A task PR closes its child issue; the parent WP closes only when every child is complete and the parent acceptance criteria are verified. Use sprint milestones S0..S7. Split a child only when discovery yields independently reviewable acceptance criteria. Do not open PRs for planned work.
+Create one parent GitHub Issue for each WP, linked to the requirements and OpenSpec capabilities above. Every implementation checkbox has one native child issue under its WP parent, with the same sprint milestone. A task PR references its child issue; the parent WP closes only when every child is complete and the parent acceptance criteria are verified. Use sprint milestones S0–S10. Split a child only when discovery yields independently reviewable acceptance criteria. Do not open PRs for planned work.
 
 The public [PeerCanvas Workflow Board](https://github.com/users/VforVitorio/projects/4/views/2) contains all parent and child issues. Its board groups items by Status and shows Milestone and Parent issue fields; the table view remains available from the project selector.
 
-The initial public backlog is now represented by 13 parent GitHub Issues, 41 native task sub-issues, and eight milestones. Each OpenSpec task has a child issue under its WP; the [sub-issue map](docs/planning/subissue-map.md) is the exact traceability index. The public [PeerCanvas Workflow Board](https://github.com/users/VforVitorio/projects/4/views/2) includes all 54 issues; the table view remains available from the project selector.
+The public [PeerCanvas Workflow Board](https://github.com/users/VforVitorio/projects/4/views/2) contains 68 items across 16 WP parents, 51 child issues, and the supplementary #81, with 11 sprint milestones. The [sub-issue map](docs/planning/subissue-map.md) is the task-to-issue traceability index. S8–S10 planning issues are Todo; their presence does not authorize implementation.
 
-| WP    | Issue                                                                                         | Milestone                     |
-| ----- | --------------------------------------------------------------------------------------------- | ----------------------------- |
-| WP-00 | [#1 Engineering foundation](https://github.com/furancho-labs/Peer2Canvas/issues/1)            | S0 - Engineering Foundation   |
-| WP-01 | [#3 Tauri and Weave compatibility](https://github.com/furancho-labs/Peer2Canvas/issues/3)     | S0 - Engineering Foundation   |
-| WP-02 | [#2 Canonical document model](https://github.com/furancho-labs/Peer2Canvas/issues/2)          | S1 - Document and Persistence |
-| WP-03 | [#4 Local persistence and recovery](https://github.com/furancho-labs/Peer2Canvas/issues/4)    | S1 - Document and Persistence |
-| WP-04 | [#6 Core diagram editing](https://github.com/furancho-labs/Peer2Canvas/issues/6)              | S2 - Core Canvas Editor       |
-| WP-05 | [#5 Licensed shape catalog](https://github.com/furancho-labs/Peer2Canvas/issues/5)            | S3 - Shapes and Interchange   |
-| WP-06 | [#7 draw.io import/export](https://github.com/furancho-labs/Peer2Canvas/issues/7)             | S3 - Shapes and Interchange   |
-| WP-07 | [#8 Yjs and Trystero transport](https://github.com/furancho-labs/Peer2Canvas/issues/8)        | S4 - P2P Collaboration        |
-| WP-08 | [#10 Secure sharing and participants](https://github.com/furancho-labs/Peer2Canvas/issues/10) | S5 - Secure Sharing           |
-| WP-09 | [#9 Optional Codex assistant](https://github.com/furancho-labs/Peer2Canvas/issues/9)          | S6 - Codex and MCP            |
-| WP-10 | [#13 MCP tools](https://github.com/furancho-labs/Peer2Canvas/issues/13)                       | S6 - Codex and MCP            |
-| WP-11 | [#11 Cross-platform hardening](https://github.com/furancho-labs/Peer2Canvas/issues/11)        | S7 - Hardening and Skills     |
-| WP-12 | [#12 Verified Codex skills](https://github.com/furancho-labs/Peer2Canvas/issues/12)           | S7 - Hardening and Skills     |
+| WP    | Issue                                                                                                   | Milestone                     |
+| ----- | ------------------------------------------------------------------------------------------------------- | ----------------------------- |
+| WP-00 | [#1 Engineering foundation](https://github.com/furancho-labs/Peer2Canvas/issues/1)                      | S0 - Engineering Foundation   |
+| WP-01 | [#3 Tauri and Weave compatibility](https://github.com/furancho-labs/Peer2Canvas/issues/3)               | S0 - Engineering Foundation   |
+| WP-02 | [#2 Canonical document model](https://github.com/furancho-labs/Peer2Canvas/issues/2)                    | S1 - Document and Persistence |
+| WP-03 | [#4 Local persistence and recovery](https://github.com/furancho-labs/Peer2Canvas/issues/4)              | S1 - Document and Persistence |
+| WP-04 | [#6 Core diagram editing](https://github.com/furancho-labs/Peer2Canvas/issues/6)                        | S2 - Core Canvas Editor       |
+| WP-05 | [#5 Licensed shape catalog](https://github.com/furancho-labs/Peer2Canvas/issues/5)                      | S3 - Shapes and Interchange   |
+| WP-06 | [#7 draw.io import/export](https://github.com/furancho-labs/Peer2Canvas/issues/7)                       | S3 - Shapes and Interchange   |
+| WP-07 | [#8 Yjs and Trystero transport](https://github.com/furancho-labs/Peer2Canvas/issues/8)                  | S4 - P2P Collaboration        |
+| WP-08 | [#10 Secure sharing and participants](https://github.com/furancho-labs/Peer2Canvas/issues/10)           | S5 - Secure Sharing           |
+| WP-09 | [#9 Optional Codex assistant](https://github.com/furancho-labs/Peer2Canvas/issues/9)                    | S6 - Codex and MCP            |
+| WP-10 | [#13 MCP tools](https://github.com/furancho-labs/Peer2Canvas/issues/13)                                 | S6 - Codex and MCP            |
+| WP-11 | [#11 Cross-platform hardening](https://github.com/furancho-labs/Peer2Canvas/issues/11)                  | S7 - Hardening and Skills     |
+| WP-12 | [#12 Verified Codex skills](https://github.com/furancho-labs/Peer2Canvas/issues/12)                     | S7 - Hardening and Skills     |
+| WP-13 | [#93 Local appearance and language preferences](https://github.com/furancho-labs/Peer2Canvas/issues/93) | S8 - Desktop Experience       |
+| WP-14 | [#91 Diagram grouping](https://github.com/furancho-labs/Peer2Canvas/issues/91)                          | S9 - Diagram Grouping         |
+| WP-15 | [#92 PMV onboarding](https://github.com/furancho-labs/Peer2Canvas/issues/92)                            | S10 - PMV Onboarding          |
 
 For implementation, create **feature/WP-xx-short-name** from **dev**, open a PR back to **dev**, and include the relevant FR, OpenSpec change, acceptance evidence, security impact, and issue-closing keyword. At sprint close, open one promotion PR from **dev** to **main** with the batch summary and all checks. Do not merge incomplete work to **main**.
 
 ## Open decisions
 
-| Decision                                    | Current position                                                                                             | Closure evidence                                                                      |
-| ------------------------------------------- | ------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------- |
-| Weave package and WebView compatibility     | S0 fixture probe passes on current CI runner images; minimum OS floor and product adapter remain open        | [S0 platform matrix](docs/support/platform-matrix.md); product gate in WP-04/WP-11    |
-| Durable local store                         | `.peercanvas` JSON selected and implemented locally; cross-platform CI and final acceptance evidence pending | WP-03 tests and [ADR-0003](docs/architecture/decisions/ADR-0003-local-persistence.md) |
-| P2P relay/STUN/TURN policy                  | Trystero + WebRTC candidate; direct connection not guaranteed                                                | WP-07 network matrix, service/cost analysis                                           |
-| Invitation and authorization protocol       | Capability link plus host approval proposed; revocation limits must be explicit                              | WP-08 threat review and protocol tests                                                |
-| draw.io parity                              | Selective compatible subset; preserve/report unsupported source                                              | WP-06 fixture matrix                                                                  |
-| ChatGPT-plan OAuth registration             | Official local OSS path exists in preview; eligibility/terms must be rechecked                               | WP-09 legal/technical gate and auth test                                              |
-| Shape catalog rights                        | No unverified assets bundled                                                                                 | WP-05 per-asset license evidence                                                      |
-| Supported OS versions and installer formats | Windows/macOS/Linux required; exact OS floor and installers open                                             | WP-01/11 compatibility and distribution review                                        |
+| Decision                                    | Current position                                                                                                                       | Closure evidence                                                                        |
+| ------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------- |
+| Weave package and WebView compatibility     | S0 fixture probe passes on current CI runner images; minimum OS floor and product adapter remain open                                  | [S0 platform matrix](docs/support/platform-matrix.md); product gate in WP-04/WP-11      |
+| Durable local store                         | `.peercanvas` JSON selected and merged to `dev`; required CI and backend storage tests pass, with native UI evidence recorded on macOS | WP-03/PR #104 and [ADR-0003](docs/architecture/decisions/ADR-0003-local-persistence.md) |
+| P2P relay/STUN/TURN policy                  | Trystero + WebRTC candidate; direct connection not guaranteed                                                                          | WP-07 network matrix, service/cost analysis                                             |
+| Invitation and authorization protocol       | Capability link plus host approval proposed; revocation limits must be explicit                                                        | WP-08 threat review and protocol tests                                                  |
+| draw.io parity                              | Selective compatible subset; preserve/report unsupported source                                                                        | WP-06 fixture matrix                                                                    |
+| ChatGPT-plan OAuth registration             | Official local OSS path exists in preview; eligibility/terms must be rechecked                                                         | WP-09 legal/technical gate and auth test                                                |
+| Shape catalog rights                        | No unverified assets bundled                                                                                                           | WP-05 per-asset license evidence                                                        |
+| Supported OS versions and installer formats | Windows/macOS/Linux required; exact OS floor and installers open                                                                       | WP-01/11 compatibility and distribution review                                          |
 
 ## Traceability
 
