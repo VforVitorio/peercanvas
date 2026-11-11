@@ -8,18 +8,18 @@ Distinguish planned, automated, manual, and not-yet-tested evidence. A frontend 
 
 ## Test layers
 
-| Layer             | Purpose                                                                   | Planned tools/evidence                                                    |
-| ----------------- | ------------------------------------------------------------------------- | ------------------------------------------------------------------------- |
-| Unit              | Model invariants, commands, migrations, serializers, permission checks    | Vitest for TypeScript; Rust unit tests where native logic exists          |
-| Property/fuzz     | IDs, serialization, XML/SVG parser bounds, Yjs updates                    | Property tests and bounded fuzz corpus chosen in relevant WP              |
-| Integration       | Weave adapter, persistence adapter, MCP boundary, app-server protocol     | Real package boundaries with deterministic fixtures and mock providers    |
-| Native smoke      | Launch, dialogs, file association/deep link, WebView, child process       | Windows/macOS/Linux runner; S0 renderer probe plus manual release checks  |
-| E2E               | Create/edit/save/reopen, import/export, invite approval, Codex proposal   | Embedded WebDriver for S0 probe; product workflow tests in their WPs      |
-| Visual regression | Canvas rendering and key accessible states                                | Stable diagram fixtures and OS/browser snapshots; review platform diffs   |
-| Network           | Yjs convergence, LAN, STUN/TURN, reconnection, host loss                  | Controlled multi-peer fixtures, not a unit-test substitute                |
-| Security          | XML/SVG, links, OAuth token boundary, MCP authorization, dependency risks | Malicious fixtures, secret scanning, static analysis, threat-model review |
-| Accessibility     | Keyboard flows, focus, dialogs, contrast, screen reader semantics         | Automated checks plus manual keyboard/screen-reader review                |
-| Performance       | Startup, open/save, pan/zoom and large-document behavior                  | NFR fixtures and reference machine agreed in WP-01                        |
+| Layer             | Purpose                                                                   | Planned tools/evidence                                                                                         |
+| ----------------- | ------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------- |
+| Unit              | Model invariants, commands, migrations, serializers, permission checks    | Vitest for TypeScript; Rust unit tests where native logic exists                                               |
+| Property/fuzz     | IDs, serialization, XML/SVG parser bounds, Yjs updates                    | Property tests and bounded fuzz corpus chosen in relevant WP                                                   |
+| Integration       | Weave adapter, persistence adapter, MCP boundary, app-server protocol     | Real package boundaries with deterministic fixtures and mock providers                                         |
+| Native smoke      | Launch, dialogs, file association/deep link, WebView, child process       | Windows/macOS/Linux runner; `cargo test` covers native persistence per OS; S0 probe plus manual product checks |
+| E2E               | Create/edit/save/reopen, import/export, invite approval, Codex proposal   | Embedded WebDriver for S0 probe; product workflow tests in their WPs                                           |
+| Visual regression | Canvas rendering and key accessible states                                | Stable diagram fixtures and OS/browser snapshots; review platform diffs                                        |
+| Network           | Yjs convergence, LAN, STUN/TURN, reconnection, host loss                  | Controlled multi-peer fixtures, not a unit-test substitute                                                     |
+| Security          | XML/SVG, links, OAuth token boundary, MCP authorization, dependency risks | Malicious fixtures, secret scanning, static analysis, threat-model review                                      |
+| Accessibility     | Keyboard flows, focus, dialogs, contrast, screen reader semantics         | Automated checks plus manual keyboard/screen-reader review                                                     |
+| Performance       | Startup, open/save, pan/zoom and large-document behavior                  | NFR fixtures and reference machine agreed in WP-01                                                             |
 
 ## S0 compatibility gate
 

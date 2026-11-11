@@ -55,7 +55,7 @@ The AI provider and MCP client are not trusted authorities. They may propose com
 - The target desktop OS families are Windows, macOS (Apple Silicon and Intel where viable), and Linux. Exact OS minimum versions are undecided.
 - Weave.js 5.7.1 and React 18.3.1 are the pinned research baseline. Recheck current releases and peer dependencies before changing either.
 - Yjs + Trystero + WebRTC is a proposed collaboration path. Signaling, STUN, TURN, NAT traversal, and relay availability remain external dependencies.
-- Local persistence engine is undecided. SQLite, Tauri storage APIs, browser IndexedDB, and Yjs update storage must be compared before selection.
+- Local diagrams use versioned `.peercanvas` JSON files; the native save, recovery, and migration policy is recorded in [ADR-0003](../architecture/decisions/ADR-0003-local-persistence.md). SQLite and IndexedDB remain evaluated alternatives, not additional document authorities.
 - The initial release does not rely on centralized user identity.
 - The current OpenAI documentation describes a Sign in with ChatGPT plan-usage path for eligible open-source/local apps. It is a preview; verify registration, eligibility, rate/usage limits, terms, and storage requirements before implementation.
 - Effort and sprint estimates in PLANS.md are planning estimates, not promises or measured velocity.

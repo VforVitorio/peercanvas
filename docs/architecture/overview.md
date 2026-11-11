@@ -12,7 +12,7 @@ Status: architecture baseline with bounded S0 compatibility evidence, 2026-11-10
 - AI candidate: optional Codex app-server process using Sign in with ChatGPT for eligible open-source/local-app plan usage, subject to preview terms and registration.
 - Chat UI: adapt the shadcn chatbot template's React components and interaction patterns while retaining the Tauri/Vite shell and PeerCanvas provider boundary; do not adopt its Next.js routes or Vercel AI SDK backend.
 
-The bounded test-only WP-01 probe passed native launch, rendering, selection, transforms, connector rendering, and one in-memory Weave-store-backed edit on the runner images in the [platform matrix](../support/platform-matrix.md). It is excluded from normal production builds, which retain the engineering scaffold. This result does not establish minimum OS floors, product editing workflows, or durable persistence; WP-03 owns the storage decision.
+The bounded test-only WP-01 probe passed native launch, rendering, selection, transforms, connector rendering, and one in-memory Weave-store-backed edit on the runner images in the [platform matrix](../support/platform-matrix.md). It is excluded from normal production builds, which retain the engineering scaffold. This result does not establish minimum OS floors, product editing workflows, or durable persistence; WP-03 owns the native adapter and recovery evidence selected in [ADR-0003](decisions/ADR-0003-local-persistence.md).
 
 ## Logical component view
 
@@ -131,7 +131,7 @@ The provider returns a proposed operation list. The MCP/assistant adapter parses
 - P2P does not mean zero infrastructure. Signaling may use public or configured relays; NAT/firewall conditions may require TURN.
 - The invitation secret is a bearer capability. A link alone does not establish a person's identity or guarantee that an admitted peer cannot copy data.
 - OpenAI access tokens remain in the native process/token store and are passed only to the Codex child process as required by the documented app-server integration. No token is exposed to the renderer or logs.
-- No installer format, signing, update mechanism, database engine, network relay operator, or AI provider is fixed by this baseline.
+- No installer format, signing, update mechanism, network relay operator, or AI provider is fixed by this baseline. The local document file format is selected in ADR-0003.
 
 ## Validation gates
 

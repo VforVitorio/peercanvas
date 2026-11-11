@@ -2,7 +2,7 @@
 
 ## Context
 
-See proposal.md for the motivation and capability list. The normal application contains an empty Tauri/React shell; none of the product capabilities in the specifications are implemented. S0 plans a separately invoked test-only Tauri/WebView probe for the rendering compatibility gate, with its fixture excluded from normal production builds. The product definition, architecture overview, ADRs, risk register, test strategy, and PLANS.md provide the surrounding contracts and execution plan.
+See proposal.md for the motivation and capability list. At the S0 baseline, the normal application contained an empty Tauri/React shell and no product workflows. Later, separately authorized WP-04 tasks added an in-memory editor; WP-03 persistence is now in progress. The S0 probe remains a separately invoked test-only Tauri/WebView check, with its fixture excluded from normal production builds. Current implementation status is recorded in PLANS.md and the session handoff.
 
 The selected baseline is Tauri 2, React 18.3.1, TypeScript, Vite 8, and Weave.js 5.7.1. React 18 is retained because the selected Weave React package's peer range excludes React 19. The S0 probe verifies a bounded fixture on the hosted runner images in `docs/support/platform-matrix.md`; package versions alone remain research facts, and this result does not set minimum OS support floors or establish product editor integration.
 
@@ -20,10 +20,10 @@ The selected baseline is Tauri 2, React 18.3.1, TypeScript, Vite 8, and Weave.js
 
 **Non-Goals:**
 
-- Implement product workflows or replace the normal scaffold with editor controls.
+- Treat the S0 compatibility probe as implementation of product workflows or as approval to replace the normal scaffold.
 - Include the compatibility probe or its instrumentation in normal production builds.
 - Infer product-level Weave, Tauri WebView, Yjs transport, draw.io, OpenAI auth, or MCP readiness from the bounded probe.
-- Select a persistence engine, TURN provider, installer format, supported OS floor, or external shape license without the planned evidence.
+- Select a TURN provider, installer format, supported OS floor, or external shape license without the planned evidence.
 - Promise full draw.io parity, universal direct WebRTC connectivity, or unconditional ChatGPT-plan inference.
 
 ## Decisions
@@ -52,11 +52,11 @@ Use the pinned Weave renderer and only the required frontend composition in a se
 
 The probe does not introduce a second product document model, durable storage, persisted Yjs updates, or user save/open/recovery workflows. The normal application retains its honest scaffold state. This test instrumentation is excluded from normal production builds.
 
-### Keep local storage choice behind a recovery experiment
+### Store portable JSON documents through a native adapter
 
-Do not select SQLite, a Tauri storage plugin, IndexedDB, or persisted Yjs updates in this change. WP-03 compares viable options and chooses one durable source of truth with rebuildable caches and indexes.
+Use one user-selected `.peercanvas` JSON file as the durable document source, using the canonical model's serializer and parser. Keep native dialogs and bounded filesystem operations in Rust commands; keep app preferences in a separate app-data file. Save through a temporary sibling and one prior-version backup. Never publish an incomplete candidate or overwrite the source when recovery validation fails. The detailed policy and measured option comparison are in [ADR-0003](../../../docs/architecture/decisions/ADR-0003-local-persistence.md).
 
-**Alternative considered:** select a database before modeling recovery. Rejected because cross-platform atomicity, backup behavior, migration, and crash recovery are not yet measured.
+**Alternative considered:** use SQLite as the document source. Rejected for the initial editor because the product's open/save workflow is built around portable user-managed files, and the JSON file already matches the canonical versioned snapshot without a database projection or a separate export/import format. SQLite remains suitable for future indexes if they stay rebuildable and do not become a second semantic authority.
 
 ### Use capability invitations, but do not equate a link with identity
 
@@ -98,8 +98,8 @@ User-facing Codex skills remain a later capability. They can be distributed only
 
 ## Migration Plan
 
-This change has no normal-app runtime or stored-data migration. The compatibility probe operates only on temporary fixture data. Review the proposal, 18 specs, design, and task list as one product-contract baseline with a bounded S0 validation harness. After maintainer approval, product behavior changes will use new OpenSpec changes, implementation branches from dev, PRs to dev, and sprint promotion PRs to main. Any change to an approved requirement must update the relevant spec and traceability before implementation continues.
+The S0 compatibility probe operates only on temporary fixture data and remains excluded from normal builds. Later implementation work follows the task-specific OpenSpec items and GitHub Issues; this session addresses WP-02/WP-03 dependencies and WP-04 acceptance under explicit maintainer authorization. Behavior changes continue to update the relevant spec, issue traceability, and handoff before PR promotion from dev to main.
 
 ## Open Questions
 
-The storage engine, precise supported OS versions, TURN service and credentials, cryptographic invitation construction, draw.io compatibility corpus, shape asset set, and OpenAI OAuth client registration are intentionally delegated to the validation work packages in PLANS.md. They do not block this behavior baseline; each must be resolved with evidence before the dependent implementation starts.
+The selected local document format and policy are recorded in ADR-0003. Precise supported OS versions, TURN service and credentials, cryptographic invitation construction, draw.io compatibility corpus, shape asset set, and OpenAI OAuth client registration remain delegated to the validation work packages in PLANS.md; each requires evidence before the dependent implementation starts.
