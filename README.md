@@ -33,7 +33,7 @@ The project is in early development. The current editor works with an in-memory 
 | Peer collaboration                              | Planned around Yjs and Trystero/WebRTC; network behavior is unverified.                                                                        |
 | Codex and MCP                                   | Optional integrations researched; not implemented.                                                                                             |
 
-The current branch passes 166 automated tests and frontend/native compilation checks. S2.1 browser interactions were checked; S2.2 has automated tests only. The product editor has not been verified through interaction in the native Tauri WebView. See the [platform matrix](docs/support/platform-matrix.md) and [handoff](docs/handoff/START_HERE.md) for the scope of each result.
+Local checks for the current S2 implementation pass 166 automated tests and frontend/native compilation. S2.1 browser interactions were checked; S2.2 has automated tests only. The product editor has not been verified through interaction in the native Tauri WebView. See the [platform matrix](docs/support/platform-matrix.md) and [handoff](docs/handoff/START_HERE.md) for the scope of each result.
 
 The [PeerCanvas Delivery Board](https://github.com/users/VforVitorio/projects/4) groups work by parent working-package issues, task sub-issues, and sprint milestones. Issues #25 and #26 are the WP-04 implementation children. [Parent #6](https://github.com/furancho-labs/Peer2Canvas/issues/6) remains open until its save, close, and reopen acceptance passes. Durable persistence is absent, so S2 remains open.
 

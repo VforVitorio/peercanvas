@@ -21,9 +21,9 @@ The #26 fixture validates serialization/parsing only; it does not prove durable 
 
 ## Product boundary
 
-Implemented on the current feature branch: in-memory example document; add/select/move/resize/delete rectangles; add/select/edit/remove straight connectors; node text and geometry editing; page/layer switch/add/rename; undo/redo; keyboard equivalents; zoom controls. Connection labels and endpoints appear in the list/inspector. Selection and rendering state do not replace the canonical document.
+Implemented in the current S2 editor: in-memory example document; add/select/move/resize/delete rectangles; add/select/edit/remove straight connectors; node text and geometry editing; page/layer switch/add/rename; undo/redo; keyboard equivalents; zoom controls. Connection labels and endpoints appear in the list/inspector. Selection and rendering state do not replace the canonical document.
 
-Not implemented: durable save/open/recovery, page/layer deletion or reordering, connection-label rendering on the canvas, grouping, draw.io, peer collaboration, invitations, real assistant/provider calls, MCP, and native WebView interaction verification of the product editor. The S2 branch does not establish minimum supported OS versions or release readiness.
+Not implemented: durable save/open/recovery, page/layer deletion or reordering, connection-label rendering on the canvas, grouping, draw.io, peer collaboration, invitations, real assistant/provider calls, MCP, and native WebView interaction verification of the product editor. The S2 implementation does not establish minimum supported OS versions or release readiness.
 
 ## Repository workflow and current GitHub state
 
