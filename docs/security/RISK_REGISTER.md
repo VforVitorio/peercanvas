@@ -23,4 +23,4 @@ Review this register when the corresponding experiment runs or a new failure mod
 
 ## Current dependency alerts
 
-As of 2026-11-10, GitHub reports seven open Dependabot alerts: one high, five medium, and one low. The high Vite alert and the remaining findings are tracked under WP-11.3, issue [#50](https://github.com/VforVitorio/peercanvas/issues/50). S0 does not remediate these pre-existing alerts or establish release readiness; resolve them or record a separate maintainer disposition before release.
+As of 2026-11-10, GitHub reports seven open Dependabot alerts: one high, five medium, and one low. The high Vite alert and the remaining findings are tracked under WP-11.3, issue [#50](https://github.com/furancho-labs/Peer2Canvas/issues/50). S0 does not remediate these pre-existing alerts or establish release readiness; resolve them or record a separate maintainer disposition before release.

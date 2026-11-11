@@ -29,10 +29,20 @@ The system SHALL represent a connection with a stable identifier and references 
 - **WHEN** the user creates a connection between two valid nodes
 - **THEN** the connection references both endpoints and preserves its supported routing and style properties
 
+#### Scenario: Edit a connection
+
+- **WHEN** the user changes a connection's label or endpoints to valid nodes on the same page
+- **THEN** the stable connection identifier is retained, the canvas line reflects the accepted endpoints, and the connection list/inspector show the accepted label and properties
+
 #### Scenario: Reject a missing endpoint
 
 - **WHEN** a connection references a node that does not exist on the page
 - **THEN** the system rejects the connection and leaves the document unchanged
+
+#### Scenario: Reject an endpoint on another page
+
+- **WHEN** the user edits a connection to reference a node on a different page
+- **THEN** the system rejects the command and leaves the document unchanged
 
 ### Requirement: Preserve supported shape properties
 

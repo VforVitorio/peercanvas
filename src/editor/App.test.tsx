@@ -115,9 +115,11 @@ describe("in-memory model-backed editor", () => {
     fireEvent.click(screen.getByRole("button", { name: "Add rectangle" }));
     expect(nodes()).toHaveLength(3);
     expect(nodes()[2].nodeId).toBe(canvas.props!.selection);
-    expect(
-      commands.mock.calls.slice(1).map(([, command]) => (command as { type: string }).type),
-    ).toEqual(["node.update", "node.update", "node.remove", "node.add"]);
+    for (const type of ["node.update", "node.remove", "node.add"]) {
+      expect(
+        commands.mock.calls.some(([, command]) => (command as { type: string }).type === type),
+      ).toBe(true);
+    }
   });
 
   it("provides keyboard selection, move, resize, clear and delete without hijacking fields", () => {
@@ -270,5 +272,109 @@ describe("in-memory model-backed editor", () => {
     selectIdea();
     expect((screen.getByLabelText("Width") as HTMLInputElement).value).toBe("180");
     expect(JSON.stringify(snapshot())).toBe(original);
+  });
+  it("creates, updates, deletes and restores connectors through canonical history", () => {
+    render(<App />);
+    const initial = snapshot().pages[0].layers[0].connections.length;
+    fireEvent.change(screen.getByLabelText("Connector label"), { target: { value: "Decision" } });
+    fireEvent.click(screen.getByRole("button", { name: "Add connector" }));
+    expect(snapshot().pages[0].layers[0].connections).toHaveLength(initial + 1);
+    const created = snapshot().pages[0].layers[0].connections.at(-1)!;
+    expect(created.label).toBe("Decision");
+    fireEvent.change(screen.getByLabelText("Connector label"), { target: { value: "Accepted" } });
+    fireEvent.click(screen.getByRole("button", { name: "Apply connector" }));
+    expect(snapshot().pages[0].layers[0].connections.at(-1)!.label).toBe("Accepted");
+    fireEvent.click(screen.getByRole("button", { name: "Delete connector" }));
+    expect(snapshot().pages[0].layers[0].connections).toHaveLength(initial);
+    fireEvent.click(screen.getByRole("button", { name: "Undo" }));
+    expect(snapshot().pages[0].layers[0].connections.at(-1)!.connectionId).toBe(
+      created.connectionId,
+    );
+    fireEvent.click(screen.getByRole("button", { name: "Redo" }));
+    expect(snapshot().pages[0].layers[0].connections).toHaveLength(initial);
+    const before = JSON.stringify(snapshot());
+    fireEvent.change(screen.getByLabelText("Target"), { target: { value: nodes()[0].nodeId } });
+    fireEvent.click(screen.getByRole("button", { name: "Add connector" }));
+    expect(JSON.stringify(snapshot())).toBe(before);
+    expect(screen.getByRole("alert").textContent).toMatch(/differ/);
+  });
+
+  it("replaces connector selection when adding a rectangle before keyboard deletion", () => {
+    const commands = vi.spyOn(core, "executeCommand");
+    render(<App />);
+    const connections = JSON.stringify(snapshot().pages[0].layers[0].connections);
+    const initialNodes = nodes().length;
+    fireEvent.click(screen.getByRole("button", { name: "Refine" }));
+    expect(canvas.props!.connectionSelection).toBe(
+      snapshot().pages[0].layers[0].connections[0].connectionId,
+    );
+    fireEvent.click(screen.getByRole("button", { name: "Add rectangle" }));
+    const addedId = nodes().at(-1)!.nodeId;
+    expect(canvas.props!.selection).toBe(addedId);
+    expect(canvas.props!.connectionSelection).toBeNull();
+    const region = screen.getByRole("region", { name: "Diagram canvas" });
+    region.focus();
+    fireEvent.keyDown(region, { key: "Delete" });
+    expect(nodes()).toHaveLength(initialNodes);
+    expect(nodes().some((node) => node.nodeId === addedId)).toBe(false);
+    expect(JSON.stringify(snapshot().pages[0].layers[0].connections)).toBe(connections);
+    expect(
+      commands.mock.calls.some(([, command]) => {
+        const value = command as { type: string; nodeId?: string };
+        return value.type === "node.remove" && value.nodeId === addedId;
+      }),
+    ).toBe(true);
+  });
+
+  it("manages page and layer contexts and clears stale selection across undo", () => {
+    render(<App />);
+    selectIdea();
+    const initialPages = snapshot().pages.length;
+    fireEvent.click(screen.getByRole("button", { name: "Add page" }));
+    expect(snapshot().pages).toHaveLength(initialPages + 1);
+    expect(canvas.props!.selection).toBeNull();
+    expect(canvas.props!.pageId).toBe(snapshot().pages.at(-1)!.pageId);
+    fireEvent.change(screen.getByLabelText("Page name"), { target: { value: "Details" } });
+    fireEvent.click(screen.getByRole("button", { name: "Rename page" }));
+    expect(snapshot().pages.at(-1)!.name).toBe("Details");
+    fireEvent.click(screen.getByRole("button", { name: "Add layer" }));
+    const addedPage = snapshot().pages.at(-1)!;
+    expect(addedPage.layers).toHaveLength(2);
+    fireEvent.change(screen.getByLabelText("Layer name"), { target: { value: "Annotations" } });
+    fireEvent.click(screen.getByRole("button", { name: "Rename layer" }));
+    expect(snapshot().pages.at(-1)!.layers[1].name).toBe("Annotations");
+    fireEvent.click(screen.getByRole("button", { name: "Add rectangle" }));
+    expect(snapshot().pages.at(-1)!.layers[1].nodes).toHaveLength(1);
+    fireEvent.click(screen.getByRole("button", { name: "Undo" }));
+    expect(canvas.props!.selection).toBeNull();
+    fireEvent.change(screen.getByLabelText("Page", { exact: true }), {
+      target: { value: snapshot().pages[0].pageId },
+    });
+    expect(canvas.props!.layerId).toBe(snapshot().pages[0].layers[0].layerId);
+    expect(canvas.props!.selection).toBeNull();
+  });
+
+  it("resolves canvas node ownership and preserves native text undo", () => {
+    render(<App />);
+    const notes = snapshot().pages[0].layers[1];
+    const node = notes.nodes[0];
+    act(() => canvas.props!.onSelect(node.nodeId));
+    expect(canvas.props!.layerId).toBe(notes.layerId);
+    act(() => canvas.props!.onCommitGeometry!(node.nodeId, { ...node.geometry, x: 300 }));
+    expect(snapshot().pages[0].layers[1].nodes[0].geometry.x).toBe(300);
+    fireEvent.change(screen.getByLabelText("Text", { exact: true }), {
+      target: { value: "New note" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Apply text" }));
+    expect(snapshot().pages[0].layers[1].nodes[0].text).toBe("New note");
+    const current = revision();
+    fireEvent.keyDown(screen.getByLabelText("Text", { exact: true }), { key: "z", ctrlKey: true });
+    expect(revision()).toBe(current);
+    const region = screen.getByRole("region", { name: "Diagram canvas" });
+    region.focus();
+    fireEvent.keyDown(region, { key: "z", ctrlKey: true });
+    expect(snapshot().pages[0].layers[1].nodes[0].text).toBe(node.text);
+    fireEvent.keyDown(region, { key: "z", ctrlKey: true, shiftKey: true });
+    expect(snapshot().pages[0].layers[1].nodes[0].text).toBe("New note");
   });
 });

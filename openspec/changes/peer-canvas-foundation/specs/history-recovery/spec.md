@@ -20,6 +20,11 @@ The system SHALL allow users to undo and redo supported accepted document mutati
 - **WHEN** the user redoes an edit that has not been invalidated by a new branch of edits
 - **THEN** the document returns to the state produced by that edit
 
+#### Scenario: Undo a connector or page/layer mutation
+
+- **WHEN** the user undoes an accepted connector, page, or layer mutation
+- **THEN** the supported entities, stable identifiers, endpoint references, and ordering return to the prior valid state
+
 ### Requirement: Create durable recovery checkpoints
 
 The system SHALL retain a complete recovery checkpoint according to a documented persistence policy.

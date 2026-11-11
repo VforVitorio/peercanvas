@@ -4,7 +4,7 @@
 // Modified for PeerCanvas: Weave is a disposable projection of the canonical document.
 // Only completed gestures can request a validated model command from the caller.
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import {
   Weave,
   WeaveArrowNode,
@@ -38,6 +38,7 @@ interface Props {
   pageId: string | null;
   layerId: string | null;
   selection: string | null;
+  connectionSelection?: string | null;
   zoom: number;
   fitRequest: number;
   onCommitGeometry?: (nodeId: string, geometry: Geometry) => boolean;
@@ -122,6 +123,7 @@ export default function WeaveCanvas({
   pageId,
   layerId,
   selection,
+  connectionSelection = null,
   zoom,
   fitRequest,
   onCommitGeometry,
@@ -134,7 +136,25 @@ export default function WeaveCanvas({
   const selectionPluginRef = useRef<WeaveNodesSelectionPlugin | null>(null);
   const [status, setStatus] = useState<CanvasStatus>({ state: "starting" });
   const [attempt, setAttempt] = useState(0);
-  const projection = useMemo(() => buildProjection(doc, pageId, layerId), [doc, pageId, layerId]);
+  const projection = useMemo(() => {
+    const next = buildProjection(doc, pageId, layerId);
+    return {
+      ...next,
+      elements: next.elements.map((element) =>
+        element.kind === "arrow" && element.id === `pc-connection-${connectionSelection}`
+          ? {
+              ...element,
+              props: {
+                ...element.props,
+                stroke: SELECTION_COLOR,
+                fill: SELECTION_COLOR,
+                strokeWidth: element.props.strokeWidth + 2,
+              },
+            }
+          : element,
+      ),
+    };
+  }, [doc, pageId, layerId, connectionSelection]);
   const editable = onCommitGeometry !== undefined;
   // Pages already auto-fitted in this workspace; later zoom changes are the user's.
   const fittedPages = useRef(new Set<string>());
@@ -149,15 +169,17 @@ export default function WeaveCanvas({
     selection,
     projection,
   });
-  latest.current = {
-    onSelect,
-    onZoomChange,
-    onStatusChange,
-    onCommitGeometry,
-    zoom,
-    selection,
-    projection,
-  };
+  useLayoutEffect(() => {
+    latest.current = {
+      onSelect,
+      onZoomChange,
+      onStatusChange,
+      onCommitGeometry,
+      zoom,
+      selection,
+      projection,
+    };
+  }, [onSelect, onZoomChange, onStatusChange, onCommitGeometry, zoom, selection, projection]);
 
   const geometryOf = (nodeId: string | null) => {
     const found = projection.elements.find(

@@ -4,9 +4,10 @@ import {
   type Document as DiagramDocument,
   type ModelState,
   type Node as DiagramNode,
-  type Page,
-  type Layer,
+  type CommandOutcome,
+  type Result,
 } from "../../document";
+import { createDocumentHistory } from "../../document/history";
 
 export type Fixture = "empty" | "diagram" | "collaboration" | "proposal";
 export type Scenario = "success" | "wait" | "cancel" | "error";
@@ -59,11 +60,6 @@ export interface DemoState {
   connected: boolean;
   invitation: string | null;
   recovery: Array<{ id: string; title: string; description: string }>;
-}
-interface HistoryEntry {
-  forward: Command[];
-  inverse: Command[];
-  label: string;
 }
 const NOW = "2026-11-10T12:00:00.000Z";
 const id = (n: number) => `00000000-0000-4000-8000-${n.toString(16).padStart(12, "0")}`;
@@ -272,8 +268,7 @@ export function createDemoService() {
   let settle: ((success: boolean) => void) | null = null;
   let waiting: (() => void) | null = null;
   let pendingReplacement: (() => Promise<void>) | null = null;
-  let undoStack: HistoryEntry[] = [];
-  let redoStack: HistoryEntry[] = [];
+  const history = createDocumentHistory();
   let proposalCommands: Command[] = [];
   let proposalRevision = -1;
   let proposalDocument: string | null = null;
@@ -367,143 +362,14 @@ export function createDemoService() {
     });
   }
   function historyFlags() {
-    return { canUndo: undoStack.length > 0, canRedo: redoStack.length > 0 };
+    return { canUndo: history.canUndo, canRedo: history.canRedo };
   }
-  function inverseFor(command: Command, document: DiagramDocument): Command[] {
-    const type = String(command.type);
-    const p = document.pages.find((value) => value.pageId === command.pageId);
-    const l = p?.layers.find((value) => value.layerId === command.layerId);
-    switch (type) {
-      case "document.setMetadata":
-        return [
-          { type, title: document.metadata.title, description: document.metadata.description },
-        ];
-      case "page.reorder":
-        return [{ type, pageIds: document.pages.map((p) => p.pageId) }];
-      case "layer.reorder":
-        return p ? [{ type, pageId: p.pageId, layerIds: p.layers.map((l) => l.layerId) }] : [];
-      case "page.add":
-        return [{ type: "page.remove", pageId: (command.page as Page).pageId }];
-      case "page.remove":
-        return p ? [{ type: "page.add", page: p, index: document.pages.indexOf(p) }] : [];
-      case "page.rename":
-        return p ? [{ type, pageId: p.pageId, name: p.name }] : [];
-      case "layer.add":
-        return [
-          {
-            type: "layer.remove",
-            pageId: command.pageId,
-            layerId: (command.layer as Layer).layerId,
-          },
-        ];
-      case "layer.remove": {
-        if (!p || !l) return [];
-        const removed = new Set(l.nodes.map((n) => n.nodeId));
-        return [
-          { type: "layer.add", pageId: p.pageId, layer: l, index: p.layers.indexOf(l) },
-          ...p.layers
-            .filter((other) => other !== l)
-            .flatMap((other) =>
-              other.connections.flatMap((connection, index) =>
-                removed.has(connection.sourceNodeId) || removed.has(connection.targetNodeId)
-                  ? [
-                      {
-                        type: "connection.add",
-                        pageId: p.pageId,
-                        layerId: other.layerId,
-                        connection,
-                        index,
-                      },
-                    ]
-                  : [],
-              ),
-            ),
-        ];
-      }
-      case "layer.rename":
-        return l ? [{ type, pageId: command.pageId, layerId: l.layerId, name: l.name }] : [];
-      case "node.add":
-        return [
-          {
-            type: "node.remove",
-            pageId: command.pageId,
-            layerId: command.layerId,
-            nodeId: (command.node as DiagramNode).nodeId,
-          },
-        ];
-      case "node.update": {
-        const node = l?.nodes.find((n) => n.nodeId === (command.node as DiagramNode).nodeId);
-        return node ? [{ type, pageId: command.pageId, layerId: command.layerId, node }] : [];
-      }
-      case "node.remove": {
-        const node = l?.nodes.find((n) => n.nodeId === command.nodeId);
-        if (!p || !l || !node) return [];
-        return [
-          {
-            type: "node.add",
-            pageId: p.pageId,
-            layerId: l.layerId,
-            node,
-            index: l.nodes.indexOf(node),
-          },
-          ...p.layers.flatMap((owner) =>
-            owner.connections.flatMap((connection, index) =>
-              connection.sourceNodeId === node.nodeId || connection.targetNodeId === node.nodeId
-                ? [
-                    {
-                      type: "connection.add",
-                      pageId: p.pageId,
-                      layerId: owner.layerId,
-                      connection,
-                      index,
-                    },
-                  ]
-                : [],
-            ),
-          ),
-        ];
-      }
-      case "connection.add":
-        return [
-          {
-            type: "connection.remove",
-            pageId: command.pageId,
-            layerId: command.layerId,
-            connectionId: (command.connection as { connectionId: string }).connectionId,
-          },
-        ];
-      case "connection.update": {
-        const connection = l?.connections.find(
-          (c) => c.connectionId === (command.connection as { connectionId: string }).connectionId,
-        );
-        return connection
-          ? [{ type, pageId: command.pageId, layerId: command.layerId, connection }]
-          : [];
-      }
-      case "connection.remove": {
-        const connection = l?.connections.find((c) => c.connectionId === command.connectionId);
-        return connection && l
-          ? [
-              {
-                type: "connection.add",
-                pageId: command.pageId,
-                layerId: command.layerId,
-                connection,
-                index: l.connections.indexOf(connection),
-              },
-            ]
-          : [];
-      }
-      case "style.put": {
-        const style = command.style as { styleId: string };
-        const old = document.styles.find((s) => s.styleId === style.styleId);
-        return old ? [{ type, style: old }] : [{ type: "style.remove", styleId: style.styleId }];
-      }
-      default:
-        return [];
-    }
-  }
-  function apply(command: unknown, origin: Origin = "ui", track = true): boolean {
+  function apply(
+    command: unknown,
+    origin: Origin = "ui",
+    track = true,
+    accepted?: Result<CommandOutcome>,
+  ): boolean {
     if (!state.document) {
       notice("Open a demo document first.", "error");
       return false;
@@ -516,10 +382,12 @@ export function createDemoService() {
       return false;
     }
     const before = state.document;
-    const result = executeCommand({ document: before, revision: state.revision }, command, {
-      expectedRevision: state.revision,
-      now: NOW,
-    });
+    const result =
+      accepted ??
+      executeCommand({ document: before, revision: state.revision }, command, {
+        expectedRevision: state.revision,
+        now: NOW,
+      });
     if (!result.ok) {
       notice(result.errors.map((error) => `${error.code}: ${error.message}`).join(" · "), "error");
       return false;
@@ -528,27 +396,7 @@ export function createDemoService() {
     // The accepted payload is JSON data. History must not retain caller-owned
     // mutable objects that could change what a later redo executes.
     const raw = immutable(JSON.parse(JSON.stringify(command)) as Command);
-    if (track) {
-      const forward = raw.type === "batch" ? (raw.commands as Command[]) : [raw];
-      let candidate: ModelState = { document: before, revision: state.revision };
-      let inverse: Command[] = [];
-      let reversible = true;
-      for (const child of forward) {
-        const childInverse = inverseFor(child, candidate.document);
-        if (!childInverse.length) reversible = false;
-        inverse = [...childInverse, ...inverse];
-        const step = executeCommand(candidate, child, {
-          expectedRevision: candidate.revision,
-          now: NOW,
-        });
-        if (step.ok) candidate = step.value.state;
-      }
-      // Only expose undo for actions for which the service has a complete inverse.
-      if (reversible && inverse.length)
-        undoStack.push({ forward, inverse, label: actionLabel(raw) });
-      else undoStack = [];
-      redoStack = [];
-    }
+    if (track) history.record({ document: before, revision: state.revision }, raw);
     const doc = result.value.state.document;
     const activePage = doc.pages.find((p) => p.pageId === state.pageId) ?? doc.pages[0];
     const activeLayer =
@@ -575,8 +423,7 @@ export function createDemoService() {
     return true;
   }
   function activate(model: ModelState, fixture: Fixture, recovered = false) {
-    undoStack = [];
-    redoStack = [];
+    history.clear();
     proposalCommands = [];
     const p = model.document.pages[0];
     publish({
@@ -650,8 +497,7 @@ export function createDemoService() {
       pendingReplacement = null;
       if (staged && fixture) activate(staged, fixture, recovered);
       else {
-        undoStack = [];
-        redoStack = [];
+        history.clear();
         publish({
           document: null,
           revision: 0,
@@ -725,8 +571,7 @@ export function createDemoService() {
       clearPending();
       nextId = 100;
       sequence = 0;
-      undoStack = [];
-      redoStack = [];
+      history.clear();
       proposalCommands = [];
       pendingReplacement = null;
       state = immutable(initial(fixture));
@@ -769,28 +614,48 @@ export function createDemoService() {
       if (page()?.layers.some((l) => l.layerId === layerId)) publish({ layerId, selection: null });
     },
     undo() {
-      const entry = undoStack.at(-1);
-      if (!entry) {
+      if (!state.document) {
         notice("Nothing to undo.");
         return;
       }
-      if (apply({ type: "batch", commands: entry.inverse }, "history", false)) {
-        undoStack.pop();
-        redoStack.push(entry);
-        publish(historyFlags());
+      if (state.role === "viewer") {
+        notice(
+          "Viewer permission: document changes are rejected by the simulated service boundary.",
+          "error",
+        );
+        return;
       }
+      const result = history.undo(
+        { document: state.document, revision: state.revision },
+        {
+          expectedRevision: state.revision,
+          now: NOW,
+        },
+      );
+      if (result) apply({ type: "batch", commands: [] }, "history", false, result);
+      else notice("Nothing to undo.");
     },
     redo() {
-      const entry = redoStack.at(-1);
-      if (!entry) {
+      if (!state.document) {
         notice("Nothing to redo.");
         return;
       }
-      if (apply({ type: "batch", commands: entry.forward }, "history", false)) {
-        redoStack.pop();
-        undoStack.push(entry);
-        publish(historyFlags());
+      if (state.role === "viewer") {
+        notice(
+          "Viewer permission: document changes are rejected by the simulated service boundary.",
+          "error",
+        );
+        return;
       }
+      const result = history.redo(
+        { document: state.document, revision: state.revision },
+        {
+          expectedRevision: state.revision,
+          now: NOW,
+        },
+      );
+      if (result) apply({ type: "batch", commands: [] }, "history", false, result);
+      else notice("Nothing to redo.");
     },
     startOperation(kind: "import" | "export" | "assistant" | "mcp") {
       if (!state.document) {

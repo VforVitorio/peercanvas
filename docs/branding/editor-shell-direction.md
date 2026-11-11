@@ -1,6 +1,6 @@
 # Editor-shell direction
 
-Status: proposed design brief for [WP-00.3 / issue #18](https://github.com/VforVitorio/peercanvas/issues/18), reviewed on 2026-11-10. This document adds no application controls.
+Status: proposed design brief for [WP-00.3 / issue #18](https://github.com/furancho-labs/Peer2Canvas/issues/18), reviewed on 2026-11-10. This document adds no application controls.
 
 ## Purpose and current surface
 
