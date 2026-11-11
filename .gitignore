@@ -1,6 +1,7 @@
 # Node
 /node_modules/
 /dist/
+/dist-ui-mock/
 /src-tauri/target/
 /target/
 

@@ -177,6 +177,8 @@ Effort ranges are initial engineering estimates. They exclude release administra
 
 ## Sprint sequence
 
+The separate [UI demonstration](docs/development/ui-mock.md), tracked locally by OpenSpec `ui-mock`, supports UI review across the planned packages. Its shared pure-core implementation was explicitly authorized in the UI session; simulated workflows do not close S1–S7 tasks or advance package acceptance. A dedicated public issue is pending separate publication authorization. Keep production sprint sequencing below unchanged.
+
 Each box is an initial two-week iteration, not a delivery date. If the package estimate exceeds available capacity, split it into acceptance-complete slices and carry the remainder. No velocity is assumed.
 
 S0 contains the full bounded WP-01 compatibility gate through a test-only probe. Its in-memory fixture does not implement the canonical document model, durable storage, or the useful local editor planned for WP-02, WP-03, and WP-04. The normal app remains the engineering scaffold.
