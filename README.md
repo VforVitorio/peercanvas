@@ -5,7 +5,7 @@
 <p align="center">A local-first desktop workspace for diagrams and collaborative thinking.</p>
 
 <p align="center">
-  <a href="https://github.com/VforVitorio/peercanvas">GitHub repository</a>
+  <a href="https://github.com/furancho-labs/Peer2Canvas">GitHub repository</a>
   ·
   <a href="docs/branding/brand-guide.md">Brand guide</a>
   ·
@@ -20,16 +20,16 @@ PeerCanvas is not an official project of Weave.js, InditexTech, OpenPencil, draw
 
 ## Project status
 
-PeerCanvas has completed its S0 engineering foundation and renderer compatibility gate. The normal application is still a minimal Tauri/React shell. Diagram editing, durable document storage, collaboration, import/export, and AI tools are not implemented.
+PeerCanvas has completed its S0 engineering foundation and renderer compatibility gate. S2 is in progress: the current implementation adds an in-memory editor slice for selecting, moving, resizing, and deleting diagram elements through the canonical document commands. Saving, opening, and recovering files, collaboration, import/export, and AI tools are not implemented.
 
-| Capability                            | Status                                                                                                                                                 |
-| ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Tauri desktop shell                   | The normal shell builds; CI checks native builds and a test-only WebView probe on Ubuntu, macOS, and Windows                                           |
-| Weave.js canvas                       | The test-only renderer probe passed on the runner images in the [platform matrix](docs/support/platform-matrix.md); product editing is not implemented |
-| Local diagram editing and persistence | Specified; not implemented                                                                                                                             |
-| draw.io import/export                 | Compatibility subset planned; no support claimed yet                                                                                                   |
-| Peer-to-peer sessions                 | Yjs and Trystero/WebRTC proposed; network behavior not verified                                                                                        |
-| Codex and MCP                         | Optional integration researched; not implemented                                                                                                       |
+| Capability                            | Status                                                                                                                                                             |
+| ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Tauri desktop shell                   | The shell builds; CI checks native builds and the S0 test-only WebView probe on Ubuntu, macOS, and Windows. Native interaction with the S2 editor is not verified. |
+| Weave.js canvas                       | The S2 implementation uses Weave as a disposable projection of the canonical document; browser interaction is verified, but not yet in the native WebView.         |
+| Local diagram editing and persistence | The current S2 slice supports in-memory add/select/move/resize/delete; save, open, and recovery remain unimplemented.                                              |
+| draw.io import/export                 | Compatibility subset planned; no support claimed yet.                                                                                                              |
+| Peer-to-peer sessions                 | Yjs and Trystero/WebRTC proposed; network behavior not verified.                                                                                                   |
+| Codex and MCP                         | Optional integration researched; not implemented.                                                                                                                  |
 
 The project plan tracks 13 working-package parent issues, 41 task sub-issues, and eight sprint milestones on the [PeerCanvas Workflow Board](https://github.com/users/VforVitorio/projects/4/views/2). No product feature should be treated as complete until its issue acceptance criteria and verification evidence are recorded.
 
@@ -66,7 +66,7 @@ npm run ui:mock
 
 Open `http://127.0.0.1:1430/`. The demonstration uses fictional data, a shared pure document/command core, and a disposable Weave projection. File lifecycle, recovery, interchange, participants, assistant, and MCP results are simulated; nothing is saved or sent. Choose a fixture and success/wait/cancel/error scenario from the banner, and use Reset demo to start again. Preferences are temporary.
 
-`npm run build:ui-mock` writes `dist-ui-mock/` separately from the normal build. The normal desktop application remains the scaffold. See the [demo evidence and limitations](docs/development/ui-mock.md); this demonstration does not establish production persistence, collaboration, provider access, or native editor support.
+`npm run build:ui-mock` writes `dist-ui-mock/` separately from the normal build. The UI demonstration remains separate from the S2 editor branch and uses simulated services. See the [demo evidence and limitations](docs/development/ui-mock.md); the demonstration does not establish production persistence, collaboration, provider access, or native editor support.
 
 Build the native shell without creating an installer:
 
@@ -96,7 +96,7 @@ npm run native-smoke:build
 npm run native-smoke
 ```
 
-The probe uses a temporary in-memory fixture and does not change the normal application's scaffold or store a document.
+The probe uses a temporary in-memory fixture and does not implement product editing or store a document. The current S2 editor slice is also in-memory and does not establish native WebView interaction support.
 
 ## Project workflow
 
@@ -122,12 +122,12 @@ The probe uses a temporary in-memory fixture and does not change the normal appl
 
 ## Acknowledgments and references
 
-PeerCanvas is independently developed. These projects informed the proposed technology choices, format support, workflows, or interface research; they do not endorse PeerCanvas. The normal application remains the scaffold. The test-only S0 probe adapts selected Weave.js frontend composition under Apache-2.0; it does not import the example runtime. The shadcn chatbot template remains a future UI reference, and no template source has been copied. See [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) for the adapted Weave files and commits.
+PeerCanvas is independently developed. These projects informed the proposed technology choices, format support, workflows, or interface research; they do not endorse PeerCanvas. The S2 implementation uses the Weave.js renderer as a disposable view of the canonical document; it does not import the example app runtime. The shadcn chatbot template remains a future UI reference, and no template source has been copied. See [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) for adopted Weave sources and notices.
 
 | Project or documentation                                                                                                                                            | How it informed the plan                                                                                           |
 | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
 | [Tauri](https://v2.tauri.app/)                                                                                                                                      | Cross-platform desktop shell and native integration                                                                |
-| [Weave.js](https://github.com/InditexTech/weavejs)                                                                                                                  | Test-only S0 renderer probe and planned product canvas foundation (Apache-2.0)                                     |
+| [Weave.js](https://github.com/InditexTech/weavejs)                                                                                                                  | S0 compatibility probe and S2 product editor renderer (Apache-2.0)                                                 |
 | [weavejs-frontend](https://github.com/InditexTech/weavejs-frontend)                                                                                                 | Selected composition adapted in the probe (Apache-2.0); the example app runtime is not adopted                     |
 | [OpenPencil](https://github.com/open-pencil/open-pencil)                                                                                                            | Peer-collaboration architecture reference                                                                          |
 | [Yjs](https://docs.yjs.dev/) and [Trystero](https://trystero.dev/)                                                                                                  | Proposed document synchronization and WebRTC transport                                                             |

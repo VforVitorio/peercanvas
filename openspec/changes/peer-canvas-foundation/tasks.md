@@ -23,7 +23,7 @@ S0 comprises tasks 1.1–1.5 and 8.2. Its compatibility probe is test-only and e
 
 ## 3. Canvas editing and shape catalog (WP-04, WP-05)
 
-- [ ] 3.1 Implement model-backed selection, movement, resizing, and deletion; verify pointer and keyboard workflows and model assertions. — GitHub Issue [#25](https://github.com/VforVitorio/peercanvas/issues/25)
+- [x] 3.1 Implement model-backed selection, movement, resizing, and deletion; verify pointer and keyboard workflows and model assertions. — GitHub Issue [#25](https://github.com/VforVitorio/peercanvas/issues/25)
 - [ ] 3.2 Implement connectors, property inspection, pages/layers, and undo/redo; verify each operation through integration tests and a reopen fixture. — GitHub Issue [#26](https://github.com/VforVitorio/peercanvas/issues/26)
 - [ ] 3.3 Define a shape manifest with source, version, license, attribution, and review fields; verify invalid and unreviewed entries are excluded. — GitHub Issue [#27](https://github.com/VforVitorio/peercanvas/issues/27)
 - [ ] 3.4 Implement offline catalog browse/search and safe SVG handling; verify deterministic search and malicious SVG rejection fixtures. — GitHub Issue [#28](https://github.com/VforVitorio/peercanvas/issues/28)

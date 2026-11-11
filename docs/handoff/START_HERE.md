@@ -1,85 +1,53 @@
 # PeerCanvas session handoff
 
-Last updated: 2026-11-10.
+Last updated: 2026-11-11.
 
-## UI demo branch session
+## Current checkpoint
 
-The maintainer requested an interim commit/merge of the currently viewable demo on 2026-11-10. Delivery is isolated on `feature/ui-mock-checkpoint` in `/private/tmp/peercanvas-ui-checkpoint`, captured from `feature/ui-mock` at base `ff6ec3f`; the original UI, S1, and agent-configuration checkouts are preserved. This is a partial checkpoint, not completion of the full UI change or any production work package. See [evidence and limitations](../development/ui-mock.md) and the still-incomplete [OpenSpec tasks](../../openspec/changes/ui-mock/tasks.md).
+- The repository is [furancho-labs/Peer2Canvas](https://github.com/furancho-labs/Peer2Canvas). The user moved it to the organization intentionally.
+- Remote `main` is `4463497f6c444abc5f97b9301f5d742f8d4b2f2b`; remote `dev` is `cd367f52a35ca715d3255c1870d4430081837bdb`.
+- PRs [#83](https://github.com/furancho-labs/Peer2Canvas/pull/83), [#84](https://github.com/furancho-labs/Peer2Canvas/pull/84), and [#85](https://github.com/furancho-labs/Peer2Canvas/pull/85) are merged. They promote the UI demo checkpoint and synchronize `main`/`dev`; they did not close S1's milestone issues.
+- S1 milestone #2 still has eight open issues: #2, #4, and #19–#24. Do not report S1 complete or close its milestone without current acceptance evidence.
+- S2 milestone #3 contains WP-04 parent #6 and child issues #25/#26. Issue #25 is In Progress; #26 is Todo; supplementary issue #81 is closed.
+- Current checkout: `feature/s2-selection-editing`, based on `origin/dev` at `cd367f5`. Its changes are local, uncommitted, and unpublished.
 
-The demo has home/lifecycle/recovery controls, a Weave workspace, inspector/pages/layers/history, simulated import/export, participants/invitations/roles, assistant/MCP approval, temporary preferences/themes, help, shortcuts, and reset/scenario controls. Pointer dragging and canvas resize gestures are not implemented: select a shape and use keyboard arrows or inspector coordinates/dimensions. Final visual, accessibility, native, and complete UI-flow acceptance remain pending.
+## S2 progress
 
-Run `npm run ui:mock` at `http://127.0.0.1:1430/`; `npm run build:ui-mock` writes `dist-ui-mock/`. Normal application/native-smoke entries remain unchanged. All file/recovery/interchange/collaboration/assistant/MCP service results are simulated; no real file, network, provider, credential, or persistent browser-storage integration was added.
+The current slice is issue [#25](https://github.com/furancho-labs/Peer2Canvas/issues/25), OpenSpec task 3.1: model-backed selection, movement, resizing, and deletion. The app uses Weave as a disposable renderer projection; accepted edits go through the canonical document command boundary. The example is only in memory and clearly warns that reload or close loses changes.
 
-After the dependency was explained, the maintainer explicitly authorized the shared pure S1 core here. `src/document/**` is the checkpoint's single semantic module, described by [the shared contract](../architecture/shared-document-contract.md). Demo edits, inverse undo/redo, and approved proposals use its validated command boundary. S1 acknowledges UI as the sole active shared-core writer and retains persistence/Rust ownership. Compatibility reconciliation with the frozen S1 reference remains pending; this checkpoint does not claim that reference's acceptance evidence or close a production work-package issue.
+Local browser verification on this Mac covered pointer selection, movement, resizing, keyboard movement/resizing/deletion, canonical revision changes, focus retention after edits, and restoring the sample after testing. This was a Vite browser session, not a native Tauri WebView interaction test. Verification passed: `npm test` (151 tests), lint, typecheck, format, production and UI-demo builds, `npm run native-smoke -- --check-production`, `openspec validate --all --strict`, `git diff --check`, and `npm run tauri -- build --no-bundle`. The native build compiled the app but did not launch it. The JavaScript production bundles exceed Vite's 500 kB advisory threshold. An independent review found no remaining concrete findings in the editor interaction boundary.
 
-Development used existing local agent profiles: Claude Opus for UI, Sonnet for UI verification/corrections, and Luna for core/tests. Agent configuration, its prompt/license delivery, and private client state are excluded from this checkpoint. All UI/UI-test corrections remain Claude-owned. The maintainer explicitly authorized committing/merging this checkpoint; publication follows the separately confirmed delivery scope. No merge or CI result is claimed before it occurs.
+Issue #26 remains the next child task: connectors, property inspection, pages/layers, and undo/redo. WP-04 parent #6 is not complete: its acceptance includes saving, closing, and reopening a diagram, and S1 persistence work remains open. Do not close #6 or claim S2 exit until that acceptance is supported by evidence.
 
-Checkpoint verification passes 114 tests, lint, TypeScript, formatting, both builds, strict OpenSpec validation, diff checks, and independent technical review. The review's reset/save race, sparse-array serialization, and layer projection ordering findings were fixed with regressions. Git staging was rejected because the execution policy requires approval while `AskForApproval` is `Never`; no commit, merge, push, PR, or GitHub issue was created. The next delivery step is to permit the required Git operation, then commit the explicit checkpoint file selection and complete the confirmed local/remote merge scope. See the [delivery record](../development/ui-mock.md).
+## Product boundary
 
-Subsequent work: complete remaining UI tasks, including pointer gestures, final browser/visual/accessibility acceptance, and shared-core compatibility review before production use. Production storage, real interchange/peers/providers/MCP, and native editor validation remain unimplemented. Dependency installation reported eight existing audit findings (seven moderate, one high); no dependency remediation or performance/native-support claim is made.
+Implemented on the current feature branch: in-memory example document; add/select/move/resize/delete for rectangles; position/size inspector; keyboard equivalents; zoom controls. Selection and rendering state do not replace the canonical document.
 
-## Project goal and boundary
+Not implemented: durable save/open/recovery, connectors, pages/layers, undo/redo, draw.io, peer collaboration, invitations, real assistant/provider calls, MCP, and native WebView verification of the product editor. The S2 branch does not establish minimum supported OS versions or release readiness.
 
-PeerCanvas is a personal, open-source, local-first desktop diagram editor planned for Windows, macOS, and Linux. The target stack is Tauri 2, React 18, TypeScript, Vite, and Weave.js. Optional planned capabilities include draw.io interchange, Yjs/Trystero/WebRTC collaboration, secure invitations, and Codex/MCP assistance.
+## Repository workflow and current GitHub state
 
-The normal app remains a minimal engineering shell. It has no product editing, persistence, collaboration, import/export, AI, or MCP workflow. Its visible “Engineering scaffold” placeholder remains until a separate product implementation is approved and verified.
-
-S0's native compatibility evidence and platform matrix are recorded. The probe is test-only; the normal app remains the engineering scaffold with no editor, persistence, collaboration, import/export, AI, or MCP workflow.
-
-## Current repository state
-
-- Public repository: [VforVitorio/peercanvas](https://github.com/VforVitorio/peercanvas).
-- `main` is the default stable branch; `dev` is the integration branch. The first skeletal commit was `360b4a9`, whose author and committer resolve to `VforVitorio`.
-- The repository setup changes entered `dev` through [PR #61](https://github.com/VforVitorio/peercanvas/pull/61), and the initial foundation was promoted to `main` through [PR #63](https://github.com/VforVitorio/peercanvas/pull/63). Use the protected `dev` → `main` promotion flow for stable updates; GitHub branch refs and PRs are authoritative for live state.
-- The S0 documentation, test-only native probe, and platform matrix entered `dev` through [PR #70](https://github.com/VforVitorio/peercanvas/pull/70), [PR #71](https://github.com/VforVitorio/peercanvas/pull/71), and [PR #72](https://github.com/VforVitorio/peercanvas/pull/72). The matrix links the current runner evidence.
-- Final traceability reconciliation entered `dev` through [PR #73](https://github.com/VforVitorio/peercanvas/pull/73). S0 was promoted to `main` through [PR #74](https://github.com/VforVitorio/peercanvas/pull/74) (`d84cfce`); [PR #76](https://github.com/VforVitorio/peercanvas/pull/76) synchronized branch history without changing files.
-- S0 milestone #1 is closed with all eight issues closed; the Project Board marks each S0 parent and child issue Done.
-- The public [PeerCanvas Workflow Board](https://github.com/users/VforVitorio/projects/4/views/2) tracks 13 WP parent issues, 41 task sub-issues, and eight sprint milestones.
-- WP-01/#3 and child issues #15/#16 describe the isolated Weave probe and its matrix. WP-09/#9 and #44 retain the planned shadcn chatbot adaptation boundaries.
-- GitHub branch protection is active and API-verified on `main` and `dev` on 2026-11-10: pull requests required, strict checks `lint`, `format`, `typecheck`, `test`, `frontend-build`, `native-linux`, `native-macos`, `native-windows`, conversation resolution, admin enforcement, and no force pushes or branch deletion. Approval count is zero for the solo-maintainer workflow.
-- CI run [42824270374](https://github.com/VforVitorio/peercanvas/actions/runs/42824270374) passed all 14 checks, including the eight required checks and the test-only native canvas probe on Linux, macOS, and Windows. See the [platform matrix](../support/platform-matrix.md).
-- Child issue #17 is closed after native CI and branch protection were verified.
-- GitHub reported seven open Dependabot alerts on 2026-11-10: one high, five moderate, and one low. The high Vite alert and remaining findings are tracked under WP-11.3, issue #50; resolve or disposition them before product release.
-
-## Architecture and reuse decisions
-
-- The shell uses Tauri 2, React 18.3.1, TypeScript, and Vite 8.
-- Weave.js remains the planned canvas foundation. The test-only probe adapts selected composition from the pinned `weavejs-frontend` source under Apache-2.0; it preserves the Tauri/Vite shell and does not import the example's TanStack Start runtime. The normal app remains a scaffold without product canvas integration.
-- Adapt the shadcn chatbot template for the optional chat UI. Keep PeerCanvas's Tauri/Vite structure and provider boundary; do not import its Next.js routes or Vercel AI SDK backend. No template source has been copied yet. Preserve its MIT notice for any code adopted.
-- One versioned document model and validated command boundary are proposed. Local storage choice remains open until recovery experiments compare SQLite, Tauri storage, and browser/Yjs persistence.
-- Yjs plus a replaceable Trystero/WebRTC transport is proposed; direct peer connectivity is not guaranteed and TURN is unresolved.
-- Codex/MCP remain optional. Recheck current auth eligibility, terms, and behavior before implementation. No token exchange or model call was made.
+- Branch flow: `feature/*` from `dev`, focused PRs to `dev`, then a promotion PR from `dev` to protected `main` at sprint close.
+- The GitHub Project remains under the personal account `VforVitorio` and tracks the organization repository. GitHub issue/PR/milestone states are authoritative.
+- Branch protection is active on `main` and `dev`; required checks and the native S0 compatibility probe are recorded in [the platform matrix](../support/platform-matrix.md) and [GitHub workflow](../planning/github-workflow.md).
+- The S0 renderer probe is test-only. Its Linux/macOS/Windows CI results verify the bounded probe, not native product editor workflows.
+- Seven Dependabot alerts were recorded on 2026-11-10 and are tracked under WP-11.3/#50. Refresh their live status before security or release work.
+- Optional Gitleaks checks on the last promotion did not scan because the organization requires `GITLEAKS_LICENSE`; no secret-scan result was produced.
 
 ## Planning and source documents
 
 - Product requirements and use cases: `docs/requirements/product-definition.md`.
-- Architecture, integration research, and ADRs: `docs/architecture/`.
-- Work packages, sprint cadence, dependencies, estimates, and WP issue map: `PLANS.md`.
-- OpenSpec foundation proposal/specs/design/tasks: `openspec/changes/peer-canvas-foundation/`.
-- Task-to-child-issue mapping: `docs/planning/subissue-map.md`.
-- GitHub branch flow, protection, CI, and repository settings: `docs/planning/github-workflow.md`.
-- Security and risk register: `docs/security/`.
-- Quality and verification plan: `docs/quality/TEST_STRATEGY.md`.
-- Maintainer-supplied brand assets and usage: `docs/branding/brand-guide.md`.
-- Reviewable editor-shell direction and its placeholder/accessibility boundary: `docs/branding/editor-shell-direction.md`.
-- Third-party license notes: `THIRD_PARTY_NOTICES.md`.
-- Agent workflow and skill routing: `AGENTS.md`.
-
-## Verification and limitations
-
-- `npm run format:check`: passed.
-- `openspec validate --all --strict`: passed.
-- `bash -n scripts/setup-github.sh`: passed.
-- `scripts/setup-github.sh --dry-run`: passed; the actual script was also run to apply repository settings and branch protection.
-- `npm run format:check`, `npm run lint`, `npm run typecheck`, `npm test`, and `npm run build` pass locally.
-- The normal `npm run tauri -- build --no-bundle` passes. The production-isolation check confirms it includes the scaffold and excludes probe markers.
-- The test-only native smoke passes on the maintainer's macOS and on the CI runner matrix in [Actions run 42824270374](https://github.com/VforVitorio/peercanvas/actions/runs/42824270374). The CI results and WebView/runtime versions are recorded in `docs/support/platform-matrix.md`.
-- `cargo fmt --manifest-path src-tauri/Cargo.toml --check`, `git diff --check`, and `openspec validate --all --strict` pass. A release build with the test-only `native-smoke` feature is rejected by the compile guard.
-- The supplied 1024×1024 app icon remains the PNG source; `src-tauri/icons/icon.ico` is a Tauri-generated Windows format derivative.
-- The test-only probe verifies renderer interactions on the listed runner images; it does not verify product editor workflows, minimum OS support floors, save/open, manual accessibility, signing/installers, peer networking, auth, or a full dependency/SBOM audit.
+- Architecture decisions and integration research: `docs/architecture/`.
+- Work packages, sprint cadence, dependencies, and issue map: `PLANS.md`.
+- OpenSpec baseline and implementation tasks: `openspec/changes/peer-canvas-foundation/`.
+- Quality gates and evidence rules: `docs/quality/TEST_STRATEGY.md`.
+- Security risks and data boundaries: `docs/security/`.
+- Agent workflow and skill routing: `AGENTS.md` and `.agents/skills/`.
+- Tauri documentation source: [tauri-apps/tauri-docs](https://github.com/tauri-apps/tauri-docs); verify guidance against the pinned Tauri version.
 
 ## Next steps
 
-1. Start the next work package from `dev` on a short-lived feature branch; merge its task PR into `dev`, then promote completed sprint batches to `main`.
-2. Plan WP-02's canonical document model and command boundary under OpenSpec before implementation. S1+ product code requires separate maintainer approval.
-3. Resolve or disposition the dependency alerts tracked under WP-11.3/#50 before product release.
+1. Issue #25 is locally implemented and verified; OpenSpec task 3.1 is checked, but the GitHub child issue remains In Progress until its focused PR is merged.
+2. Stop before commit, push, or PR until the user explicitly authorizes publication for this S2 task.
+3. After #25 is merged, start #26 from the then-current `dev`, refreshing `main`, `dev`, PRs, issues, milestone, and Project first.
+4. Keep the WP-04 parent and S2 milestone open until all child issues and the parent save/close/reopen acceptance pass.

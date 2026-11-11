@@ -112,13 +112,7 @@ export const canvasPaper = {
  * shared document contract's default-style paragraph. These are adapter defaults, not
  * persisted renderer state.
  */
-export const defaultAppearance = {
-  fill: "#ffffff",
-  stroke: "#000000",
-  strokeWidth: 1,
-  textColor: "#000000",
-  fontSize: 16,
-} as const;
+export { defaultAppearance } from "../../canvas/projection";
 
 /** Colours drawn on the paper by the read-only projection (selection overlay). */
 export function canvasChrome() {
