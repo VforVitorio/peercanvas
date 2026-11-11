@@ -1,6 +1,7 @@
 # Node
 /node_modules/
 /dist/
+/dist-ui-mock/
 /src-tauri/target/
 /target/
 
@@ -32,3 +33,6 @@ lerna-debug.log*
 # graphify-axet
 .graphify/
 .graphifyignore
+
+# Local code analysis
+.code-review-graph/

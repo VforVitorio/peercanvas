@@ -26,6 +26,14 @@ The separately invoked native probe uses Weave.js 5.7.1 (Apache-2.0), Konva 10.0
 
 The optional test-only Rust dependency [tauri-plugin-wdio-webdriver 1.5.1](https://github.com/webdriverio/desktop-mobile/tree/ba733f664e034976499fd3d43cf940f357f904c4/packages/tauri-plugin-webdriver) is MIT-licensed. Its embedded loopback server is enabled only by the `native-smoke` Cargo feature in debug builds; a release build with that feature is rejected at compile time. The probe does not use the separate WDIO API/mocking plugin or require a paid driver service.
 
+## Isolated UI demonstration
+
+`src/ui-mock/ui/WeaveCanvas.tsx` derives its in-memory provider/container, node registration, and lifecycle composition from the S0 probe and the exact Apache-2.0 upstream revisions listed above. Its header retains the Inditex copyright/SPDX attribution and identifies the PeerCanvas modification. The demo adds a disposable read-only projection, selection reporting, transient zoom, and cleanup; it excludes native WebDriver instrumentation. It uses the same pinned Weave/Konva/Yjs packages and unchanged maintainer-supplied brand symbol. Other demo controls and stroke icons are project code; no third-party stencil, font, chatbot-template source, or new artwork is bundled.
+
+## Development agent prompts
+
+Selected profiles in `.codex/agents/` and `.claude/agents/` adapt the MIT-licensed [VoltAgent subagent prompts](https://github.com/VoltAgent/awesome-claude-code-subagents) at revision `ed74d115b7fb7026a22a4f816a8e3250f425e3b4`, copyright (c) 2025 VoltAgent. The [profile provenance ledger](docs/development/agents.md#provenance-and-license-ledger) maps every adaptation to its source and records modifications. Preserve the [upstream MIT license](LICENSES/VoltAgent-MIT.txt) with these prompt files. First-party coordinator/explorer profiles remain under the project license. No upstream installer, plugin, runtime code, or agent catalog is vendored.
+
 ## Project references
 
 - [Weave.js](https://github.com/InditexTech/weavejs) and [weavejs-frontend](https://github.com/InditexTech/weavejs-frontend) supply the bounded test probe described above and remain the planned sources for the product canvas. Both upstream repositories declare Apache-2.0: [Weave.js license](https://github.com/InditexTech/weavejs/blob/5.7.1/LICENSE) and [frontend license](https://github.com/InditexTech/weavejs-frontend/blob/ce3c4b663de1297daa37241a0be9b14a2469bc0c/LICENSE). PeerCanvas is independent and does not imply endorsement by InditexTech.

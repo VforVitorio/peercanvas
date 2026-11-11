@@ -177,6 +177,8 @@ Effort ranges are initial engineering estimates. They exclude release administra
 
 ## Sprint sequence
 
+The separate [UI demonstration](docs/development/ui-mock.md), tracked locally by OpenSpec `ui-mock`, supports UI review across the planned packages. Its shared pure-core implementation was explicitly authorized in the UI session; simulated workflows do not close S1–S7 tasks or advance package acceptance. A dedicated demo child issue under WP-04/#6 is pending delivery. The maintainer has authorized commit/PR publication, but the staging attempt was blocked by the executor's approval policy; no production child issue closes through this demo. The maintainer-authorized demo phase 1 includes the complete mock UI, dragging and technical/visual/S1 acceptance; its [completion inventory](docs/development/phase1-completion-20261111.md) keeps all mandatory remaining demo work in phase 1. Demo phase 2 is distinct from production sprint S2 and requires separate scope/authorization. Keep production sprint sequencing below unchanged.
+
 Each box is an initial two-week iteration, not a delivery date. If the package estimate exceeds available capacity, split it into acceptance-complete slices and carry the remainder. No velocity is assumed.
 
 S0 contains the full bounded WP-01 compatibility gate through a test-only probe. Its in-memory fixture does not implement the canonical document model, durable storage, or the useful local editor planned for WP-02, WP-03, and WP-04. The normal app remains the engineering scaffold.
@@ -244,3 +246,7 @@ For implementation, create **feature/WP-xx-short-name** from **dev**, open a PR 
 ## Traceability
 
 Stable requirement IDs and use cases are in the [product definition](docs/requirements/product-definition.md). OpenSpec capability specs link their requirements. This plan maps each WP to those requirements/specs. GitHub Issues must carry WP ID and links; PRs close Issues and cite checks. CI check names become required only after they have run and GitHub exposes the exact contexts.
+
+## Manual publication trace
+
+The supplementary demo child is [#81](https://github.com/furancho-labs/Peer2Canvas/issues/81), a native sub-issue of [WP-04 #6](https://github.com/furancho-labs/Peer2Canvas/issues/6). This committed snapshot prepares the accepted phase-1 delivery through the user-run publication script. The script prints the actual commit and PR URL and writes a local publication receipt. The earlier executor rejection is historical; it does not describe this manual run. Existing production children #25/#26 and parent acceptance remain unchanged. Phase-2 implementation and merge/release still require separate authorization.

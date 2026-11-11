@@ -1,5 +1,9 @@
 # Initial risk register
 
+The [UI demonstration](../development/ui-mock.md) checks simulated role/proposal boundaries and avoids real file/network/provider integration. It does not resolve the production risks below. In particular, simulated recovery, admission, and approval tests are not evidence of durable recovery, peer authorization, or provider/MCP transport security.
+
+The [phase 1 completion record](../development/phase1-completion-20261111.md) tracks renderer lifecycle/viewport and drag cancellation checks, including pending-initialization disposal and the SDK global-clearing behavior discovered during browser validation. These local browser/unit results must receive independent technical and fresh visual review, and the exact shared core must receive explicit S1 acceptance. Passing mocks or a partial checkpoint cannot close phase 1 or retire R-01/R-11. Mandatory demo defects remain in phase 1 until verified.
+
 Status: planning baseline reviewed on 2026-11-10 after the S0 compatibility probe. Likelihood and impact remain qualitative ratings, not measured probabilities.
 
 | ID   | Risk                                                                      | Likelihood / impact | Mitigation and closure evidence                                                                                                                               | WP          |
@@ -18,6 +22,8 @@ Status: planning baseline reviewed on 2026-11-10 after the S0 compatibility prob
 | R-12 | Work-package estimates exceed available solo/community capacity           | High / Medium       | Use person-day ranges, no velocity assumption, split/carry packages between two-week boxes                                                                    | All         |
 
 Review this register when the corresponding experiment runs or a new failure mode appears. Do not lower a rating without evidence.
+
+The 2026-11-10 shared pure-core correction addresses hostile JavaScript values at the in-memory boundary: accessor/method execution, unstable proxy rereads, sparse or decorated arrays, and canonical output exceeding the source byte budget. Descriptor-only detached capture, bounded traversal, full graph validation, and source/output ceilings are checked separately from any native parser or persistence boundary. See [the shared contract](../architecture/shared-document-contract.md) and the exact compatibility evidence in the session handoff. This does not close R-02, R-05, R-07, or R-08 or lower their ratings; production storage, transport, import, and authorization adapters remain unimplemented.
 
 ## Current dependency alerts
 

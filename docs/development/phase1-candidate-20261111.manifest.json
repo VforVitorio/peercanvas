@@ -1,0 +1,498 @@
+{
+  "manifestVersion": 1,
+  "date": "2026-11-11",
+  "status": "phase-1-closed; technical and visual foundation ready for phase 2",
+  "sourceCandidate": {
+    "repoRoot": "/private/tmp/peercanvas-ui-mock",
+    "baseCommit": "ff6ec3fc6d390a3b2a83e9b9e3a69dfadc3ed5c0",
+    "files": [
+      {
+        "path": "src/document/README.md",
+        "sha256": "e2ef6a05aa89d9e15205201597902f35930c99b2ff9664f865d0a7f9fd6e2fd8",
+        "bytes": 1305
+      },
+      {
+        "path": "src/document/index.ts",
+        "sha256": "e3e18dde77702c3234e27d4aa48a633d3dd77eaf38a2cac4d0105d536c39564f",
+        "bytes": 52821
+      },
+      {
+        "path": "src/ui-mock/index.html",
+        "sha256": "2426f0db08826edb4f3169265e27f687972fde6ba7a897c22f95d63ea289bb3c",
+        "bytes": 530
+      },
+      {
+        "path": "src/ui-mock/main.tsx",
+        "sha256": "ddc0e21056f805dc5cc385daaab3c50f3f98fd90461b517c4d8c091209fd5c33",
+        "bytes": 255
+      },
+      {
+        "path": "src/ui-mock/services/README.md",
+        "sha256": "5dc3f8fe9a87dada70a97fed360148a3b4baadbe390391e48a5dc8ccaf5cbfbf",
+        "bytes": 2460
+      },
+      {
+        "path": "src/ui-mock/services/demo-service.ts",
+        "sha256": "6f0717180ad5c492e41316d2de7d6365543e40f41606f7113d8704c5e682f906",
+        "bytes": 41759
+      },
+      {
+        "path": "src/ui-mock/ui/App.canvas.test.tsx",
+        "sha256": "a9aff574290f40fa1d504e16c7b400c394a6bf3928757b3ac97610e8b38f37cf",
+        "bytes": 43763
+      },
+      {
+        "path": "src/ui-mock/ui/App.flows.test.tsx",
+        "sha256": "32182860381e350c6952dffc0eaede161e6a5fe0924ab6b0ed454e80c6977636",
+        "bytes": 45020
+      },
+      {
+        "path": "src/ui-mock/ui/App.test.tsx",
+        "sha256": "174adb4c8acb437bbb0ff506639354814a7b92e558d9d597f039505f2a8e9074",
+        "bytes": 18173
+      },
+      {
+        "path": "src/ui-mock/ui/App.tsx",
+        "sha256": "737497c854e68b5cf6f8638595c2ec067d0c993604339bc1c59aff74f889864f",
+        "bytes": 11158
+      },
+      {
+        "path": "src/ui-mock/ui/Banner.tsx",
+        "sha256": "c5647b8731d25bcfcc9bf067491630d38bc8e7d032d4dddb6cb9a67d954f1059",
+        "bytes": 2330
+      },
+      {
+        "path": "src/ui-mock/ui/Dialog.tsx",
+        "sha256": "f868fe4b5272698db9ec772996b7907c381f5512e93a9a7f8cc262539dd8848c",
+        "bytes": 4627
+      },
+      {
+        "path": "src/ui-mock/ui/Dialogs.tsx",
+        "sha256": "2b4debe9ad2f292d8d4ccf51308bfb13e544e54a3c2a104e84e046334aa82afe",
+        "bytes": 15435
+      },
+      {
+        "path": "src/ui-mock/ui/Feedback.tsx",
+        "sha256": "bacf97175fc042302610f6461a616f79931c085cb7b89b2e42083045d9fd7fa0",
+        "bytes": 4511
+      },
+      {
+        "path": "src/ui-mock/ui/Home.tsx",
+        "sha256": "bbb9eef5ee4ea09f555b99bd41bd6be73e3f538e33d408daf39712022a8015a5",
+        "bytes": 8316
+      },
+      {
+        "path": "src/ui-mock/ui/Icon.tsx",
+        "sha256": "4bc168bf713ba089f4025a3f4add98866798a43efb3985a4cac0449acb645850",
+        "bytes": 1431
+      },
+      {
+        "path": "src/ui-mock/ui/LeftPanel.tsx",
+        "sha256": "105a41e124e67bdb04fd4656707d5c24e07c6021f4a5e714c6b7208a4f6cf548",
+        "bytes": 9374
+      },
+      {
+        "path": "src/ui-mock/ui/Menu.tsx",
+        "sha256": "23a12e210e6103d425883e7fafbb9ab22a408f6fcf05cdf6816c1b331346df96",
+        "bytes": 4150
+      },
+      {
+        "path": "src/ui-mock/ui/ProposalCard.tsx",
+        "sha256": "277f61e4cf75a35f7423ffdf7076a89f6ac2971da25f19b0dbac3a25d9f67c8e",
+        "bytes": 2223
+      },
+      {
+        "path": "src/ui-mock/ui/RightPanel.tsx",
+        "sha256": "19c0d1c42f9711cbae77610d380712ccd81c7a461d2e5eceb4fce20b4e6bbafc",
+        "bytes": 18596
+      },
+      {
+        "path": "src/ui-mock/ui/Tabs.tsx",
+        "sha256": "e08844c45fa95351c91d595e2660bb589427c6a558e57d5113eeec8bfdd8d61b",
+        "bytes": 1926
+      },
+      {
+        "path": "src/ui-mock/ui/WeaveCanvas.tsx",
+        "sha256": "3f09db11c37f4509b26ffccee35c4e9da0fb87dd62d123ec705d3fbed8613cb4",
+        "bytes": 38173
+      },
+      {
+        "path": "src/ui-mock/ui/Workspace.tsx",
+        "sha256": "a69e32d5cc2bbd9f68218c18bf09b0ceab613e94f365a85525f8293d7bb531ec",
+        "bytes": 19213
+      },
+      {
+        "path": "src/ui-mock/ui/context.ts",
+        "sha256": "453e22327432dba2fc0c319b3a513abd797c366064b2e5680da034ed02e7b9bb",
+        "bytes": 2869
+      },
+      {
+        "path": "src/ui-mock/ui/projection.test.ts",
+        "sha256": "b2f83e0a944e70b6217804c0b170155d4dbf5e405e1509f5e439d74efa4c762a",
+        "bytes": 21149
+      },
+      {
+        "path": "src/ui-mock/ui/projection.ts",
+        "sha256": "9e036501b1c41ffeceaa4fb4682a61fd35db31b7d941160f7a83caebf13310d6",
+        "bytes": 12790
+      },
+      {
+        "path": "src/ui-mock/ui/styles.css",
+        "sha256": "b388a7fc95bee2ec8f902de67cbdb3697720707822c9523eae0ad57af3ee9cf7",
+        "bytes": 30721
+      },
+      {
+        "path": "src/ui-mock/ui/test/weaveMock.ts",
+        "sha256": "05ccaa22587e485f99ee584decd63c90ea1ab0e98ec4c1cba01d4e273a1e944f",
+        "bytes": 11309
+      },
+      {
+        "path": "src/ui-mock/ui/tokens.test.ts",
+        "sha256": "249e572c2448ba45a4a8b3eb8d3e282d2223206e0b7190ca19b908fadcf81e12",
+        "bytes": 1955
+      },
+      {
+        "path": "src/ui-mock/ui/tokens.ts",
+        "sha256": "832d2b8c29177acb5973dccd45fc59c1fd6821b7d7afc5d4a84be2dfbe6a309b",
+        "bytes": 4279
+      },
+      {
+        "path": "src/ui-mock/ui/types.ts",
+        "sha256": "c77257f4731f3f79d4567f0e050954d62c18ef3a831f94bd24a4d7306c1b1dd6",
+        "bytes": 2625
+      },
+      {
+        "path": "tests/core-compatibility/public-api-readonly.ts",
+        "sha256": "8b138d0b2bf5410b3468950eee98b7b2c1906218a6783f6eb4c80901678aa845",
+        "bytes": 4537
+      },
+      {
+        "path": "tests/document/compatibility-regressions.test.ts",
+        "sha256": "3ee2b18b4882fc983dccfb2ae9e127ba5f2fef5bdfd39cd08fc900317122e22c",
+        "bytes": 24205
+      },
+      {
+        "path": "tests/document/contract.test.ts",
+        "sha256": "3f7af82f937b48418e7bfd7ed771fbfe88a9cd17be9d3d0da1e3dfc94bf54598",
+        "bytes": 32470
+      },
+      {
+        "path": "tests/ui-mock-services/demo-service.test.ts",
+        "sha256": "cbdad82b4fb20ac1f956cb92ddbe6b9cad0e4a4c31fba1e56d3704c316cef3ef",
+        "bytes": 29289
+      },
+      {
+        "path": "tests/ui-mock-services/move-node.test.ts",
+        "sha256": "1d63f6602efde09b4aff57706a846a782164fbe2ab7e09f185e7f600085291e6",
+        "bytes": 6319
+      }
+    ],
+    "bundleMethod": "SHA256 of sorted path + NUL + file SHA256 joined with LF, no final LF",
+    "bundleSha256": "69b97e4a39040a27de5760ba9edf60bac50db0d406247eeef1525932e7cc1913"
+  },
+  "core": {
+    "path": "src/document/index.ts",
+    "sha256": "e3e18dde77702c3234e27d4aa48a633d3dd77eaf38a2cac4d0105d536c39564f",
+    "interface": "s1-pure-v1",
+    "changedThisSession": false,
+    "S1Acceptance": "accepted by explicit maintainer sign-off for this exact core and sole canonical consumption in S1; integration remains separate"
+  },
+  "verification": {
+    "format": "passed",
+    "lint": "passed",
+    "sourceTypecheck": "passed",
+    "unit": {
+      "executed": 212,
+      "passed": 212,
+      "failed": 0,
+      "skipped": 0,
+      "maxWorkers": 2
+    },
+    "nonvisual": {
+      "executed": 55,
+      "passed": 55,
+      "sourceAndTestHashesUnchangedSinceFocusedRun": true
+    },
+    "frozenS1": {
+      "executed": 35,
+      "passed": 33,
+      "failed": 2,
+      "skipped": 0,
+      "exitCode": 1,
+      "onlyAuthorizedDiagnosticDifferences": [
+        {
+          "test": "model.test.ts: orders deferred reference diagnostics by document field and array position",
+          "expected": "/pages/0/layers/0/nodes/1/geometry/rotation",
+          "actual": "/pages/0/layers/0/nodes/1/geometry"
+        },
+        {
+          "test": "model.test.ts: orders root diagnostics by declared field order",
+          "expected": "/styles/0",
+          "actual": "/styles/0/textColor"
+        }
+      ],
+      "inputHashes": [
+        {
+          "path": "tests/s1-oracle/commands.test.ts",
+          "bytes": 18498,
+          "sha256": "fc0c01c03be35b8851477fc1c31eb04829af38d6d4a75e7e03310efe8d307cf2"
+        },
+        {
+          "path": "tests/s1-oracle/model.test.ts",
+          "bytes": 12383,
+          "sha256": "2108f906e9629bbc28f0797f95bcd67be58941b6519edf17f631cb3b6a3b3f2b"
+        },
+        {
+          "path": "tests/s1-oracle/projection.test.ts",
+          "bytes": 3235,
+          "sha256": "0f136f8862855a44dc0057a0a8372afa6a90d8d7672079f805cca100adf5b6e7"
+        },
+        {
+          "path": "tests/fixtures/s1/generate.ts",
+          "bytes": 3649,
+          "sha256": "bb4c54444ca93fe40c2fc2547ebc4fb9c46c724f29ebce093bdc6d3a82531a3b"
+        },
+        {
+          "path": "tests/fixtures/s1/weaveProjection.ts",
+          "bytes": 2449,
+          "sha256": "f3dd42081bb60ae436751f44d75a428c8967089cc1de6cbac5ae0c2f7e5dbbab"
+        },
+        {
+          "path": "s1-api-compatibility.ts",
+          "bytes": 430,
+          "sha256": "7791f9a784c472043c19f32e43f6b526b5f09f9b48a0bd368b12faa8298e5462"
+        }
+      ]
+    },
+    "readonlyApiProbes": "passed; exact frozen probe and nested readonly public-consumer probe; standalone test TypeScript passed",
+    "normalBuild": "passed; scaffold present, demo/probe markers absent",
+    "demoBuild": "passed; existing large-chunk warning",
+    "strictOpenSpec": "passed; final documentation validation recorded separately",
+    "browser": {
+      "passed": 40,
+      "failed": 0,
+      "skipped": 1,
+      "errors": 0,
+      "externalRequests": 0,
+      "blockedRequests": 0,
+      "websockets": [],
+      "optionalSkip": "F3 real window blur could not be induced in headless; actual Tab focus loss and unit window-blur cancellation passed"
+    },
+    "isolationAst": {
+      "queries": 22,
+      "matches": 0,
+      "toolErrors": 0
+    },
+    "readOnlyReferenceFilesChecked": 15,
+    "readOnlyReferenceMismatches": []
+  },
+  "reviews": {
+    "technical": {
+      "status": "accepted; no remaining blocking defects",
+      "candidateBundleSha256": "69b97e4a39040a27de5760ba9edf60bac50db0d406247eeef1525932e7cc1913",
+      "priorP2": "resolved; dismissal scoped to immutable result identity",
+      "evidence": "/private/tmp/peercanvas-phase1-review-final2.txt"
+    },
+    "visual": {
+      "status": "approved; V-B1 and V-E1 resolved",
+      "candidateBundleSha256": "69b97e4a39040a27de5760ba9edf60bac50db0d406247eeef1525932e7cc1913",
+      "freshScreenshotsInspected": 11,
+      "claimedContrastPairsVerified": 51,
+      "evidence": "independent designer final response; summarized in phase1-completion-20261111.md"
+    },
+    "S1": {
+      "status": "accepted by maintainer assuming exact-core S1 sign-off",
+      "coreSha256": "e3e18dde77702c3234e27d4aa48a633d3dd77eaf38a2cac4d0105d536c39564f",
+      "canonicalConsumption": "S1 will consume this as the sole canonical implementation",
+      "date": "2026-11-11",
+      "authority": "On 2026-11-11, after the exact candidate and canonical-consumption agreement were presented, the maintainer explicitly accepted the shared core and authorized commit, push and a PR to dev. This supersedes the earlier owner-only sign-off instruction. The acceptance is the maintainer's decision; no separate S1-agent acceptance or automatic S1 integration is claimed.",
+      "previousDelivery": "Original owner-session delivery was rejected by an active writer; no S1-agent response is claimed.",
+      "integrationPerformed": false
+    }
+  },
+  "environment": {
+    "node": "v24.21.0",
+    "playwright": "1.65.0",
+    "chromium": "153.0.8010.12",
+    "os": "Darwin 25.6.0 arm64",
+    "cpu": "Apple M5",
+    "viewport": {
+      "width": 1440,
+      "height": 1000
+    },
+    "deviceScaleFactor": 1,
+    "reducedMotion": "reduce"
+  },
+  "screenshots": [
+    {
+      "path": "p1-browser-dialog-shortcuts-light.png",
+      "sha256": "d9c3a8e3100416f21b5f9d8738410185b6c08e05d433e2e68146e7da0dece2f9",
+      "bytes": 147622
+    },
+    {
+      "path": "p1-browser-error-export-failed-light.png",
+      "sha256": "7234a70c0db96e05390e90bfeb84f4b3f76fbc4153f7a9d5170f618eb50e5fe2",
+      "bytes": 122278
+    },
+    {
+      "path": "p1-browser-home-light.png",
+      "sha256": "4f96eacc3134783093eca334709a03790f014ed2880d86726d754f6b9e638734",
+      "bytes": 97187
+    },
+    {
+      "path": "p1-browser-negative-coordinates-200.png",
+      "sha256": "74f557d3f546a5540477148377dec7dbc9255a4264a046654488603f1c46bace",
+      "bytes": 108014
+    },
+    {
+      "path": "p1-browser-proposal-pending-light.png",
+      "sha256": "6584e4a4b25c3c34a30786329d8a25b15dff75ad443c813bda7ae51de5925986",
+      "bytes": 129862
+    },
+    {
+      "path": "p1-browser-workspace-clean-dark.png",
+      "sha256": "8a8c21be641fe5367a7c658dc55050f1d5e182e77dd6f81a800e9a3708fd6315",
+      "bytes": 106683
+    },
+    {
+      "path": "p1-browser-workspace-clean-light.png",
+      "sha256": "9e4f2643d74f9028a36063f3f27d0a94d86b53f47c0d4d0144c28d4edd5c0040",
+      "bytes": 104547
+    },
+    {
+      "path": "p1-browser-workspace-focused-dark.png",
+      "sha256": "abcdbed5b597582834c530391b1d45160dbf30b4da7d3d019c887615f4a11084",
+      "bytes": 111647
+    },
+    {
+      "path": "p1-browser-workspace-focused-light.png",
+      "sha256": "7c3d0ed0d0b91c257e8cffa51e90e06bb0bb4fa27fa8ef2f1d76edd755e4882e",
+      "bytes": 109545
+    },
+    {
+      "path": "p1-browser-workspace-selected-dark.png",
+      "sha256": "fd2d6e016a729a3449c198b4b33eaa8fdce9b43e571288b9824f785f5f970132",
+      "bytes": 111331
+    },
+    {
+      "path": "p1-browser-workspace-selected-light.png",
+      "sha256": "95ba89d51c92e6acc6a8398bef8f870894f59cfcf8851525c3769972841be670",
+      "bytes": 109175
+    }
+  ],
+  "buildOutputs": {
+    "dist": [
+      {
+        "path": "dist/assets/index-BoUBJ-aC.css",
+        "bytes": 8084,
+        "sha256": "f3a717082ea85c329658486fab6ce5ec5cf7c7161e8439a3f505ec2ceeec1927"
+      },
+      {
+        "path": "dist/assets/index-DkByxoaI.js",
+        "bytes": 141582,
+        "sha256": "dabafb41e362841b5e18f121ce68326d427b2a56f6461c01bda56636db3e5bb0"
+      },
+      {
+        "path": "dist/index.html",
+        "bytes": 396,
+        "sha256": "107a5b3325bf3fae2260ef0ab39a2db06e14781703304272b7c777f703cd80ba"
+      }
+    ],
+    "dist-ui-mock": [
+      {
+        "path": "dist-ui-mock/assets/index-BfL_8MwX.js",
+        "bytes": 906947,
+        "sha256": "a1a0364b24caabdf5603bff35d4533dc3fe5833f0ec7000074b5ec606b1f9788"
+      },
+      {
+        "path": "dist-ui-mock/assets/index-CWjwQOM6.css",
+        "bytes": 31381,
+        "sha256": "85795bf661e794c2b03b90cb6aee7feae04891c3e9bcada794eb4a276e38a466"
+      },
+      {
+        "path": "dist-ui-mock/assets/peercanvas-symbol-color-Cvwa80UA.png",
+        "bytes": 229519,
+        "sha256": "21eaf9f0f33222c30074df809937d0a4decf720a9bf4871027f106dfb30cf5df"
+      },
+      {
+        "path": "dist-ui-mock/index.html",
+        "bytes": 621,
+        "sha256": "f9b04c7e30075f892c6ae173e102ed097440bbdf6411eada5b7b1aff6078f735"
+      }
+    ]
+  },
+  "artifacts": [
+    {
+      "path": "/private/tmp/peercanvas-phase1-final2-vitest.json",
+      "sha256": "b708c2a67c936f4b0b5fa15673a6567a65b0b5811479cd15f1bf6194b6240014"
+    },
+    {
+      "path": "/private/tmp/peercanvas-phase1-frozen-vitest.json",
+      "sha256": "189df9ca0f931ad13e57426f78bf9458d2e769c13a1d6ff48e8e3f03480f1e01"
+    },
+    {
+      "path": "/private/tmp/peercanvas-phase1-diagnostics.json",
+      "sha256": "9abc4bd24f5853af6349ef44bc5ed3dc5275868b39eec42c0ff59c4a0b6dc6c2"
+    },
+    {
+      "path": "/private/tmp/peercanvas-phase1-final-isolation-ast.json",
+      "sha256": "dbd43cdd34989f261e2aee39a35529ce0378dc03a9df9478b1afe11ad3d5475c"
+    },
+    {
+      "path": "/private/tmp/peercanvas-phase1-evidence-20261111/p1-browser-result.json",
+      "sha256": "c826ad6b1bb286f5e9a0634b6365b45cd6b84f64e15a2fcb4671c80ef0b9f0fe"
+    },
+    {
+      "path": "/private/tmp/peercanvas-phase1-review-final2.txt",
+      "sha256": "1a450a1405c31632ff34cd6d814c89ac69bab7b95633862436ee8cf22e4e0fa3"
+    },
+    {
+      "path": "/private/tmp/peercanvas-phase1-visual-measure.json",
+      "sha256": "a3c6f1c94f2522b7978e1a9acd0b3e4ea652f70a957a13ddd4b666da83d60564"
+    },
+    {
+      "path": "/private/tmp/peercanvas-phase1-browser.mjs",
+      "sha256": "db07c185e4ec671d9b9fd2e096139f895931c1bb8527616556dd7291154bfe55"
+    }
+  ],
+  "limits": [
+    "Isolated fictional in-memory demo; normal app remains scaffold.",
+    "No real user file IO, downloads, durable storage, external network, credentials, collaboration transport, provider calls or MCP server.",
+    "Browser evidence is headless Chromium; no new native editor/WebView, assistive-technology, forced-colours, HiDPI or performance certification.",
+    "Text/focus/status/button/banner token pairs pass; input borders and grid remain about 1.45:1, explicitly nonblocking in visual review; no full WCAG certification or maintainer contrast exception is inferred.",
+    "An earlier full 207-test run had one 5-second large-fixture timeout; quiet 207-test and final 212-test runs passed without changing test assertions/timeouts.",
+    "Code Review Graph omits untracked source; zero graph impacts are not coverage.",
+    "At phase-1 validation no delivery action had occurred. The maintainer subsequently authorized staging, commit, push and PR publication; merges/releases, S1/checkpoint writes and phase-2 implementation remain outside this authorization."
+  ],
+  "deliveryAuthorization": {
+    "date": "2026-11-11",
+    "scope": ["stage task files", "commit", "push feature/ui-mock", "open PR to dev"],
+    "mergeAuthorized": false,
+    "phase2ImplementationAuthorized": false
+  },
+  "delivery": {
+    "method": "maintainer-run terminal script",
+    "status": "publication preparation snapshot; actual result is in the local receipt",
+    "head": "feature/ui-mock",
+    "base": "dev",
+    "demoIssue": {
+      "number": 81,
+      "url": "https://github.com/furancho-labs/Peer2Canvas/issues/81",
+      "parent": 6
+    },
+    "sourceBundleUnchanged": true,
+    "localReceipt": "/private/tmp/peercanvas-phase1-publication-receipt.json",
+    "previousAgentAttempt": {
+      "status": "blocked by execution policy before staging",
+      "rejectedAction": "git add with the explicit accepted-task file allowlist",
+      "toolError": "approval required by policy, but AskForApproval is set to Never",
+      "stageExecuted": false,
+      "commitCreated": false,
+      "pushAttempted": false,
+      "pullRequestCreated": false,
+      "dedicatedDemoIssueCreated": false,
+      "preparedPullRequestBody": "/private/tmp/peercanvas-phase1-pr-body.md",
+      "sourceBundleUnchanged": true
+    }
+  }
+}
