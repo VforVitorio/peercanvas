@@ -2,6 +2,22 @@
 
 Last updated: 2026-11-10.
 
+## UI demo branch session
+
+The maintainer requested an interim commit/merge of the currently viewable demo on 2026-11-10. Delivery is isolated on `feature/ui-mock-checkpoint` in `/private/tmp/peercanvas-ui-checkpoint`, captured from `feature/ui-mock` at base `ff6ec3f`; the original UI, S1, and agent-configuration checkouts are preserved. This is a partial checkpoint, not completion of the full UI change or any production work package. See [evidence and limitations](../development/ui-mock.md) and the still-incomplete [OpenSpec tasks](../../openspec/changes/ui-mock/tasks.md).
+
+The demo has home/lifecycle/recovery controls, a Weave workspace, inspector/pages/layers/history, simulated import/export, participants/invitations/roles, assistant/MCP approval, temporary preferences/themes, help, shortcuts, and reset/scenario controls. Pointer dragging and canvas resize gestures are not implemented: select a shape and use keyboard arrows or inspector coordinates/dimensions. Final visual, accessibility, native, and complete UI-flow acceptance remain pending.
+
+Run `npm run ui:mock` at `http://127.0.0.1:1430/`; `npm run build:ui-mock` writes `dist-ui-mock/`. Normal application/native-smoke entries remain unchanged. All file/recovery/interchange/collaboration/assistant/MCP service results are simulated; no real file, network, provider, credential, or persistent browser-storage integration was added.
+
+After the dependency was explained, the maintainer explicitly authorized the shared pure S1 core here. `src/document/**` is the checkpoint's single semantic module, described by [the shared contract](../architecture/shared-document-contract.md). Demo edits, inverse undo/redo, and approved proposals use its validated command boundary. S1 acknowledges UI as the sole active shared-core writer and retains persistence/Rust ownership. Compatibility reconciliation with the frozen S1 reference remains pending; this checkpoint does not claim that reference's acceptance evidence or close a production work-package issue.
+
+Development used existing local agent profiles: Claude Opus for UI, Sonnet for UI verification/corrections, and Luna for core/tests. Agent configuration, its prompt/license delivery, and private client state are excluded from this checkpoint. All UI/UI-test corrections remain Claude-owned. The maintainer explicitly authorized committing/merging this checkpoint; publication follows the separately confirmed delivery scope. No merge or CI result is claimed before it occurs.
+
+Checkpoint verification passes 114 tests, lint, TypeScript, formatting, both builds, strict OpenSpec validation, diff checks, and independent technical review. The review's reset/save race, sparse-array serialization, and layer projection ordering findings were fixed with regressions. Git staging was rejected because the execution policy requires approval while `AskForApproval` is `Never`; no commit, merge, push, PR, or GitHub issue was created. The next delivery step is to permit the required Git operation, then commit the explicit checkpoint file selection and complete the confirmed local/remote merge scope. See the [delivery record](../development/ui-mock.md).
+
+Subsequent work: complete remaining UI tasks, including pointer gestures, final browser/visual/accessibility acceptance, and shared-core compatibility review before production use. Production storage, real interchange/peers/providers/MCP, and native editor validation remain unimplemented. Dependency installation reported eight existing audit findings (seven moderate, one high); no dependency remediation or performance/native-support claim is made.
+
 ## Project goal and boundary
 
 PeerCanvas is a personal, open-source, local-first desktop diagram editor planned for Windows, macOS, and Linux. The target stack is Tauri 2, React 18, TypeScript, Vite, and Weave.js. Optional planned capabilities include draw.io interchange, Yjs/Trystero/WebRTC collaboration, secure invitations, and Codex/MCP assistance.

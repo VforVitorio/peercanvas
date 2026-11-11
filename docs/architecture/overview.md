@@ -16,6 +16,8 @@ The bounded test-only WP-01 probe passed native launch, rendering, selection, tr
 
 ## Logical component view
 
+The separately invoked [UI demonstration](../development/ui-mock.md) consumes the pure shared `src/document` core and derives an in-memory Weave projection. Its services simulate file lifecycle, interchange, collaboration, and assistant/MCP outcomes. It does not add these services to the normal application, select a durable backend, or establish production/native capability acceptance. The frozen shared pure interface is recorded in [the shared document contract](shared-document-contract.md).
+
 ```mermaid
 flowchart LR
   User[Local user]

@@ -58,6 +58,16 @@ Run the desktop shell:
 npm run tauri -- dev
 ```
 
+Run the separate UI demonstration:
+
+```sh
+npm run ui:mock
+```
+
+Open `http://127.0.0.1:1430/`. The demonstration uses fictional data, a shared pure document/command core, and a disposable Weave projection. File lifecycle, recovery, interchange, participants, assistant, and MCP results are simulated; nothing is saved or sent. Choose a fixture and success/wait/cancel/error scenario from the banner, and use Reset demo to start again. Preferences are temporary.
+
+`npm run build:ui-mock` writes `dist-ui-mock/` separately from the normal build. The normal desktop application remains the scaffold. See the [demo evidence and limitations](docs/development/ui-mock.md); this demonstration does not establish production persistence, collaboration, provider access, or native editor support.
+
 Build the native shell without creating an installer:
 
 ```sh
