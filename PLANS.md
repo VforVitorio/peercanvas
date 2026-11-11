@@ -1,6 +1,6 @@
 # PeerCanvas delivery plan
 
-Status: planning baseline, 2026-11-07; S0 is complete, S2 is in progress, and the S7–S10 roadmap additions were recorded on 2026-11-11. This plan does not authorize product implementation by itself.
+Status: planning baseline established 2026-11-07; S0–S2 are complete on `main` as of 2026-11-11, and the S7–S10 roadmap additions are recorded here. This plan does not authorize product implementation by itself.
 
 This file is the canonical roadmap and work-package ledger. Product behavior and acceptance requirements live in the [product definition](docs/requirements/product-definition.md); versioned capability contracts live in OpenSpec; GitHub Issues track execution. Update this file when scope, dependencies, estimates, sprint assignments, or risks change.
 
@@ -19,7 +19,7 @@ This file is the canonical roadmap and work-package ledger. Product behavior and
 
 The first product milestone is a local-first desktop diagram editor for Windows, macOS, and Linux, using Tauri 2, React, TypeScript, Vite, and Weave.js. Planned capabilities include a document model, editing, local persistence and recovery, a searchable shape catalog, draw.io import/export, optional P2P collaboration and secure invitations, and optional Codex/MCP tools.
 
-WP-04.1 and WP-04.2 provide in-memory editing. S2 adds `.peercanvas` save/open/recovery under WP-03 and is merged to `dev` in PR #104; keep WP-03 and WP-04 issues open through the `dev`→`main` promotion. Cross-platform CI passes; the recorded native save/close/reopen flow is macOS, while other native UI smoke remains release evidence. The S7 icon-packaging, S8 preferences, S9 grouping, and S10 PMV-onboarding work remain planned and are not implementation approvals. Invitation authorization, relay/TURN policy, shape asset licensing, exact draw.io parity, and OpenAI client registration remain open pending experiments or review.
+WP-04.1 and WP-04.2 provide in-memory editing. S1 persistence and S2 local editing were promoted to `main` by PR [#106](https://github.com/furancho-labs/Peer2Canvas/pull/106), merged as `a2d9837`. The app supports versioned `.peercanvas` save/open, migration, recovery, and local editing, but this source promotion does not publish an installer or establish supported OS versions. The S7 icon-packaging, S8 preferences, S9 grouping, and S10 PMV-onboarding work remain planned and are not implementation approvals. Invitation authorization, relay/TURN policy, shape asset licensing, exact draw.io parity, and OpenAI client registration remain open pending experiments or review.
 
 ## Work packages
 
@@ -218,6 +218,8 @@ S0 delivered the bounded WP-01 compatibility gate through a test-only probe. Its
 
 S0 implementation and native evidence are complete. Promotion PR #74 (`d84cfce`) merged the sprint to `main`; all eight S0 issues and milestone #1 are closed, and the Project Board marks them Done.
 
+S1 and S2 are complete on `main`. Promotion PR [#106](https://github.com/furancho-labs/Peer2Canvas/pull/106) merged as `a2d9837`, closed the S1/S2 work-package and task issues (#2, #4, #6, and #19–#24), and the Project Board marks the related issues Done. Milestones #2 (S1) and #3 (S2) are closed. All eight required checks passed. The optional Gitleaks job did not scan because the organization has no `GITLEAKS_LICENSE`; this promotion has no secret-scan result.
+
 | Sprint | Goal                                   | Packages     | Exit evidence                                                                                                                             |
 | ------ | -------------------------------------- | ------------ | ----------------------------------------------------------------------------------------------------------------------------------------- |
 | S0     | Foundation and feasibility gates       | WP-00, WP-01 | OpenSpec/CI baseline and branded shell brief; native canvas smoke matrix or blocking issues with fallback decisions; approved ADR updates |
@@ -232,7 +234,7 @@ S0 implementation and native evidence are complete. Promotion PR #74 (`d84cfce`)
 | S9     | Diagram grouping                       | WP-14        | reviewed grouping contract, validated group operations, persistence and undo/redo evidence                                                |
 | S10    | PMV onboarding                         | WP-15        | audited journey inventory and localized, accessible tours for verified PMV workflows                                                      |
 
-S2 implementation is merged into `dev` through PR #104 as `aa646e2`. WP-04.1/#25 and WP-04.2/#26 provide the editor; WP-03 supplies local persistence. The eight required CI checks pass, and a macOS Tauri flow has saved, closed, and reopened an edited diagram. Keep #6 and the S2 milestone open until the promotion PR reaches `main` and issue closeout completes. Grouping is outside S2 and belongs to S9/WP-14, with discovery child #89; it does not block S2 closure.
+S1 and S2 are complete on `main`; PR #106 promoted the S1 persistence and S2 editor work and closed their issues and milestones. The eight required CI checks passed, and a macOS Tauri flow saved, closed, and reopened an edited diagram. Grouping is outside S2 and belongs to S9/WP-14, with discovery child #89; it did not block S2 closure. No product implementation for S3 or later is authorized by this planning update.
 
 ### Critical path and parallel work
 
