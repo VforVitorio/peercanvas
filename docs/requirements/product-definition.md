@@ -55,7 +55,7 @@ The AI provider and MCP client are not trusted authorities. They may propose com
 - The target desktop OS families are Windows, macOS (Apple Silicon and Intel where viable), and Linux. Exact OS minimum versions are undecided.
 - Weave.js 5.7.1 and React 18.3.1 are the pinned research baseline. Recheck current releases and peer dependencies before changing either.
 - Yjs + Trystero + WebRTC is a proposed collaboration path. Signaling, STUN, TURN, NAT traversal, and relay availability remain external dependencies.
-- Local persistence engine is undecided. SQLite, Tauri storage APIs, browser IndexedDB, and Yjs update storage must be compared before selection.
+- Local diagrams use versioned `.peercanvas` JSON through the Rust persistence adapter selected in [ADR-0003](../architecture/decisions/ADR-0003-local-persistence.md). Application preferences remain separate from diagram content.
 - The initial release does not rely on centralized user identity.
 - The current OpenAI documentation describes a Sign in with ChatGPT plan-usage path for eligible open-source/local apps. It is a preview; verify registration, eligibility, rate/usage limits, terms, and storage requirements before implementation.
 - Effort and sprint estimates in PLANS.md are planning estimates, not promises or measured velocity.
@@ -79,57 +79,63 @@ The AI provider and MCP client are not trusted authorities. They may propose com
 
 The OpenSpec capability names below are the planned canonical capability contracts. The requirements matrix is the stable high-level index; details and scenarios live in the matching OpenSpec change/spec files.
 
-| ID     | Requirement                                                                                                            | Capability                 |
-| ------ | ---------------------------------------------------------------------------------------------------------------------- | -------------------------- |
-| FR-001 | The application shall launch as a desktop app on each declared supported OS.                                           | Desktop Application        |
-| FR-002 | The UI shall host the selected Weave renderer without requiring Next.js.                                               | Desktop Application        |
-| FR-003 | The canvas shall render and select diagram elements through model-backed state.                                        | Canvas Editing             |
-| FR-004 | The canvas shall support basic node selection, movement, resize, and connector editing.                                | Canvas Editing             |
-| FR-005 | Each document element shall have a stable unique identifier.                                                           | Document Model             |
-| FR-006 | A document shall contain ordered pages, layers, nodes, connections, styles, and metadata.                              | Document Model             |
-| FR-007 | Mutations shall enter through validated typed commands and return explicit success or error results.                   | Document Model             |
-| FR-008 | Nodes shall support a declared initial set of shapes and properties.                                                   | Diagram Shapes             |
-| FR-009 | Connections shall reference valid endpoints and preserve connector style and routing metadata.                         | Diagram Shapes             |
-| FR-010 | The editor shall support undo and redo for accepted model mutations.                                                   | History & Recovery         |
-| FR-011 | Selection state shall be available to editor tools without becoming a second document source of truth.                 | Canvas Editing             |
-| FR-012 | Users shall create, open, save, rename, and close local documents.                                                     | Local Persistence          |
-| FR-013 | Persisted documents shall carry a schema version and use explicit migrations.                                          | Local Persistence          |
-| FR-014 | The application shall create recoverable snapshots or equivalent durable checkpoints.                                  | History & Recovery         |
-| FR-015 | The application shall detect incomplete/corrupt recovery state and offer a non-destructive recovery path.              | History & Recovery         |
-| FR-016 | Local preferences shall be stored separately from diagram content.                                                     | Local Persistence          |
-| FR-017 | Shape libraries shall be described by a manifest with stable IDs and categories.                                       | Shape Catalog              |
-| FR-018 | Users shall search and browse installed shapes without requiring a remote service.                                     | Shape Catalog              |
-| FR-019 | Every bundled asset shall record source, version, license, attribution, and review status.                             | Shape Catalog              |
-| FR-020 | Imported SVG content shall be validated/sanitized before rendering or export.                                          | Security & Privacy         |
-| FR-021 | The application shall import a documented subset of draw.io XML/compressed documents.                                  | draw.io Compatibility      |
-| FR-022 | The application shall export supported document semantics to draw.io format.                                           | Import & Export            |
-| FR-023 | The application shall report unsupported or lossy transformations before the user confirms them.                       | draw.io Compatibility      |
-| FR-024 | The adapter shall retain original unsupported source data when safe and technically feasible.                          | draw.io Compatibility      |
-| FR-025 | Concurrent document edits shall synchronize through Yjs updates.                                                       | P2P Collaboration          |
-| FR-026 | The proposed peer transport shall use a replaceable adapter and support Trystero/WebRTC as the initial candidate.      | P2P Collaboration          |
-| FR-027 | Joining a peer session shall receive an initial document state before declaring the peer ready.                        | P2P Collaboration          |
-| FR-028 | The session shall surface connection state, reconnection, and presence/awareness separately from saved document state. | Presence & Awareness       |
-| FR-029 | The host shall generate an invitation with a random session identifier and a high-entropy secret.                      | Secure Session Invitations |
-| FR-030 | Invitations shall support expiry and a host-controlled admission decision.                                             | Secure Session Invitations |
-| FR-031 | The host shall inspect participants and assign editor or viewer roles.                                                 | Secure Session Invitations |
-| FR-032 | Viewer peers shall be prevented from mutating the model through all supported command paths.                           | Security & Privacy         |
-| FR-033 | The host shall revoke a participant or close a session.                                                                | Secure Session Invitations |
-| FR-034 | Session loss shall not delete the host's last durable local document.                                                  | P2P Collaboration          |
-| FR-035 | AI shall be optional and accessed through a provider boundary.                                                         | Codex Embedded Chat        |
-| FR-036 | The assistant shall retain conversation metadata and support a streaming response view.                                | Codex Embedded Chat        |
-| FR-037 | The assistant shall support cancellation and recoverable provider errors.                                              | Codex Embedded Chat        |
-| FR-038 | The user may explicitly share the active document and selected elements as prompt context.                             | Codex Embedded Chat        |
-| FR-039 | A proposed diagram mutation shall be previewed and approved before application.                                        | Codex Embedded Chat        |
-| FR-040 | Approved assistant changes shall be attributable in the local action history.                                          | Codex Embedded Chat        |
-| FR-041 | MCP tools shall read a document and return a bounded structured representation.                                        | MCP Integration            |
-| FR-042 | MCP tools shall inspect current selection and search available shapes.                                                 | MCP Integration            |
-| FR-043 | MCP tools may propose node/edge creation, editing, deletion, layout, analysis, and export.                             | MCP Integration            |
-| FR-044 | The app shall validate tool arguments and scope them to an explicitly selected document.                               | MCP Integration            |
-| FR-045 | Mutating MCP calls shall require the same preview/approval path as UI-originated AI proposals.                         | MCP Integration            |
-| FR-046 | MCP operations shall expose cancellation, errors, and audit events without secrets.                                    | MCP Integration            |
-| FR-047 | User-facing Codex skills shall be authored only after the referenced tools are implemented and verified.               | User-Facing Codex Skills   |
-| FR-048 | The Codex integration shall be removable/disableable without disabling local editing.                                  | User-Facing Codex Skills   |
-| FR-049 | Published skills shall document required tools, permissions, installation, limits, and examples.                       | User-Facing Codex Skills   |
+| ID     | Requirement                                                                                                            | Capability                     |
+| ------ | ---------------------------------------------------------------------------------------------------------------------- | ------------------------------ |
+| FR-001 | The application shall launch as a desktop app on each declared supported OS.                                           | Desktop Application            |
+| FR-002 | The UI shall host the selected Weave renderer without requiring Next.js.                                               | Desktop Application            |
+| FR-003 | The canvas shall render and select diagram elements through model-backed state.                                        | Canvas Editing                 |
+| FR-004 | The canvas shall support basic node selection, movement, resize, and connector editing.                                | Canvas Editing                 |
+| FR-005 | Each document element shall have a stable unique identifier.                                                           | Document Model                 |
+| FR-006 | A document shall contain ordered pages, layers, nodes, connections, styles, and metadata.                              | Document Model                 |
+| FR-007 | Mutations shall enter through validated typed commands and return explicit success or error results.                   | Document Model                 |
+| FR-008 | Nodes shall support a declared initial set of shapes and properties.                                                   | Diagram Shapes                 |
+| FR-009 | Connections shall reference valid endpoints and preserve connector style and routing metadata.                         | Diagram Shapes                 |
+| FR-010 | The editor shall support undo and redo for accepted model mutations.                                                   | History & Recovery             |
+| FR-011 | Selection state shall be available to editor tools without becoming a second document source of truth.                 | Canvas Editing                 |
+| FR-012 | Users shall create, open, save, rename, and close local documents.                                                     | Local Persistence              |
+| FR-013 | Persisted documents shall carry a schema version and use explicit migrations.                                          | Local Persistence              |
+| FR-014 | The application shall create recoverable snapshots or equivalent durable checkpoints.                                  | History & Recovery             |
+| FR-015 | The application shall detect incomplete/corrupt recovery state and offer a non-destructive recovery path.              | History & Recovery             |
+| FR-016 | Local preferences shall be stored separately from diagram content.                                                     | Local Persistence              |
+| FR-017 | Shape libraries shall be described by a manifest with stable IDs and categories.                                       | Shape Catalog                  |
+| FR-018 | Users shall search and browse installed shapes without requiring a remote service.                                     | Shape Catalog                  |
+| FR-019 | Every bundled asset shall record source, version, license, attribution, and review status.                             | Shape Catalog                  |
+| FR-020 | Imported SVG content shall be validated/sanitized before rendering or export.                                          | Security & Privacy             |
+| FR-021 | The application shall import a documented subset of draw.io XML/compressed documents.                                  | draw.io Compatibility          |
+| FR-022 | The application shall export supported document semantics to draw.io format.                                           | Import & Export                |
+| FR-023 | The application shall report unsupported or lossy transformations before the user confirms them.                       | draw.io Compatibility          |
+| FR-024 | The adapter shall retain original unsupported source data when safe and technically feasible.                          | draw.io Compatibility          |
+| FR-025 | Concurrent document edits shall synchronize through Yjs updates.                                                       | P2P Collaboration              |
+| FR-026 | The proposed peer transport shall use a replaceable adapter and support Trystero/WebRTC as the initial candidate.      | P2P Collaboration              |
+| FR-027 | Joining a peer session shall receive an initial document state before declaring the peer ready.                        | P2P Collaboration              |
+| FR-028 | The session shall surface connection state, reconnection, and presence/awareness separately from saved document state. | Presence & Awareness           |
+| FR-029 | The host shall generate an invitation with a random session identifier and a high-entropy secret.                      | Secure Session Invitations     |
+| FR-030 | Invitations shall support expiry and a host-controlled admission decision.                                             | Secure Session Invitations     |
+| FR-031 | The host shall inspect participants and assign editor or viewer roles.                                                 | Secure Session Invitations     |
+| FR-032 | Viewer peers shall be prevented from mutating the model through all supported command paths.                           | Security & Privacy             |
+| FR-033 | The host shall revoke a participant or close a session.                                                                | Secure Session Invitations     |
+| FR-034 | Session loss shall not delete the host's last durable local document.                                                  | P2P Collaboration              |
+| FR-035 | AI shall be optional and accessed through a provider boundary.                                                         | Codex Embedded Chat            |
+| FR-036 | The assistant shall retain conversation metadata and support a streaming response view.                                | Codex Embedded Chat            |
+| FR-037 | The assistant shall support cancellation and recoverable provider errors.                                              | Codex Embedded Chat            |
+| FR-038 | The user may explicitly share the active document and selected elements as prompt context.                             | Codex Embedded Chat            |
+| FR-039 | A proposed diagram mutation shall be previewed and approved before application.                                        | Codex Embedded Chat            |
+| FR-040 | Approved assistant changes shall be attributable in the local action history.                                          | Codex Embedded Chat            |
+| FR-041 | MCP tools shall read a document and return a bounded structured representation.                                        | MCP Integration                |
+| FR-042 | MCP tools shall inspect current selection and search available shapes.                                                 | MCP Integration                |
+| FR-043 | MCP tools may propose node/edge creation, editing, deletion, layout, analysis, and export.                             | MCP Integration                |
+| FR-044 | The app shall validate tool arguments and scope them to an explicitly selected document.                               | MCP Integration                |
+| FR-045 | Mutating MCP calls shall require the same preview/approval path as UI-originated AI proposals.                         | MCP Integration                |
+| FR-046 | MCP operations shall expose cancellation, errors, and audit events without secrets.                                    | MCP Integration                |
+| FR-047 | User-facing Codex skills shall be authored only after the referenced tools are implemented and verified.               | User-Facing Codex Skills       |
+| FR-048 | The Codex integration shall be removable/disableable without disabling local editing.                                  | User-Facing Codex Skills       |
+| FR-049 | Published skills shall document required tools, permissions, installation, limits, and examples.                       | User-Facing Codex Skills       |
+| FR-050 | Users shall choose a light or dark application theme that persists separately from diagram content.                    | User Preferences               |
+| FR-051 | Users shall choose English or Spanish interface resources with locale-aware formatting and a defined fallback.         | Localization                   |
+| FR-052 | Users shall start, navigate, and close optional guided tours for verified PMV workflows without changing active work.  | Guided Onboarding              |
+| FR-053 | Users shall group and ungroup eligible diagram elements through validated document commands.                           | Document Model, Canvas Editing |
+
+FR-050..FR-052 have planned OpenSpec changes in `desktop-preferences` and `guided-onboarding`. FR-053 is proposed for S9; its membership rules and full contract remain pending discovery in WP-14.1/#89. These entries do not authorize implementation.
 
 ## Non-functional requirements
 
@@ -151,6 +157,7 @@ Targets below are proposed acceptance goals, not measured results. WP-01 and WP-
 | NFR-012 | Every functional requirement shall have at least one acceptance scenario and automated or documented manual evidence before release.                                                                           |
 | NFR-013 | Dependencies shall be versioned/locked and scanned on pull requests; critical/high findings require a documented disposition before release.                                                                   |
 | NFR-014 | The local editor shall not require a permanently hosted PeerCanvas service. External signaling or TURN dependencies must be identified, replaceable where feasible, and reflected in privacy/cost disclosures. |
+| NFR-015 | Each declared native app package shall include the authorized PeerCanvas icon and pass package inspection and launch verification.                                                                             |
 
 ## Use-case overview
 
@@ -166,6 +173,11 @@ Targets below are proposed acceptance goals, not measured results. WP-01 and WP-
 | UC-08 | Collaboration     | Admit, assign, or revoke a participant          | Session host     |
 | UC-09 | AI assistance     | Ask Codex to analyze or propose an edit         | Local user       |
 | UC-10 | MCP               | Read or propose document changes through a tool | MCP client       |
+| UC-11 | Desktop settings  | Change appearance and language preferences      | Local user       |
+| UC-12 | Onboarding        | Use a guided tour for a verified PMV workflow   | Local user       |
+| UC-13 | Canvas editing    | Group and ungroup eligible diagram elements     | Local user       |
+
+UC-11 and UC-12 are planned for S8 and S10. UC-13 remains proposed until WP-14.1/#89 defines the grouping behavior.
 
 ### UC-01: Create, open, edit, and save a local diagram
 
@@ -277,6 +289,39 @@ Targets below are proposed acceptance goals, not measured results. WP-01 and WP-
 - **Postconditions:** operation is auditable and does not bypass model/session permissions.
 - **Acceptance:** FR-041..FR-046, BR-003, BR-004.
 
+### UC-11: Change appearance and language preferences
+
+- **Actors/roles:** local user.
+- **Preconditions:** the desktop application is open.
+- **Trigger/input:** the user changes the theme control or interface-language setting.
+- **Main flow:** select Light or Dark and English or Spanish; the application applies the choice and persists it separately from diagrams.
+- **Alternatives:** when no preference exists, a supported OS locale/appearance is used; unsupported language falls back to English.
+- **Errors:** a preference write failure leaves the active diagram unchanged and reports the problem.
+- **Postconditions:** the chosen appearance and interface language are available after restart; document content and history are unchanged.
+- **Acceptance:** FR-050..FR-051, FR-016, and accessibility/reduced-motion checks.
+
+### UC-12: Use guided onboarding for a verified PMV workflow
+
+- **Actors/roles:** local user.
+- **Preconditions:** the tour describes a workflow included in the reviewed PMV journey inventory.
+- **Trigger/input:** the user starts or restarts a guide from Help.
+- **Main flow:** review a spotlight/callout sequence; navigate by keyboard or visible controls; close the guide at any time.
+- **Alternatives:** the user skips the guide; a missing target produces a fallback step; a workflow not implemented in the PMV has no tour.
+- **Errors:** a changed or unavailable UI target must not block normal editing or leave stale focus.
+- **Postconditions:** the user can resume normal work with the same document, route, draft, selection, and history.
+- **Acceptance:** FR-052, accessibility checks, and confirmation that no file/network/provider operation occurs.
+
+### UC-13: Group and ungroup eligible diagram elements (proposed)
+
+- **Actors/roles:** local user as document editor.
+- **Preconditions:** a writable document and an approved grouping contract are available.
+- **Trigger/input:** the user selects eligible elements and chooses Group or Ungroup.
+- **Main flow:** validate membership and apply the group command through the canonical document boundary.
+- **Alternatives:** invalid membership or unsupported nesting/cross-layer combinations are rejected without partial mutation.
+- **Errors:** failed grouping leaves the document and history unchanged.
+- **Postconditions:** supported group membership is serialized and can be undone/redone.
+- **Acceptance:** FR-053 and the grouping behavior approved after WP-14.1 discovery; this use case is not yet authorized for implementation.
+
 ## Traceability map
 
 | Requirement range | Use cases                        | WPs                        | OpenSpec capability                                                 |
@@ -291,4 +336,8 @@ Targets below are proposed acceptance goals, not measured results. WP-01 and WP-
 | FR-035..040       | UC-09                            | WP-09                      | Codex Embedded Chat                                                 |
 | FR-041..046       | UC-10                            | WP-10                      | MCP Integration                                                     |
 | FR-047..049       | Not applicable before tools ship | WP-12                      | User-Facing Codex Skills                                            |
+| FR-050..051       | UC-11                            | WP-13                      | User Preferences, Localization                                      |
+| FR-052            | UC-12                            | WP-15                      | Guided Onboarding                                                   |
+| FR-053 (proposed) | UC-13                            | WP-14                      | Document Model, Canvas Editing, History & Recovery                  |
 | NFR-001..014      | UC-01..UC-10                     | WP-00, WP-11               | Quality & Testing, Cross-Platform Compatibility, Security & Privacy |
+| NFR-015           | Release packaging                | WP-11                      | Desktop Application, Cross-Platform Compatibility                   |

@@ -40,15 +40,17 @@ const runtimeEnvironment = Object.fromEntries(
 );
 
 async function assertProductionIsolation(directory) {
-  let scaffoldFound = false;
+  let editorFound = false;
   for (const entry of await readdir(directory, { withFileTypes: true })) {
     const file = path.join(directory, entry.name);
-    if (entry.isDirectory())
-      scaffoldFound = (await assertProductionIsolation(file)) || scaffoldFound;
+    if (entry.isDirectory()) editorFound = (await assertProductionIsolation(file)) || editorFound;
     else {
       const content = await readFile(file, "utf8");
-      scaffoldFound ||= content.includes(
-        "Engineering scaffold. Diagram editing is not implemented yet.",
+      editorFound ||=
+        content.includes("Diagram canvas") && content.includes("Document file actions");
+      assert(
+        !content.includes("Engineering scaffold. Diagram editing is not implemented yet."),
+        `Stale scaffold in ${file}`,
       );
       assert(!content.includes("__PEERCANVAS_NATIVE_SMOKE__"), `Smoke instrumentation in ${file}`);
       assert(
@@ -58,15 +60,17 @@ async function assertProductionIsolation(directory) {
       assert(!content.includes("Native canvas compatibility probe"), `Smoke entry in ${file}`);
     }
   }
-  return scaffoldFound;
+  return editorFound;
 }
 
 if (process.argv[2] === "--check-production") {
   assert(
     await assertProductionIsolation(path.join(root, "dist")),
-    "Normal application scaffold missing from build",
+    "Normal application editor missing from build",
   );
-  console.log("Normal frontend build excludes native-smoke entry and instrumentation.");
+  console.log(
+    "Normal frontend includes the in-memory editor and excludes native-smoke instrumentation.",
+  );
 } else {
   assert.equal(process.argv.length, 2, "Unknown native-smoke argument");
   await runNativeSmoke();

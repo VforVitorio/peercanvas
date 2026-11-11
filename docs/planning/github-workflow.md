@@ -1,6 +1,6 @@
 # GitHub workflow and protections
 
-Repository: [VforVitorio/peercanvas](https://github.com/VforVitorio/peercanvas), public and owner-managed.
+Repository: [furancho-labs/Peer2Canvas](https://github.com/furancho-labs/Peer2Canvas), public and owner-managed.
 
 ## Branch and pull request flow
 

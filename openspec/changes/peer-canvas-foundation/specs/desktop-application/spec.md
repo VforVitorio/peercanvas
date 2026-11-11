@@ -37,3 +37,12 @@ Each release SHALL identify the operating system and webview/runtime combination
 
 - **WHEN** a release is published
 - **THEN** its support notes distinguish automated build evidence from manual native smoke evidence
+
+### Requirement: Include the authorized application icon in native packages
+
+Each reproducible native application package SHALL include the reviewed PeerCanvas icon for its declared operating system.
+
+#### Scenario: Launch a package built from a clean checkout
+
+- **WHEN** a native package is built from the declared source and launched
+- **THEN** the operating system displays the authorized PeerCanvas icon in the application surface and the package records reproducible icon inputs

@@ -4,7 +4,7 @@
 
 ## Evidence
 
-The matrix comes from [Actions run 42824270374](https://github.com/VforVitorio/peercanvas/actions/runs/42824270374) for PR [#71](https://github.com/VforVitorio/peercanvas/pull/71), tested merge ref `b8853f82599fb1e6f7a178fa2739ee2c15b088c8` and PR head `c29007b2235070fe25e881d8c677eff8af28996f`. The run uploaded `native-smoke-Linux`, `native-smoke-macOS`, and `native-smoke-Windows` artifacts. Each contains a result record, initial and edited screenshots, logs, and the native WebView version.
+The matrix comes from [Actions run 42824270374](https://github.com/furancho-labs/Peer2Canvas/actions/runs/42824270374) for PR [#71](https://github.com/furancho-labs/Peer2Canvas/pull/71), tested merge ref `b8853f82599fb1e6f7a178fa2739ee2c15b088c8` and PR head `c29007b2235070fe25e881d8c677eff8af28996f`. The run uploaded `native-smoke-Linux`, `native-smoke-macOS`, and `native-smoke-Windows` artifacts. Each contains a result record, initial and edited screenshots, logs, and the native WebView version.
 
 | GitHub-hosted runner image        | Operating system and architecture                | Native WebView reported by Tauri | Result and artifact            |
 | --------------------------------- | ------------------------------------------------ | -------------------------------- | ------------------------------ |

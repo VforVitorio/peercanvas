@@ -24,15 +24,17 @@
     "test": "vitest run"
   },
   "dependencies": {
-    "@tauri-apps/api": "2.12.4",
-    "react": "18.3.1",
-    "react-dom": "18.3.1"
-  },
-  "devDependencies": {
-    "@eslint/js": "9.39.5",
     "@inditextech/weave-renderer-konva-base": "5.7.1",
     "@inditextech/weave-sdk": "5.7.1",
     "@inditextech/weave-store-standalone": "5.7.1",
+    "@tauri-apps/api": "2.12.4",
+    "konva": "10.0.2",
+    "react": "18.3.1",
+    "react-dom": "18.3.1",
+    "yjs": "13.6.27"
+  },
+  "devDependencies": {
+    "@eslint/js": "9.39.5",
     "@inditextech/weave-types": "5.7.1",
     "@tauri-apps/cli": "2.12.4",
     "@testing-library/react": "16.3.3",
@@ -44,14 +46,12 @@
     "eslint": "9.39.5",
     "eslint-plugin-react-hooks": "5.2.0",
     "jsdom": "31.0.0",
-    "konva": "10.0.2",
     "postcss": "8.5.32",
     "prettier": "3.9.10",
     "tailwindcss": "3.4.19",
     "typescript": "5.9.3",
     "typescript-eslint": "8.72.1",
     "vite": "8.0.16",
-    "vitest": "5.1.0",
-    "yjs": "13.6.27"
+    "vitest": "5.1.0"
   }
 }

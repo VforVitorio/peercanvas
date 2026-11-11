@@ -21,8 +21,12 @@ export const harness = {
 };
 
 class FakeStage {
+  element: HTMLElement = document.createElement("div");
   handlers = new Map<string, Handler>();
   scaleValue = { x: 1, y: 1 };
+  container() {
+    return this.element;
+  }
   on(names: string, handler: Handler) {
     for (const name of names.split(" ")) this.handlers.set(name.split(".")[0], handler);
   }
@@ -54,7 +58,11 @@ export class FakeWeave {
   overlay: Element | null = null;
   destroyed = false;
   listeners = new Map<string, Handler>();
-  constructor(public config: { store: FakeStore }) {
+  constructor(
+    public config: { store: FakeStore },
+    view?: { container: HTMLElement },
+  ) {
+    if (view) this.stage.element = view.container;
     harness.instances.push(this);
   }
   addEventListener(name: string, handler: Handler) {

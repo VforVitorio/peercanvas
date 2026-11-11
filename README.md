@@ -2,79 +2,88 @@
   <img src="docs/branding/assets/peercanvas-lockup-color.png" alt="PeerCanvas" width="520">
 </h1>
 
-<p align="center">A local-first desktop workspace for diagrams and collaborative thinking.</p>
+<p align="center"><strong>A local-first desktop workspace for diagrams and collaborative thinking.</strong></p>
 
 <p align="center">
-  <a href="https://github.com/VforVitorio/peercanvas">GitHub repository</a>
+  <a href="#project-status">Status</a>
   ·
-  <a href="docs/branding/brand-guide.md">Brand guide</a>
+  <a href="#getting-started">Getting started</a>
   ·
-  <a href="docs/support/platform-matrix.md">Platform matrix</a>
+  <a href="PLANS.md">Roadmap</a>
   ·
-  <a href="docs/handoff/START_HERE.md">Project handoff</a>
+  <a href="docs/architecture/overview.md">Architecture</a>
+  ·
+  <a href="docs/handoff/START_HERE.md">Handoff</a>
 </p>
 
-PeerCanvas is an independent open-source project for creating architecture, UML, BPMN, network, cloud, database, process, and workflow diagrams. The goal is a capable desktop editor that works locally, with optional peer collaboration, draw.io interchange, and Codex/MCP assistance.
+PeerCanvas is an open-source desktop diagram editor for turning ideas into architecture, UML, BPMN, network, cloud, database, process, and workflow diagrams. The goal is a useful local editor that works without a network connection or an AI account, with optional peer collaboration, draw.io interchange, and Codex/MCP assistance.
 
-PeerCanvas is not an official project of Weave.js, InditexTech, OpenPencil, draw.io, or OpenAI.
+The project is in early development. S2 adds local `.peercanvas` save/open and recovery to the in-memory editor. The implementation is merged into `dev`; the sprint stays open through promotion to `main` and issue closeout. Collaboration, interchange, and AI/MCP features remain planned.
 
 ## Project status
 
-PeerCanvas has completed its S0 engineering foundation and renderer compatibility gate. The normal application is still a minimal Tauri/React shell. Diagram editing, durable document storage, collaboration, import/export, and AI tools are not implemented.
+**S0 is complete. S2 implementation is merged into `dev`; sprint closeout is pending promotion to `main`.** The renderer compatibility gate passed its bounded native fixture on Windows, macOS, and Linux. That evidence does not establish full native product support.
 
-| Capability                            | Status                                                                                                                                                 |
-| ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Tauri desktop shell                   | The normal shell builds; CI checks native builds and a test-only WebView probe on Ubuntu, macOS, and Windows                                           |
-| Weave.js canvas                       | The test-only renderer probe passed on the runner images in the [platform matrix](docs/support/platform-matrix.md); product editing is not implemented |
-| Local diagram editing and persistence | Specified; not implemented                                                                                                                             |
-| draw.io import/export                 | Compatibility subset planned; no support claimed yet                                                                                                   |
-| Peer-to-peer sessions                 | Yjs and Trystero/WebRTC proposed; network behavior not verified                                                                                        |
-| Codex and MCP                         | Optional integration researched; not implemented                                                                                                       |
+| Area                                            | Current state                                                                                                                                               |
+| ----------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Core editing                                    | In-memory add, select, move, resize, and delete. [WP-04.1 / #25](https://github.com/furancho-labs/Peer2Canvas/issues/25) is merged into `dev`.              |
+| Connectors, properties, pages/layers, undo/redo | Included in the current S2 code under [WP-04.2 / #26](https://github.com/furancho-labs/Peer2Canvas/issues/26).                                              |
+| Local files and recovery                        | S2 adds `.peercanvas` Save, Save As, Open, Reopen last, migration, unsaved-change protection, and backup recovery; native UI evidence is recorded on macOS. |
+| Shape catalog and draw.io interchange           | Planned; no format compatibility or bundled catalog support claimed.                                                                                        |
+| Peer collaboration                              | Planned around Yjs and Trystero/WebRTC; network behavior is unverified.                                                                                     |
+| Codex and MCP                                   | Optional integrations researched; not implemented.                                                                                                          |
 
-The project plan tracks 13 working-package parent issues, 41 task sub-issues, and eight sprint milestones on the [PeerCanvas Workflow Board](https://github.com/users/VforVitorio/projects/4/views/2). No product feature should be treated as complete until its issue acceptance criteria and verification evidence are recorded.
+Local checks pass 191 TypeScript tests and 14 Rust tests; typecheck, lint, formatting, OpenSpec validation, and the macOS native build pass. PR #104 passed all eight required checks. The optional Gitleaks job could not scan because the organization has no license configured. See the [platform matrix](docs/support/platform-matrix.md) and [handoff](docs/handoff/START_HERE.md) for the scope of each result.
 
-## Architecture direction
+The [PeerCanvas Delivery Board](https://github.com/users/VforVitorio/projects/4) groups work by parent work-package issues, task sub-issues, and sprint milestones. Issues #25 and #26 are the WP-04 editing children. [Parent #6](https://github.com/furancho-labs/Peer2Canvas/issues/6) remains open through the `dev`→`main` promotion. Grouping is a separate S9 item under [WP-14/#91](https://github.com/furancho-labs/Peer2Canvas/issues/91), with discovery in [#89](https://github.com/furancho-labs/Peer2Canvas/issues/89).
 
-The planned desktop stack is Tauri 2, React 18, TypeScript, Vite, and Weave.js. The product implementation will reuse the official [Weave.js renderer](https://github.com/InditexTech/weavejs) and selectively adapt UI components from [weavejs-frontend](https://github.com/InditexTech/weavejs-frontend). It will keep the Tauri/Vite application structure instead of importing the example app's TanStack Start runtime. The isolated probe verifies the renderer on the current hosted runner images; it does not set minimum OS versions or prove the product editor integration.
+## What the editor is being built for
 
-The optional assistant will adapt the [shadcn chatbot template](https://github.com/shadcn-ui/chatbot-template) for PeerCanvas conversations. Its chat components and interaction patterns are a starting point; its Next.js routes and Vercel AI SDK backend are not part of the planned stack.
+- **Think visually:** create and connect diagram elements, inspect properties, organize pages and layers, and reverse accepted changes.
+- **Keep local work independent:** core editing must remain usable without peers, a provider account, or a hosted service.
+- **Collaborate when needed:** optional temporary peer sessions are planned, with explicit permissions and visible connection failures.
+- **Exchange diagrams:** draw.io import/export will target a documented compatibility subset with loss reporting.
+- **Use assistance with control:** optional Codex/MCP tools will propose changes for preview and approval before applying them.
 
-The document model will be local-first. Optional collaboration is planned around Yjs with a replaceable Trystero/WebRTC transport. Connections may require signaling relays or TURN depending on network conditions; direct connectivity is not guaranteed.
+The [product definition](docs/requirements/product-definition.md) records requirements and use cases. [PLANS.md](PLANS.md) tracks work packages, dependencies, and sprint exit evidence.
 
-The Codex assistant is optional. OpenAI documents a Sign in with ChatGPT OAuth path for eligible open-source and locally hosted apps, but it is a preview with feature and usage limits. PeerCanvas will require explicit user consent, keep the local editor usable without AI, and apply proposed document changes only after user approval. See [Codex integration research](docs/architecture/codex-integration.md).
+## Getting started
 
-## Development setup
-
-Use Node.js 24 and the stable Rust toolchain. Native development also requires the platform dependencies in the [Tauri prerequisites](https://v2.tauri.app/start/prerequisites/).
+Development requires Node.js 24, the stable Rust toolchain, and the platform dependencies listed in the [Tauri prerequisites](https://v2.tauri.app/start/prerequisites/).
 
 ```sh
+git clone https://github.com/furancho-labs/Peer2Canvas.git
+cd Peer2Canvas
 npm ci
-npm run dev
-```
-
-Run the desktop shell:
-
-```sh
 npm run tauri -- dev
 ```
 
-Run the separate UI demonstration:
+Run the frontend alone with `npm run dev`. Build the native application without an installer with `npm run tauri -- build --no-bundle`.
+
+### Separate UI demonstration
 
 ```sh
 npm run ui:mock
 ```
 
-Open `http://127.0.0.1:1430/`. The demonstration uses fictional data, a shared pure document/command core, and a disposable Weave projection. File lifecycle, recovery, interchange, participants, assistant, and MCP results are simulated; nothing is saved or sent. Choose a fixture and success/wait/cancel/error scenario from the banner, and use Reset demo to start again. Preferences are temporary.
+Open `http://127.0.0.1:1430/`. This review surface uses fictional data and simulated file, recovery, interchange, participant, assistant, and MCP outcomes. Nothing is saved or sent. Fixtures and success/wait/cancel/error scenarios can be changed from the banner; Reset demo starts again and preferences are temporary.
 
-`npm run build:ui-mock` writes `dist-ui-mock/` separately from the normal build. The normal desktop application remains the scaffold. See the [demo evidence and limitations](docs/development/ui-mock.md); this demonstration does not establish production persistence, collaboration, provider access, or native editor support.
+`npm run build:ui-mock` writes `dist-ui-mock/` separately from the normal application build. See [demo evidence and limitations](docs/development/ui-mock.md).
 
-Build the native shell without creating an installer:
+## Architecture
 
-```sh
-npm run tauri -- build --no-bundle
-```
+| Layer         | Direction                                                                                                                                                    |
+| ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Desktop shell | Tauri 2 and Rust, hosting React 18, TypeScript, and Vite.                                                                                                    |
+| Canvas        | The official Weave.js renderer, with selected composition adapted from `weavejs-frontend`. The example app's TanStack Start runtime is not adopted.          |
+| Document      | One canonical, versioned model. UI edits pass through validated commands; Weave holds a disposable rendering projection.                                     |
+| Persistence   | A versioned `.peercanvas` JSON file is the durable document; a Rust adapter owns native dialogs, safe writes, and recovery. Preferences stay separate.       |
+| Collaboration | Yjs synchronization with a replaceable Trystero/WebRTC transport is proposed. Signaling relays or TURN may be needed; direct connectivity is not guaranteed. |
+| Assistant     | A planned provider boundary and Codex app-server integration. The chat UI will adapt the shadcn chatbot template while keeping the Tauri/Vite structure.     |
 
-## Checks
+The shadcn template's Next.js routes and Vercel AI SDK backend are outside the planned stack. Current authentication research and implementation gates are documented in [Codex integration](docs/architecture/codex-integration.md).
+
+## Development and checks
 
 ```sh
 npm run format:check
@@ -87,56 +96,49 @@ cargo test --manifest-path src-tauri/Cargo.toml
 cargo clippy --manifest-path src-tauri/Cargo.toml --all-targets -- -D warnings
 ```
 
-The GitHub Actions workflows run frontend checks, native builds, and the test-only renderer probe on Ubuntu, macOS, and Windows. The probe does not prove product editor workflows, deep links, or peer network behavior.
-
-Run the test-only native compatibility probe on a desktop runner:
+GitHub Actions checks the frontend, native builds, and the separate S0 renderer probe on Ubuntu, macOS, and Windows. Run the test-only native compatibility probe on a desktop runner with:
 
 ```sh
 npm run native-smoke:build
 npm run native-smoke
 ```
 
-The probe uses a temporary in-memory fixture and does not change the normal application's scaffold or store a document.
+The probe uses a temporary in-memory fixture. Its passing result does not verify product save/open, deep links, peer connectivity, or full editor workflows.
 
-## Project workflow
+Contributions follow `feature/*` → `dev` → `main`. Focused task PRs target `dev`, close their child issue, and reference the parent work package; completed sprint batches are promoted to stable `main`. Product behavior lives in OpenSpec, execution in GitHub Issues, and sprint sequencing in [PLANS.md](PLANS.md). Read [CONTRIBUTING.md](CONTRIBUTING.md) and [AGENTS.md](AGENTS.md) before making changes.
 
-- Use short-lived feature branches from dev and open focused pull requests to dev.
-- Promote reviewed sprint batches from dev to main by pull request. Main is the stable default branch.
-- Each working package has a parent issue; each OpenSpec implementation task has a native child issue. Pull requests close the child issue and reference the parent work package.
-- Keep product behavior in OpenSpec, engineering work in GitHub Issues, and sprint sequencing in PLANS.md.
-- Read AGENTS.md and CONTRIBUTING.md before making changes. Agents commit or push only when the user explicitly authorizes it for that task; merges remain maintainer-owned.
+## Documentation
 
-## Project documents
+| Start here                                                                                            | Details                                                         |
+| ----------------------------------------------------------------------------------------------------- | --------------------------------------------------------------- |
+| [Product definition](docs/requirements/product-definition.md)                                         | Requirements, actors, use cases, and boundaries.                |
+| [Architecture](docs/architecture/overview.md)                                                         | Component responsibilities, decisions, and validation gates.    |
+| [Roadmap](PLANS.md)                                                                                   | Working packages, dependencies, estimates, and sprint sequence. |
+| [OpenSpec](openspec/changes/peer-canvas-foundation/)                                                  | Capability contracts and implementation tasks.                  |
+| [Issue map](docs/planning/subissue-map.md)                                                            | Task-to-issue traceability.                                     |
+| [GitHub workflow](docs/planning/github-workflow.md)                                                   | Branch protection, CI, and repository rules.                    |
+| [Quality strategy](docs/quality/TEST_STRATEGY.md) and [risk register](docs/security/RISK_REGISTER.md) | Verification layers, release gates, and open risks.             |
+| [Brand guide](docs/branding/brand-guide.md)                                                           | Maintainer-supplied assets, usage, and rights.                  |
+| [Session handoff](docs/handoff/START_HERE.md)                                                         | Current checkpoint, evidence, and next task.                    |
 
-- [Product requirements and use cases](docs/requirements/product-definition.md)
-- [Architecture and provisional decisions](docs/architecture/overview.md)
-- [Working packages, sprints, and parent issues](PLANS.md)
-- [OpenSpec baseline proposal and capability specifications](openspec/changes/peer-canvas-foundation/)
-- [Issue-to-task traceability](docs/planning/subissue-map.md)
-- [GitHub branch, CI, and security workflow](docs/planning/github-workflow.md)
-- [Risk register](docs/security/RISK_REGISTER.md)
-- [Quality and verification plan](docs/quality/TEST_STRATEGY.md)
-- [S0 native WebView and renderer results](docs/support/platform-matrix.md)
-- [Brand assets and visual direction](docs/branding/brand-guide.md)
-- [Next-session handoff](docs/handoff/START_HERE.md)
+## Acknowledgments and third-party notices
 
-## Acknowledgments and references
+The following projects inform the implementation and roadmap. Adopted sources, revisions, licenses, and retained notices are recorded in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
 
-PeerCanvas is independently developed. These projects informed the proposed technology choices, format support, workflows, or interface research; they do not endorse PeerCanvas. The normal application remains the scaffold. The test-only S0 probe adapts selected Weave.js frontend composition under Apache-2.0; it does not import the example runtime. The shadcn chatbot template remains a future UI reference, and no template source has been copied. See [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) for the adapted Weave files and commits.
+| Project or documentation                                                                                                                                            | Use in PeerCanvas                                                           |
+| ------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------- |
+| [Tauri](https://v2.tauri.app/)                                                                                                                                      | Desktop shell and native integration.                                       |
+| [Weave.js](https://github.com/InditexTech/weavejs) and [weavejs-frontend](https://github.com/InditexTech/weavejs-frontend)                                          | Renderer and selected frontend composition under Apache-2.0.                |
+| [OpenPencil](https://github.com/open-pencil/open-pencil)                                                                                                            | Peer-collaboration architecture reference.                                  |
+| [Yjs](https://docs.yjs.dev/) and [Trystero](https://trystero.dev/)                                                                                                  | Proposed document synchronization and WebRTC transport.                     |
+| [draw.io](https://github.com/jgraph/drawio)                                                                                                                         | Interchange target and file-format reference.                               |
+| [OpenSpec](https://github.com/Fission-AI/OpenSpec)                                                                                                                  | Specification workflow.                                                     |
+| [shadcn chatbot template](https://github.com/shadcn-ui/chatbot-template)                                                                                            | Planned MIT-licensed chat UI reference; no template source has been copied. |
+| [OpenAI Sign in with ChatGPT and Codex app-server docs](https://developers.openai.com/siwc/token-sharing-open-source)                                               | Optional subscription-authentication research.                              |
+| [t3code](https://github.com/pingdotgg/t3code), [CodexMonitor](https://github.com/Dimillian/CodexMonitor), and [CodexGui](https://github.com/wieslawsoltes/CodexGui) | Public examples reviewed for Codex app-server integration patterns.         |
 
-| Project or documentation                                                                                                                                            | How it informed the plan                                                                                           |
-| ------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
-| [Tauri](https://v2.tauri.app/)                                                                                                                                      | Cross-platform desktop shell and native integration                                                                |
-| [Weave.js](https://github.com/InditexTech/weavejs)                                                                                                                  | Test-only S0 renderer probe and planned product canvas foundation (Apache-2.0)                                     |
-| [weavejs-frontend](https://github.com/InditexTech/weavejs-frontend)                                                                                                 | Selected composition adapted in the probe (Apache-2.0); the example app runtime is not adopted                     |
-| [OpenPencil](https://github.com/open-pencil/open-pencil)                                                                                                            | Peer-collaboration architecture reference                                                                          |
-| [Yjs](https://docs.yjs.dev/) and [Trystero](https://trystero.dev/)                                                                                                  | Proposed document synchronization and WebRTC transport                                                             |
-| [draw.io](https://github.com/jgraph/drawio)                                                                                                                         | Document interchange target and file-format reference                                                              |
-| [OpenSpec](https://github.com/Fission-AI/OpenSpec)                                                                                                                  | Spec-driven change workflow                                                                                        |
-| [shadcn chatbot template](https://github.com/shadcn-ui/chatbot-template)                                                                                            | Planned chat UI and interaction starting point (MIT); its Next.js routes and Vercel AI SDK backend are not adopted |
-| [OpenAI Sign in with ChatGPT and Codex app-server docs](https://developers.openai.com/siwc/token-sharing-open-source)                                               | Optional subscription-authentication research                                                                      |
-| [t3code](https://github.com/pingdotgg/t3code), [CodexMonitor](https://github.com/Dimillian/CodexMonitor), and [CodexGui](https://github.com/wieslawsoltes/CodexGui) | Public examples reviewed for Codex app-server integration patterns                                                 |
+PeerCanvas is independently developed. It is not an official project of Weave.js, InditexTech, OpenPencil, draw.io, or OpenAI, and these references do not imply endorsement.
 
 ## License
 
-Project source code is licensed under Apache-2.0. The PeerCanvas brand artwork is maintainer-supplied and is not covered by the source-code license. Third-party packages retain their own licenses; see [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
+Project source code is licensed under [Apache-2.0](LICENSE). The maintainer-supplied PeerCanvas brand artwork has separate usage rights described in the [brand guide](docs/branding/brand-guide.md). Third-party packages and adopted sources retain their own licenses; see [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).

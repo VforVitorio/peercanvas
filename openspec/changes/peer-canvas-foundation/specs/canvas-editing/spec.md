@@ -18,7 +18,7 @@ The canvas SHALL render the active document's supported diagram elements and ref
 #### Scenario: Reflect an accepted command
 
 - **WHEN** a valid model command changes an element
-- **THEN** the canvas displays the resulting document state
+- **THEN** supported rendered geometry reflects the command and the relevant inspector or list shows the accepted properties
 
 ### Requirement: Edit selected elements
 
@@ -33,6 +33,40 @@ The editor SHALL allow a user to select, move, resize, and remove supported elem
 
 - **WHEN** the user cancels an in-progress gesture
 - **THEN** no incomplete mutation is committed to the document
+
+### Requirement: Inspect and edit supported properties
+
+The editor SHALL show the declared properties of a selected node or connection and submit supported edits through the validated document command boundary.
+
+#### Scenario: Inspect a selected element
+
+- **WHEN** the user selects a node or connection
+- **THEN** the inspector shows its supported text, geometry, endpoint, label, routing, and appearance values
+- **AND** the connection list identifies the selected connection and the inspector shows its endpoints and supported properties
+
+#### Scenario: Apply a supported property edit
+
+- **WHEN** the user applies a valid node text/geometry or connection endpoint/label edit
+- **THEN** a validated command updates the canonical document and the relevant rendered geometry, inspector, or list reflects the accepted value
+
+#### Scenario: Reject an invalid property edit
+
+- **WHEN** a property edit violates document validation
+- **THEN** the document remains unchanged and the inspector explains the error
+
+### Requirement: Navigate ordered pages and layers
+
+The editor SHALL allow a user to switch between the document's ordered pages and layers and create or rename them through validated commands.
+
+#### Scenario: Change the active page or layer
+
+- **WHEN** the user selects a different page or layer
+- **THEN** the canvas displays that page's content, the active layer is identified, and transient selection is reconciled
+
+#### Scenario: Add or rename a page or layer
+
+- **WHEN** the user adds or renames a page or layer with valid values
+- **THEN** the canonical order and identifiers are preserved and the change is reflected by the editor
 
 ### Requirement: Provide keyboard access to essential editing actions
 
