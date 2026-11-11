@@ -20,6 +20,8 @@ import {
 } from "./document";
 import { createSample } from "./editor/sample";
 import { createDocumentHistory } from "./document/history";
+import UnsavedChangesDialog from "./editor/UnsavedChangesDialog";
+import { useLocalDocuments } from "./editor/useLocalDocuments";
 import "./App.css";
 
 const geometryFields = ["x", "y", "width", "height"] as const;
@@ -49,6 +51,8 @@ export default function App() {
   const [error, setError] = useState("");
   const outlineHeading = useRef<HTMLHeadingElement>(null);
   const geometryForm = useRef<HTMLFormElement>(null);
+  const documentTitleForm = useRef<HTMLFormElement>(null);
+  const [renamingDocument, setRenamingDocument] = useState(false);
   const page =
     model.document.pages.find((value) => value.pageId === pageId) ?? model.document.pages[0];
   const layer = page.layers.find((value) => value.layerId === layerId) ?? page.layers[0];
@@ -75,6 +79,9 @@ export default function App() {
   useEffect(() => {
     layerNameForm.current?.reset();
   }, [layer.layerId, layer.name]);
+  useEffect(() => {
+    documentTitleForm.current?.reset();
+  }, [model.document.metadata.title]);
 
   function publish(next: ModelState) {
     modelRef.current = next;
@@ -99,6 +106,30 @@ export default function App() {
     );
   }
 
+  function replaceDocument(next: ModelState) {
+    const firstPage = next.document.pages[0];
+    const firstLayer = firstPage.layers[0];
+    viewRef.current = { pageId: firstPage.pageId, layerId: firstLayer.layerId };
+    modelRef.current = next;
+    setModel(next);
+    setPageId(firstPage.pageId);
+    setLayerId(firstLayer.layerId);
+    setSelection(null);
+    setConnectionSelection(null);
+    setZoom(1);
+    setFitRequest((value) => value + 1);
+    setRenamingDocument(false);
+  }
+
+  const documents = useLocalDocuments({
+    getModel: () => modelRef.current,
+    replaceModel: replaceDocument,
+    clearHistory: history.clear,
+    reportError: setError,
+    reportFeedback: setFeedback,
+  });
+  const editingLocked = documents.isEditingLocked();
+
   useEffect(() => {
     textForm.current?.reset();
   }, [selected?.nodeId, selected?.text]);
@@ -117,6 +148,7 @@ export default function App() {
   ]);
 
   function run(command: unknown, message: string): boolean {
+    if (documents.isEditingLocked()) return false;
     const current = modelRef.current;
     const result = executeCommand(current, command, {
       expectedRevision: current.revision,
@@ -126,7 +158,10 @@ export default function App() {
       setError(result.errors.map((diagnostic) => diagnostic.message).join(" "));
       return false;
     }
-    if (result.value.changed) history.record(current, command);
+    if (result.value.changed) {
+      history.record(current, command);
+      documents.markDirty();
+    }
     publish(result.value.state);
     setError("");
     setFeedback(message);
@@ -230,6 +265,7 @@ export default function App() {
       changeLayer(id);
   }
   function historyAction(direction: "undo" | "redo") {
+    if (documents.isEditingLocked()) return;
     const current = modelRef.current;
     const result = history[direction](current, {
       expectedRevision: current.revision,
@@ -240,6 +276,7 @@ export default function App() {
       setError(result.errors.map((value) => value.message).join(" "));
       return;
     }
+    if (result.value.changed) documents.markDirty();
     publish(result.value.state);
     setError("");
     setFeedback(direction === "undo" ? "Edit undone." : "Edit redone.");
@@ -251,10 +288,41 @@ export default function App() {
     )
       return;
     const key = event.key.toLowerCase();
-    if (!(event.ctrlKey || event.metaKey) || event.altKey || (key !== "z" && key !== "y")) return;
+    if (!(event.ctrlKey || event.metaKey) || event.altKey) return;
+    if (documents.isEditingLocked() && ["z", "y", "n", "o", "s"].includes(key)) {
+      event.preventDefault();
+      event.stopPropagation();
+      return;
+    }
+    if (key === "z" || key === "y") {
+      event.preventDefault();
+      event.stopPropagation();
+      historyAction(key === "y" || event.shiftKey ? "redo" : "undo");
+    } else if (key === "n" && !event.shiftKey) {
+      event.preventDefault();
+      documents.newDocument();
+    } else if (key === "o" && !event.shiftKey) {
+      event.preventDefault();
+      documents.openDocument();
+    } else if (key === "s") {
+      event.preventDefault();
+      if (event.shiftKey) documents.saveAs();
+      else documents.saveDocument();
+    }
+  }
+
+  function renameDocument(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    event.stopPropagation();
-    historyAction(key === "y" || event.shiftKey ? "redo" : "undo");
+    const fields = new FormData(event.currentTarget);
+    const renamed = run(
+      {
+        type: "document.setMetadata",
+        title: String(fields.get("title")),
+        description: model.document.metadata.description,
+      },
+      "Document renamed.",
+    );
+    if (renamed) setRenamingDocument(false);
   }
   function submitConnection(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -447,15 +515,120 @@ export default function App() {
           <img src={symbol} alt="" width="36" height="36" />
           <h1>PeerCanvas</h1>
         </div>
+        <div className="pc-file-controls" role="group" aria-label="Document file actions">
+          <button
+            type="button"
+            className="pc-btn"
+            disabled={editingLocked || renamingDocument}
+            onClick={documents.newDocument}
+          >
+            New
+          </button>
+          <button
+            type="button"
+            className="pc-btn"
+            disabled={!documents.available || editingLocked || renamingDocument}
+            onClick={documents.openDocument}
+          >
+            Open
+          </button>
+          <button
+            type="button"
+            className="pc-btn"
+            disabled={
+              !documents.available || editingLocked || renamingDocument || !documents.recentName
+            }
+            onClick={documents.reopenLast}
+            title={documents.recentName ? `Reopen ${documents.recentName}` : "No recent document"}
+          >
+            Reopen last
+          </button>
+          <button
+            type="button"
+            className="pc-btn"
+            disabled={!documents.available || editingLocked || renamingDocument}
+            onClick={documents.saveDocument}
+          >
+            Save
+          </button>
+          <button
+            type="button"
+            className="pc-btn"
+            disabled={!documents.available || editingLocked || renamingDocument}
+            onClick={documents.saveAs}
+          >
+            Save as
+          </button>
+          <button
+            type="button"
+            className="pc-btn"
+            disabled={editingLocked || renamingDocument}
+            onClick={documents.closeDocument}
+          >
+            Close
+          </button>
+        </div>
         <div className="pc-document-title">
-          <strong>{model.document.metadata.title}</strong>
-          <span className="pc-unsaved">Unsaved · in memory</span>
+          {renamingDocument ? (
+            <form
+              ref={documentTitleForm}
+              className="pc-title-form"
+              onSubmit={renameDocument}
+              onReset={() => setRenamingDocument(false)}
+            >
+              <label className="pc-visually-hidden" htmlFor="document-title">
+                Document title
+              </label>
+              <input
+                id="document-title"
+                name="title"
+                type="text"
+                required
+                maxLength={256}
+                defaultValue={model.document.metadata.title}
+                aria-describedby={error ? "editor-error" : undefined}
+                autoFocus
+              />
+              <button type="submit" className="pc-btn">
+                Save title
+              </button>
+              <button type="reset" className="pc-btn">
+                Cancel rename
+              </button>
+            </form>
+          ) : (
+            <>
+              <strong>{model.document.metadata.title}</strong>
+              <button
+                type="button"
+                className="pc-btn pc-title-rename"
+                aria-label="Rename document"
+                disabled={editingLocked}
+                onClick={() => setRenamingDocument(true)}
+              >
+                Rename
+              </button>
+              <span className="pc-unsaved" aria-live="polite">
+                {documents.dirty
+                  ? "Unsaved changes"
+                  : documents.fileName
+                    ? "Saved locally"
+                    : "New document"}
+              </span>
+              {documents.fileName && (
+                <span className="pc-file-name" title={documents.fileName}>
+                  {documents.fileName}
+                </span>
+              )}
+              {documents.recovered && <span className="pc-unsaved">Recovered · save as</span>}
+            </>
+          )}
         </div>
         <div role="group" aria-label="Edit history" className="pc-history-controls">
           <button
             type="button"
             className="pc-btn"
-            disabled={!history.canUndo}
+            disabled={editingLocked || !history.canUndo}
             onClick={() => historyAction("undo")}
           >
             Undo
@@ -463,7 +636,7 @@ export default function App() {
           <button
             type="button"
             className="pc-btn"
-            disabled={!history.canRedo}
+            disabled={editingLocked || !history.canRedo}
             onClick={() => historyAction("redo")}
           >
             Redo
@@ -474,10 +647,48 @@ export default function App() {
         </span>
       </header>
       <p className="pc-memory-notice">
-        This example lives only in memory. Closing or reloading the app loses all changes. Saving
-        and opening files are not available yet.
+        {!documents.available
+          ? "Document files are available in the PeerCanvas desktop app."
+          : documents.dirty
+            ? "Unsaved changes remain in memory until you save them."
+            : documents.fileName
+              ? `Saved locally as ${documents.fileName}.`
+              : "This new document has not been saved yet."}
       </p>
-      <div className="pc-workspace">
+      {documents.recovery && (
+        <section className="pc-recovery-notice" role="alert" aria-labelledby="recovery-heading">
+          <div>
+            <h2 id="recovery-heading">The current file could not be opened</h2>
+            <p>
+              A previous complete backup of {documents.recovery.candidate.displayName} is available.
+              Recovering it opens an unsaved copy and leaves the original file unchanged.
+            </p>
+          </div>
+          <div className="pc-recovery-actions">
+            <button
+              type="button"
+              className="pc-btn pc-primary"
+              disabled={documents.busy}
+              onClick={documents.recoverBackup}
+            >
+              Recover backup
+            </button>
+            <button
+              type="button"
+              className="pc-btn"
+              disabled={documents.busy}
+              onClick={documents.dismissRecovery}
+            >
+              Keep current document
+            </button>
+          </div>
+        </section>
+      )}
+      <div
+        className="pc-workspace"
+        aria-busy={editingLocked}
+        {...(editingLocked ? { inert: "" } : {})}
+      >
         <aside className="pc-outline" aria-labelledby="outline-heading">
           <section className="pc-structure" aria-label="Document structure">
             <label htmlFor="active-page">Page</label>
@@ -694,7 +905,7 @@ export default function App() {
             Select on canvas or in Elements. With the canvas focused: arrow keys move; Alt + arrows
             resize; Shift uses 10-unit steps. Delete removes; Escape clears selection. Geometry
             fields provide another keyboard path. Ctrl/Cmd + Z undoes; Shift + Ctrl/Cmd + Z or
-            Ctrl/Cmd + Y redoes.
+            Ctrl/Cmd + Y redoes. Ctrl/Cmd + N creates, O opens, S saves, and Shift + S saves a copy.
           </p>
         </section>
         <aside className="pc-inspector" aria-labelledby="inspector-heading">
@@ -896,11 +1107,22 @@ export default function App() {
           )}
         </aside>
       </div>
+      {documents.pendingAction && (
+        <UnsavedChangesDialog
+          onSave={documents.saveAndContinue}
+          onDiscard={documents.discardAndContinue}
+          onCancel={documents.cancelReplacement}
+          busy={documents.busy}
+          error={documents.promptError}
+        />
+      )}
       <footer className="pc-statusbar">
         <p role="status" aria-label="Editing status">
           {feedback}
         </p>
-        <span>Revision {model.revision} · in memory</span>
+        <span>
+          Revision {model.revision} · {documents.dirty ? "unsaved" : (documents.fileName ?? "new")}
+        </span>
       </footer>
     </main>
   );

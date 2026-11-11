@@ -11,6 +11,8 @@ An initial metadata scan covered 254 installed npm packages and found license me
 
 This is not a complete transitive dependency or binary-content audit. Cargo/Rust licenses, packaged runtime contents, and all direct/transitive notice obligations must be reviewed before a public release; produce a versioned SBOM and record required notices at that point.
 
+The local document workflow uses **tauri-plugin-dialog 2.7.3**, dual-licensed MIT or Apache-2.0, for native file selection from Rust commands. It does not expose the filesystem plugin's general JavaScript API. See the [plugin source](https://github.com/tauri-apps/plugins-workspace/tree/v2/plugins/dialog) and [license metadata](https://crates.io/crates/tauri-plugin-dialog/2.7.3).
+
 The logo, symbol, and app icon PNGs are first-party brand assets supplied by the maintainer and recorded in [the brand guide](docs/branding/brand-guide.md). Their rights are separate from the Apache-2.0 project-code license. No third-party stencil or shape catalog assets are bundled in the current scaffold; the future catalog must keep per-asset provenance and license records.
 
 ## S0 native compatibility probe

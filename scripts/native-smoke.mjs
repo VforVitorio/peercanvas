@@ -46,7 +46,8 @@ async function assertProductionIsolation(directory) {
     if (entry.isDirectory()) editorFound = (await assertProductionIsolation(file)) || editorFound;
     else {
       const content = await readFile(file, "utf8");
-      editorFound ||= content.includes("Diagram canvas") && content.includes("Unsaved · in memory");
+      editorFound ||=
+        content.includes("Diagram canvas") && content.includes("Document file actions");
       assert(
         !content.includes("Engineering scaffold. Diagram editing is not implemented yet."),
         `Stale scaffold in ${file}`,

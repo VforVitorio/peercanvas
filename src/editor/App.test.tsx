@@ -1,4 +1,4 @@
-import { act, cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { act, cleanup, fireEvent, render, screen, within } from "@testing-library/react";
 import type { ComponentProps } from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import App from "../App";
@@ -41,7 +41,7 @@ function nodes() {
   return snapshot().pages[0].layers[0].nodes;
 }
 function revision() {
-  return screen.getByText(/Revision \d+ · in memory/).textContent;
+  return screen.getByText(/Revision \d+ · unsaved/).textContent;
 }
 function selectIdea() {
   fireEvent.click(screen.getByRole("button", { name: /Idea/ }));
@@ -65,8 +65,16 @@ describe("in-memory model-backed editor", () => {
     render(<App />);
     const initial = JSON.stringify(snapshot());
     const initialRevision = revision();
-    expect(screen.getByText(/Closing or reloading the app loses all changes/)).toBeTruthy();
-    expect(screen.queryByRole("button", { name: /save|open/i })).toBeNull();
+    expect(
+      screen.getByText(/Document files are available in the PeerCanvas desktop app/),
+    ).toBeTruthy();
+    const fileActions = within(screen.getByRole("group", { name: "Document file actions" }));
+    expect((fileActions.getByRole("button", { name: "Open" }) as HTMLButtonElement).disabled).toBe(
+      true,
+    );
+    expect((fileActions.getByRole("button", { name: "Save" }) as HTMLButtonElement).disabled).toBe(
+      true,
+    );
     selectIdea();
     expect(screen.getByRole("button", { name: /Idea/ }).getAttribute("aria-pressed")).toBe("true");
     expect(canvas.props!.selection).toBe(nodes()[0].nodeId);

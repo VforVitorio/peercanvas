@@ -118,6 +118,8 @@ jobs:
             wget \
             xvfb
       - run: npm ci
+      - name: Test native persistence and recovery
+        run: cargo test --manifest-path src-tauri/Cargo.toml --locked
       - name: Build normal production shell
         run: npm run tauri -- build --no-bundle
       - name: Verify production frontend isolation

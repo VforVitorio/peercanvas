@@ -1,6 +1,6 @@
 # Shared pure document contract
 
-Status: authorized for the shared pure TypeScript core by the maintainer in this UI session on 2026-11-10. This does not approve native storage, S1 Gate B, or production work-package completion.
+Status: the pure TypeScript core was authorized by the maintainer on 2026-11-10. The native `.peercanvas` file policy is now selected separately in [ADR-0003](decisions/ADR-0003-local-persistence.md); this contract alone does not prove WP-02 or WP-03 acceptance.
 
 Source: S1 draft `s1-document-persistence-contract.md` from its separate worktree, captured 2026-11-10, SHA-256 `2645f3392f34d0cf111aa29a659fa87f45ec875b0789ffeec12e0bd36c079eed`. The shared pure core lives at `src/document/index.ts`; the demo imports it. S1 acknowledged UI as the sole active core writer; the previous S1 implementation remains a frozen compatibility reference. The interim checkpoint does not claim completed compatibility reconciliation or S1 production acceptance. No original S1-worktree file is edited.
 
@@ -14,7 +14,7 @@ Export `Document`, `Page`, `Layer`, `Node`, `Connection`, `Style`, `ModelState`,
 
 The exact test-only, unreleased version 0 schema is version 1 except `schemaVersion: 0` and no `metadata.updatedAt`. The declared 0→1 migration copies `createdAt` to `updatedAt`, preserves all other semantic fields/IDs, validates the whole result, and reports `sourceVersion: 0, migrated: true`. No other older/future version is supported. This paragraph is extracted from the S1 draft's recovery/migration section; version 0 is not a previously shipped product. Migration never writes the source.
 
-The candidate interchange is UTF-8 JSON in a user-selected `.peercanvas` file. The comparison must establish whether the chosen store can implement this interface safely; this draft does not select its native implementation. There is one semantic document, independent of React, Weave, Yjs, or a database.
+The persisted snapshot is UTF-8 JSON in a user-selected `.peercanvas` file. ADR-0003 selects this format as the native local document store. There is one semantic document, independent of React, Weave, Yjs, or database internals.
 
 All fields below are required. Objects reject unknown keys; optional references use explicit `null`. Arrays preserve semantic order. Strings are preserved without trimming, HTML interpretation, or Unicode normalization.
 

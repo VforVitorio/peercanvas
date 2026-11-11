@@ -60,11 +60,21 @@ p {
 .pc-topbar {
   display: flex;
   align-items: center;
-  gap: 28px;
+  gap: 12px;
   min-height: 68px;
   padding: 12px 20px;
   border-bottom: 1px solid #d5dde2;
   background: #fff;
+}
+.pc-file-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+.pc-file-controls .pc-btn {
+  min-height: 32px;
+  padding-inline: 8px;
+  font-size: 11px;
 }
 .pc-brand {
   display: flex;
@@ -83,8 +93,8 @@ p {
   display: flex;
   align-items: center;
   flex-wrap: wrap;
-  gap: 12px;
-  padding-left: 28px;
+  gap: 8px;
+  padding-left: 14px;
   border-left: 1px solid #d5dde2;
 }
 .pc-document-title strong {
@@ -96,6 +106,41 @@ p {
   padding: 3px 8px;
   font-size: 12px;
   color: #435463;
+}
+.pc-title-rename {
+  min-height: 28px;
+  padding: 4px 8px;
+}
+.pc-title-form {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.pc-title-form input {
+  width: min(240px, 35vw);
+  min-height: 32px;
+  padding: 5px 8px;
+  border: 1px solid #aebfca;
+}
+.pc-visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+.pc-file-name {
+  max-width: 170px;
+  overflow: hidden;
+  color: #526372;
+  font-size: 11px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 .pc-local-state {
   margin-left: auto;
@@ -118,6 +163,35 @@ p {
   color: #28476a;
   font-size: 12px;
   line-height: 1.6;
+}
+.pc-recovery-notice {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+  padding: 14px 20px;
+  border-bottom: 1px solid #e3bf76;
+  background: #fff8e8;
+  color: #493714;
+}
+.pc-recovery-notice h2 {
+  margin-bottom: 4px;
+  font-size: 14px;
+}
+.pc-recovery-notice p {
+  max-width: 760px;
+  font-size: 12px;
+  line-height: 1.5;
+}
+.pc-recovery-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.pc-recovery-actions .pc-primary {
+  width: auto;
+  margin-top: 0;
 }
 .pc-workspace {
   display: grid;
@@ -396,6 +470,16 @@ p {
 }
 
 @media (max-width: 1050px) {
+  .pc-topbar {
+    flex-wrap: wrap;
+  }
+  .pc-file-controls {
+    order: 3;
+  }
+  .pc-document-title {
+    padding-left: 0;
+    border: 0;
+  }
   .pc-workspace {
     grid-template-columns: 175px minmax(0, 1fr) 210px;
   }
@@ -416,6 +500,9 @@ p {
   .pc-document-title {
     padding-left: 0;
     border: 0;
+  }
+  .pc-file-controls {
+    width: 100%;
   }
   .pc-workspace {
     grid-template-columns: minmax(0, 1fr);

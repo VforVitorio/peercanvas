@@ -1,6 +1,6 @@
 # PeerCanvas delivery plan
 
-Status: planning baseline, 2026-11-07; S0 scope, implementation, and evidence reconciled on 2026-11-10. This plan records scope and does not itself authorize implementation beyond the maintainer-approved S0 work.
+Status: planning baseline, 2026-11-07; S0 is complete and S2 persistence work is in progress as of 2026-11-11. This plan records scope and does not itself authorize product implementation.
 
 This file is the canonical roadmap and work-package ledger. Product behavior and acceptance requirements live in the [product definition](docs/requirements/product-definition.md); versioned capability contracts live in OpenSpec; GitHub Issues track execution. Update this file when scope, dependencies, estimates, sprint assignments, or risks change.
 
@@ -19,7 +19,7 @@ This file is the canonical roadmap and work-package ledger. Product behavior and
 
 The first product milestone is a local-first desktop diagram editor for Windows, macOS, and Linux, using Tauri 2, React, TypeScript, Vite, and Weave.js. Planned capabilities include a document model, editing, local persistence and recovery, a searchable shape catalog, draw.io import/export, optional P2P collaboration and secure invitations, and optional Codex/MCP tools.
 
-The current S2 implementation adds the first in-memory editing slice under WP-04.1; it does not add durable storage or establish native WebView interaction support. Native packaging format, persistence engine, invitation authorization protocol, relay/TURN policy, shape asset licensing, exact draw.io parity, and OpenAI client registration remain open pending experiments or review.
+WP-04.1 and WP-04.2 provide the in-memory editor. The current S2 branch adds `.peercanvas` save/open/recovery through the WP-03 decision in [ADR-0003](docs/architecture/decisions/ADR-0003-local-persistence.md); WP-03 and parent #6 remain open until cross-platform CI and the complete native acceptance pass. Native packaging format, invitation authorization protocol, relay/TURN policy, shape asset licensing, exact draw.io parity, and OpenAI client registration remain open pending experiments or review.
 
 ## Work packages
 
@@ -30,7 +30,7 @@ Effort ranges are initial engineering estimates. They exclude release administra
 | WP-00 | Engineering foundation: repository, policies, CI, OpenSpec, traceability, local developer workflow | NFR-010..013; Desktop Application, Quality & Testing, Security & Privacy          | None                |   3-5 PD |
 | WP-01 | Tauri + Weave compatibility spike and minimal canvas integration                                   | FR-001..004; Desktop Application, Canvas Editing, Cross-Platform Compatibility    | WP-00               |   4-7 PD |
 | WP-02 | Canonical document model, command boundary, IDs, pages, layers, nodes, edges                       | FR-005..011; Document Model                                                       | WP-01               |  6-10 PD |
-| WP-03 | Local save/open, SQLite or platform-store decision, snapshots and crash recovery                   | FR-012..016; Local Persistence, History & Recovery                                | WP-02               |  6-10 PD |
+| WP-03 | Versioned local files, save/open, recovery and migration                                           | FR-012..016; Local Persistence, History & Recovery                                | WP-02               |  6-10 PD |
 | WP-04 | Core canvas editing, selection, transforms, connectors, properties and undo/redo                   | FR-004..011; Canvas Editing                                                       | WP-02, WP-03        | 10-16 PD |
 | WP-05 | Shape catalog manifest, search, categories, provenance and safe SVG rendering                      | FR-017..020; Diagram Shapes, Shape Catalog, Security & Privacy                    | WP-02               |  6-10 PD |
 | WP-06 | draw.io import/export adapter and compatibility fixtures                                           | FR-021..024; draw.io Compatibility, Import & Export                               | WP-02, WP-05        |  8-14 PD |
@@ -74,18 +74,18 @@ Effort ranges are initial engineering estimates. They exclude release administra
 
 ### WP-03: Local persistence and recovery
 
-- **Scope:** choose one durable local source of truth; implement save/open, atomic replacement, snapshots, crash recovery, and user-visible errors.
+- **Scope:** implement save/open, atomic replacement, snapshots, crash recovery, and user-visible errors for one durable local source of truth.
 - **Requirements/spec:** FR-012..016; Local Persistence, History & Recovery.
 - **Dependencies/components:** WP-02; persistence adapter, Tauri filesystem or database integration.
-- **Activities/contracts:** benchmark SQLite versus Tauri storage and browser IndexedDB for target document sizes; define file ownership, snapshot cadence, backup/restore, and migration.
-- **Acceptance:** a document survives normal close/reopen and injected interruption; recovered content is either complete or the user receives a non-destructive recovery option.
-- **Tests/DoD:** integration tests with representative fixtures, migration tests, corruption handling, and OS-specific path tests; decision recorded in ADR-0003.
-- **Effort/risk:** 6-10 PD; no storage engine is selected in this planning baseline.
+- **Activities/contracts:** compare SQLite, Tauri-native files, and browser IndexedDB for representative documents; define file ownership, checkpoint/backup policy, migration, and recovery. ADR-0003 selects the versioned `.peercanvas` JSON file as the sole durable document.
+- **Acceptance:** a document survives normal close/reopen and injected interruption; recovered content is either complete or the user receives a non-destructive recovery option. The user explicitly chooses Reopen last; startup does not auto-open a file.
+- **Tests/DoD:** integration tests with representative fixtures, migration tests, corruption handling, and OS-specific path tests on Windows, macOS, and Linux; decision recorded in ADR-0003.
+- **Effort/risk:** 6-10 PD; Windows and Linux replacement/recovery behavior must pass the same native storage tests before acceptance.
 - **Issue / PR:** WP-03 Implement local persistence and recovery; PR to **dev**.
 
 ### WP-04: Core canvas editing
 
-- **Scope:** add, select, move, resize, connect, inspect, group basic elements; support pages/layers and undo/redo using Weave capabilities where they meet requirements.
+- **Scope:** add, select, move, resize, connect, and inspect elements; support pages/layers and undo/redo using Weave capabilities where they meet requirements. Grouping is deferred to S9/WP-14; discovery is tracked by [#89](https://github.com/furancho-labs/Peer2Canvas/issues/89) under parent [#91](https://github.com/furancho-labs/Peer2Canvas/issues/91).
 - **Requirements/spec:** FR-004..011; Canvas Editing.
 - **Dependencies/components:** WP-02 and WP-03; canvas, inspector, tool panels, command history.
 - **Acceptance:** user can build and reopen a simple architecture diagram; keyboard and pointer workflows have equivalent essential actions; undo/redo restores model state.
@@ -196,7 +196,7 @@ S0 implementation and native evidence are complete. Promotion PR #74 (`d84cfce`)
 | S6     | Optional AI and model tools            | WP-09, WP-10 | provider fallback, preview/approval, MCP protocol and security tests                                                                      |
 | S7     | Hardening and ecosystem                | WP-11, WP-12 | release checklist, supported OS evidence, verified skill package                                                                          |
 
-S2 is in progress. WP-04.1/#25 and WP-04.2/#26 cover the in-memory editor implementation. The S1 milestone still has eight open issues. Do not close WP-04 or claim S2 exit: parent issue #6 requires a saved, closed, and reopened diagram, and durable persistence remains unfinished. This WP plan mentions grouping, but child issues #25/#26 do not cover it; reconcile that gap before closing the parent. Check GitHub for live issue and PR status.
+S2 remains in progress. WP-04.1/#25 and WP-04.2/#26 are merged; the current branch adds the save/close/reopen flow and native recovery. Keep #6 and the S2 milestone open until platform CI and acceptance evidence pass. Grouping is outside S2 and has its own S9/WP-14 parent #91, with discovery child #89; it does not block S2 closure.
 
 ### Critical path and parallel work
 
@@ -204,7 +204,7 @@ Critical path: WP-00 → WP-01 → WP-02 → WP-03 → WP-04 → WP-07 → WP-08
 
 WP-05 can start after the model contract is stable and run alongside persistence/editor work. WP-06 depends on the model contract and can overlap with basic editor work. WP-09 UI research and app-server process experiments can proceed in parallel with shape catalog work, but mutating MCP tools depend on WP-02 and approval controls. WP-12 is blocked until tools and their safety rules are real.
 
-The remaining external decisions include the minimum supported OS/WebView floor, durable storage choice, TURN fallback/credentials, deep-link behavior, and eligibility for ChatGPT-plan inference.
+The remaining external decisions include the minimum supported OS/WebView floor, TURN fallback/credentials, deep-link behavior, and eligibility for ChatGPT-plan inference.
 
 ## Issue and PR map
 
@@ -234,16 +234,16 @@ For implementation, create **feature/WP-xx-short-name** from **dev**, open a PR 
 
 ## Open decisions
 
-| Decision                                    | Current position                                                                                      | Closure evidence                                                                   |
-| ------------------------------------------- | ----------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
-| Weave package and WebView compatibility     | S0 fixture probe passes on current CI runner images; minimum OS floor and product adapter remain open | [S0 platform matrix](docs/support/platform-matrix.md); product gate in WP-04/WP-11 |
-| Durable local store                         | SQLite, Tauri storage, or browser storage not selected                                                | WP-03 failure-recovery benchmark and ADR-0003                                      |
-| P2P relay/STUN/TURN policy                  | Trystero + WebRTC candidate; direct connection not guaranteed                                         | WP-07 network matrix, service/cost analysis                                        |
-| Invitation and authorization protocol       | Capability link plus host approval proposed; revocation limits must be explicit                       | WP-08 threat review and protocol tests                                             |
-| draw.io parity                              | Selective compatible subset; preserve/report unsupported source                                       | WP-06 fixture matrix                                                               |
-| ChatGPT-plan OAuth registration             | Official local OSS path exists in preview; eligibility/terms must be rechecked                        | WP-09 legal/technical gate and auth test                                           |
-| Shape catalog rights                        | No unverified assets bundled                                                                          | WP-05 per-asset license evidence                                                   |
-| Supported OS versions and installer formats | Windows/macOS/Linux required; exact OS floor and installers open                                      | WP-01/11 compatibility and distribution review                                     |
+| Decision                                    | Current position                                                                                             | Closure evidence                                                                      |
+| ------------------------------------------- | ------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------- |
+| Weave package and WebView compatibility     | S0 fixture probe passes on current CI runner images; minimum OS floor and product adapter remain open        | [S0 platform matrix](docs/support/platform-matrix.md); product gate in WP-04/WP-11    |
+| Durable local store                         | `.peercanvas` JSON selected and implemented locally; cross-platform CI and final acceptance evidence pending | WP-03 tests and [ADR-0003](docs/architecture/decisions/ADR-0003-local-persistence.md) |
+| P2P relay/STUN/TURN policy                  | Trystero + WebRTC candidate; direct connection not guaranteed                                                | WP-07 network matrix, service/cost analysis                                           |
+| Invitation and authorization protocol       | Capability link plus host approval proposed; revocation limits must be explicit                              | WP-08 threat review and protocol tests                                                |
+| draw.io parity                              | Selective compatible subset; preserve/report unsupported source                                              | WP-06 fixture matrix                                                                  |
+| ChatGPT-plan OAuth registration             | Official local OSS path exists in preview; eligibility/terms must be rechecked                               | WP-09 legal/technical gate and auth test                                              |
+| Shape catalog rights                        | No unverified assets bundled                                                                                 | WP-05 per-asset license evidence                                                      |
+| Supported OS versions and installer formats | Windows/macOS/Linux required; exact OS floor and installers open                                             | WP-01/11 compatibility and distribution review                                        |
 
 ## Traceability
 
