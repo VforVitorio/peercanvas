@@ -18,24 +18,24 @@
 
 PeerCanvas is an open-source desktop diagram editor for turning ideas into architecture, UML, BPMN, network, cloud, database, process, and workflow diagrams. The goal is a useful local editor that works without a network connection or an AI account, with optional peer collaboration, draw.io interchange, and Codex/MCP assistance.
 
-The project is in early development. The current editor works with an in-memory example document; durable files and the optional connected features are still planned.
+The project is in early development. S2 adds local `.peercanvas` save/open and recovery to the in-memory editor. The implementation is merged into `dev`; the sprint stays open through promotion to `main` and issue closeout. Collaboration, interchange, and AI/MCP features remain planned.
 
 ## Project status
 
-**S0 is complete. S2 editor work is in progress.** The renderer compatibility gate passed its bounded native fixture on Windows, macOS, and Linux. That evidence does not establish native support for the full product editor.
+**S0 is complete. S2 implementation is merged into `dev`; sprint closeout is pending promotion to `main`.** The renderer compatibility gate passed its bounded native fixture on Windows, macOS, and Linux. That evidence does not establish full native product support.
 
-| Area                                            | Current state                                                                                                                                  |
-| ----------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
-| Core editing                                    | In-memory add, select, move, resize, and delete. [WP-04.1 / #25](https://github.com/furancho-labs/Peer2Canvas/issues/25) is merged into `dev`. |
-| Connectors, properties, pages/layers, undo/redo | Included in the current S2 code under [WP-04.2 / #26](https://github.com/furancho-labs/Peer2Canvas/issues/26).                                 |
-| Local files and recovery                        | Not implemented. Closing or reloading the app loses all changes.                                                                               |
-| Shape catalog and draw.io interchange           | Planned; no format compatibility or bundled catalog support claimed.                                                                           |
-| Peer collaboration                              | Planned around Yjs and Trystero/WebRTC; network behavior is unverified.                                                                        |
-| Codex and MCP                                   | Optional integrations researched; not implemented.                                                                                             |
+| Area                                            | Current state                                                                                                                                               |
+| ----------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Core editing                                    | In-memory add, select, move, resize, and delete. [WP-04.1 / #25](https://github.com/furancho-labs/Peer2Canvas/issues/25) is merged into `dev`.              |
+| Connectors, properties, pages/layers, undo/redo | Included in the current S2 code under [WP-04.2 / #26](https://github.com/furancho-labs/Peer2Canvas/issues/26).                                              |
+| Local files and recovery                        | S2 adds `.peercanvas` Save, Save As, Open, Reopen last, migration, unsaved-change protection, and backup recovery; native UI evidence is recorded on macOS. |
+| Shape catalog and draw.io interchange           | Planned; no format compatibility or bundled catalog support claimed.                                                                                        |
+| Peer collaboration                              | Planned around Yjs and Trystero/WebRTC; network behavior is unverified.                                                                                     |
+| Codex and MCP                                   | Optional integrations researched; not implemented.                                                                                                          |
 
-Local checks for the current S2 implementation pass 166 automated tests and frontend/native compilation. S2.1 browser interactions were checked; S2.2 has automated tests only. The product editor has not been verified through interaction in the native Tauri WebView. See the [platform matrix](docs/support/platform-matrix.md) and [handoff](docs/handoff/START_HERE.md) for the scope of each result.
+Local checks pass 191 TypeScript tests and 14 Rust tests; typecheck, lint, formatting, OpenSpec validation, and the macOS native build pass. PR #104 passed all eight required checks. The optional Gitleaks job could not scan because the organization has no license configured. See the [platform matrix](docs/support/platform-matrix.md) and [handoff](docs/handoff/START_HERE.md) for the scope of each result.
 
-The [PeerCanvas Delivery Board](https://github.com/users/VforVitorio/projects/4) groups work by parent working-package issues, task sub-issues, and sprint milestones. Issues #25 and #26 are the WP-04 implementation children. [Parent #6](https://github.com/furancho-labs/Peer2Canvas/issues/6) remains open until its save, close, and reopen acceptance passes. Durable persistence is absent, so S2 remains open.
+The [PeerCanvas Delivery Board](https://github.com/users/VforVitorio/projects/4) groups work by parent work-package issues, task sub-issues, and sprint milestones. Issues #25 and #26 are the WP-04 editing children. [Parent #6](https://github.com/furancho-labs/Peer2Canvas/issues/6) remains open through the `dev`→`main` promotion. Grouping is a separate S9 item under [WP-14/#91](https://github.com/furancho-labs/Peer2Canvas/issues/91), with discovery in [#89](https://github.com/furancho-labs/Peer2Canvas/issues/89).
 
 ## What the editor is being built for
 
@@ -77,7 +77,7 @@ Open `http://127.0.0.1:1430/`. This review surface uses fictional data and simul
 | Desktop shell | Tauri 2 and Rust, hosting React 18, TypeScript, and Vite.                                                                                                    |
 | Canvas        | The official Weave.js renderer, with selected composition adapted from `weavejs-frontend`. The example app's TanStack Start runtime is not adopted.          |
 | Document      | One canonical, versioned model. UI edits pass through validated commands; Weave holds a disposable rendering projection.                                     |
-| Persistence   | A durable store and recovery policy remain undecided pending WP-03 experiments.                                                                              |
+| Persistence   | A versioned `.peercanvas` JSON file is the durable document; a Rust adapter owns native dialogs, safe writes, and recovery. Preferences stay separate.       |
 | Collaboration | Yjs synchronization with a replaceable Trystero/WebRTC transport is proposed. Signaling relays or TURN may be needed; direct connectivity is not guaranteed. |
 | Assistant     | A planned provider boundary and Codex app-server integration. The chat UI will adapt the shadcn chatbot template while keeping the Tauri/Vite structure.     |
 

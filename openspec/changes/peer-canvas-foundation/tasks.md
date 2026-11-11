@@ -62,6 +62,7 @@ S0 comprises tasks 1.1–1.5 and 8.2. Its compatibility probe is test-only and e
 - [ ] 7.2 Complete native smoke checks and release evidence for Windows, macOS, and Linux; verify the release matrix distinguishes automated builds from manual tests. — GitHub Issue [#49](https://github.com/furancho-labs/Peer2Canvas/issues/49)
 - [ ] 7.3 Resolve critical/high dependency and secret findings and review third-party notices; verify the release record contains maintainer dispositions for remaining risks. — GitHub Issue [#50](https://github.com/furancho-labs/Peer2Canvas/issues/50)
 - [ ] 7.4 Create user-facing Codex skills only for verified MCP tools; validate manifests, examples, installation/removal, and permission disclosures with current official OpenAI tooling. — GitHub Issue [#51](https://github.com/furancho-labs/Peer2Canvas/issues/51)
+- [ ] 7.5 Package and verify the authorized native application icon on each declared platform; inspect the packaged resources and launch the clean-checkout build. — GitHub Issue [#90](https://github.com/furancho-labs/Peer2Canvas/issues/90)
 
 ## 8. Integration and release review
 
