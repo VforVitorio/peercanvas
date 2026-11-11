@@ -17,9 +17,9 @@ S0 comprises tasks 1.1–1.5 and 8.2. Its compatibility probe is test-only and e
 - [x] 2.1 Define the versioned document schema and typed command outcomes; verify schema, stable IDs, and invalid-command behavior with unit/property tests. — GitHub Issue [#19](https://github.com/furancho-labs/Peer2Canvas/issues/19)
 - [x] 2.2 Implement node, connection, page, and layer invariants at one command boundary; verify rejected mutations leave the document unchanged. — GitHub Issue [#20](https://github.com/furancho-labs/Peer2Canvas/issues/20)
 - [x] 2.3 Compare SQLite, Tauri storage, and browser/Yjs persistence using representative documents and failure cases; record the selected single source of truth in ADR-0003. — GitHub Issue [#21](https://github.com/furancho-labs/Peer2Canvas/issues/21)
-- [ ] 2.4 Implement local create/open/save/rename/close against the selected store; verify supported document fields survive round trips. — GitHub Issue [#22](https://github.com/furancho-labs/Peer2Canvas/issues/22)
-- [ ] 2.5 Implement migrations and non-destructive recovery; verify interrupted writes, disk errors, corrupt snapshots, and unsupported versions with integration tests. — GitHub Issue [#23](https://github.com/furancho-labs/Peer2Canvas/issues/23)
-- [ ] 2.6 Document the stored schema and recovery behavior; verify examples and migration policy match the implemented model. — GitHub Issue [#24](https://github.com/furancho-labs/Peer2Canvas/issues/24)
+- [x] 2.4 Implement local create/open/save/rename/close against the selected store; verify supported document fields survive round trips. — GitHub Issue [#22](https://github.com/furancho-labs/Peer2Canvas/issues/22)
+- [x] 2.5 Implement migrations and non-destructive recovery; verify interrupted writes, disk errors, corrupt snapshots, and unsupported versions with integration tests. — GitHub Issue [#23](https://github.com/furancho-labs/Peer2Canvas/issues/23)
+- [x] 2.6 Document the stored schema and recovery behavior; verify examples and migration policy match the implemented model. — GitHub Issue [#24](https://github.com/furancho-labs/Peer2Canvas/issues/24)
 
 ## 3. Canvas editing and shape catalog (WP-04, WP-05)
 
