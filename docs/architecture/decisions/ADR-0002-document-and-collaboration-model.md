@@ -23,4 +23,6 @@ The command boundary can validate UI, peer, import, AI, and MCP operations consi
 
 ## Risks and validation
 
+The 2026-11-10 UI demonstration work separately authorizes a pure shared document/command implementation at `src/document/**`, with [a frozen contract](../shared-document-contract.md). Demo consumers import that same core and rebuild disposable Weave state after accepted commands. This is bounded demo evidence: it does not approve a persistence backend, implement synchronization, or close WP-02/WP-07 production acceptance. Integration with the S1 worktree requires comparing its current contract and acknowledging the queued handoff.
+
 Confirm Weave's Yjs store contracts and how remote updates pass validation. WP-07 must test convergence, initial sync, awareness, LAN/NAT/TURN, disconnect, reconnect, and host loss. No assumption of universal direct peer connectivity is accepted.

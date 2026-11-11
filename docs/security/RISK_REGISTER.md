@@ -1,5 +1,7 @@
 # Initial risk register
 
+The [UI demonstration](../development/ui-mock.md) checks simulated role/proposal boundaries and avoids real file/network/provider integration. It does not resolve the production risks below. In particular, simulated recovery, admission, and approval tests are not evidence of durable recovery, peer authorization, or provider/MCP transport security.
+
 Status: planning baseline reviewed on 2026-11-10 after the S0 compatibility probe. Likelihood and impact remain qualitative ratings, not measured probabilities.
 
 | ID   | Risk                                                                      | Likelihood / impact | Mitigation and closure evidence                                                                                                                               | WP          |
