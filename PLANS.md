@@ -196,7 +196,7 @@ S0 implementation and native evidence are complete. Promotion PR #74 (`d84cfce`)
 | S6     | Optional AI and model tools            | WP-09, WP-10 | provider fallback, preview/approval, MCP protocol and security tests                                                                      |
 | S7     | Hardening and ecosystem                | WP-11, WP-12 | release checklist, supported OS evidence, verified skill package                                                                          |
 
-S2 is in progress. Issue #25 is implemented and browser-verified on `feature/s2-selection-editing`, but its PR has not been published; issue #26 remains Todo. The S1 milestone still has eight open issues in GitHub. Do not close WP-04 or claim S2 exit: parent issue #6 requires a saved, closed, and reopened diagram, and durable persistence remains unfinished.
+S2 is in progress. Issue #25 is implemented and browser-verified; [PR #86](https://github.com/furancho-labs/Peer2Canvas/pull/86) is open from `feature/s2-selection-editing` to `dev`. Issue #26 remains Todo. The S1 milestone still has eight open issues in GitHub. Do not close WP-04 or claim S2 exit: parent issue #6 requires a saved, closed, and reopened diagram, and durable persistence remains unfinished.
 
 ### Critical path and parallel work
 

@@ -7,9 +7,10 @@ Last updated: 2026-11-11.
 - The repository is [furancho-labs/Peer2Canvas](https://github.com/furancho-labs/Peer2Canvas). The user moved it to the organization intentionally.
 - Remote `main` is `4463497f6c444abc5f97b9301f5d742f8d4b2f2b`; remote `dev` is `cd367f52a35ca715d3255c1870d4430081837bdb`.
 - PRs [#83](https://github.com/furancho-labs/Peer2Canvas/pull/83), [#84](https://github.com/furancho-labs/Peer2Canvas/pull/84), and [#85](https://github.com/furancho-labs/Peer2Canvas/pull/85) are merged. They promote the UI demo checkpoint and synchronize `main`/`dev`; they did not close S1's milestone issues.
+- PR [#86](https://github.com/furancho-labs/Peer2Canvas/pull/86) is open from `feature/s2-selection-editing` to `dev`, authored through `VforVitorio`. Five Dependabot PRs are also open: #80, #69, #68, #67, and #66.
 - S1 milestone #2 still has eight open issues: #2, #4, and #19–#24. Do not report S1 complete or close its milestone without current acceptance evidence.
 - S2 milestone #3 contains WP-04 parent #6 and child issues #25/#26. Issue #25 is In Progress; #26 is Todo; supplementary issue #81 is closed.
-- Current checkout: `feature/s2-selection-editing`, based on `origin/dev` at `cd367f5`. Its changes are local, uncommitted, and unpublished.
+- Current checkout: `feature/s2-selection-editing`, based on `origin/dev` at `cd367f5`; its S2 implementation is published in PR #86 and remains unmerged.
 
 ## S2 progress
 
@@ -47,7 +48,6 @@ Not implemented: durable save/open/recovery, connectors, pages/layers, undo/redo
 
 ## Next steps
 
-1. Issue #25 is locally implemented and verified; OpenSpec task 3.1 is checked, but the GitHub child issue remains In Progress until its focused PR is merged.
-2. Stop before commit, push, or PR until the user explicitly authorizes publication for this S2 task.
-3. After #25 is merged, start #26 from the then-current `dev`, refreshing `main`, `dev`, PRs, issues, milestone, and Project first.
-4. Keep the WP-04 parent and S2 milestone open until all child issues and the parent save/close/reopen acceptance pass.
+1. Review required checks on PR #86 and merge it through the protected `dev` flow; issue #25 remains In Progress until that merge.
+2. After #25 is merged, start #26 from the then-current `dev`, refreshing `main`, `dev`, PRs, issues, milestone, and Project first.
+3. Keep the WP-04 parent and S2 milestone open until all child issues and the parent save/close/reopen acceptance pass.
