@@ -37,7 +37,7 @@ The public [PeerCanvas Delivery Board](https://github.com/users/VforVitorio/proj
 - **S9 / WP-14 #91:** separate grouping sprint. Discovery child #89 defines scope before implementation issues are created.
 - **S10 / WP-15 #92:** final PMV onboarding. Children: #102, #103, #97, #94. WP-15.1 will audit the whole implemented app and decide how many tours to author; the ten existing use cases are not a promise of ten tours.
 
-The roadmap/specification follow-up is being prepared on `feature/experience-roadmap`. Its OpenSpec proposals are `desktop-preferences` and `guided-onboarding`; FR-053/UC-13 remain proposed until grouping discovery is reviewed. No S7–S10 product code has been implemented.
+Roadmap/specification PR [#105](https://github.com/furancho-labs/Peer2Canvas/pull/105) is open against `dev`; its required checks are pending. Its OpenSpec proposals are `desktop-preferences` and `guided-onboarding`; FR-053/UC-13 remain proposed until grouping discovery is reviewed. No S7–S10 product code has been implemented.
 
 ## Repository workflow
 
@@ -56,6 +56,6 @@ The roadmap/specification follow-up is being prepared on `feature/experience-roa
 
 ## Next steps
 
-1. Rebase and publish the `feature/experience-roadmap` documentation PR to `dev`; it must update `PLANS.md`, requirements/use cases, OpenSpec task maps, issue map, and handoff consistently.
-2. Reconcile S1/S2 issue closeout after the planning PR and acceptance evidence are on `dev`.
-3. Create the S2 promotion PR from `dev` to `main`, wait for required checks, then close completed child issues and milestones.
+1. Wait for the required checks on PR #105, merge it into `dev`, then refresh `main` and `dev`.
+2. Open the S2 promotion PR from `dev` to `main` after the roadmap PR is merged; include completed S1/S2 issues and acceptance evidence.
+3. After the promotion reaches `main`, close completed child and parent issues, mark their Project items Done, and close the S1/S2 milestones.
