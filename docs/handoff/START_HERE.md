@@ -7,17 +7,17 @@ Last updated: 2026-11-11.
 - The repository is [furancho-labs/Peer2Canvas](https://github.com/furancho-labs/Peer2Canvas). The user moved it to the organization intentionally.
 - Refresh the live `main` and `dev` refs before starting new work; GitHub is authoritative.
 - PRs [#83](https://github.com/furancho-labs/Peer2Canvas/pull/83), [#84](https://github.com/furancho-labs/Peer2Canvas/pull/84), and [#85](https://github.com/furancho-labs/Peer2Canvas/pull/85) are merged. They promote the UI demo checkpoint and synchronize `main`/`dev`; they did not close S1's milestone issues.
-- PR [#86](https://github.com/furancho-labs/Peer2Canvas/pull/86) merged into `dev` as `b5fb5c9`; issue #25 is closed and Done on the Project Board. Five Dependabot PRs are also open: #80, #69, #68, #67, and #66.
+- PR [#86](https://github.com/furancho-labs/Peer2Canvas/pull/86) merged into `dev` as `b5fb5c9`; PR [#87](https://github.com/furancho-labs/Peer2Canvas/pull/87) merged as `e034c4b`. Issues #25 and #26 are closed and Done on the Project Board. Five Dependabot PRs are also open: #80, #69, #68, #67, and #66.
 - S1 milestone #2 still has eight open issues: #2, #4, and #19–#24. Do not report S1 complete or close its milestone without current acceptance evidence.
-- S2 milestone #3 contains WP-04 parent #6 and child issues #25/#26. #25 is the completed selection/editing slice; #26 tracks connectors/properties/pages/layers/history. Parent #6 remains open; supplementary issue #81 is closed. Check the Project for current child status.
+- S2 milestone #3 has one open issue: WP-04 parent #6. Its implementation children #25 and #26 are closed and Done; there are no open WP-04 child issues. Supplementary issue #81 is closed.
 
 ## S2 progress
 
-WP-04.1/#25 is merged. The WP-04.2 implementation tracked by [#26](https://github.com/furancho-labs/Peer2Canvas/issues/26) adds in-memory connectors, property inspection/editing, page/layer switch/add/rename, and undo/redo. Weave remains a disposable projection. Durable save/open/recovery is still unimplemented.
+WP-04.1/#25 and WP-04.2/#26 are merged into `dev`. The editor supports in-memory connectors, property inspection/editing, page/layer switch/add/rename, and undo/redo. Weave remains a disposable projection. Durable save/open/recovery is still unimplemented.
 
-Local browser verification on this Mac covered the WP-04.1 pointer/keyboard flow. The browser service was unavailable during WP-04.2, so those UI flows have automated integration coverage only; no native Tauri WebView interaction was run. Verification passed: `npm test` (166 tests), lint, typecheck, format, production and UI-demo builds, `npm run native-smoke -- --check-production`, `openspec validate --all --strict`, `git diff --check`, and `npm run tauri -- build --no-bundle`. PR #86 passed all eight required checks. Gitleaks did not run because the organization requires `GITLEAKS_LICENSE`. The native build compiled the app but did not launch it. Vite reports bundles above 500 kB. React Doctor reports component-size and complexity warnings; its listener-cleanup warning is contradicted by the Weave effect cleanup and teardown test.
+Local browser verification on this Mac covered the WP-04.1 pointer/keyboard flow. The browser service was unavailable during WP-04.2, so those UI flows have automated integration coverage only; no native Tauri WebView interaction was run. Local verification passed: `npm test` (166 tests), lint, typecheck, format, production and UI-demo builds, `npm run native-smoke -- --check-production`, `openspec validate --all --strict`, `git diff --check`, and `npm run tauri -- build --no-bundle`. PR #86 passed all eight required checks. On PR #87, the post-merge run reported 12 passing checks; `native-linux` failed while installing system dependencies because the runner could not resolve `azure.archive.ubuntu.com`, so its app build did not run. Gitleaks also failed because the organization requires `GITLEAKS_LICENSE`, so it produced no scan result. Branch protection was restored on `main` and `dev` with all eight required contexts. The macOS native build compiled the app but did not launch it. Vite reports bundles above 500 kB. React Doctor reports component-size and complexity warnings; its listener-cleanup warning is contradicted by the Weave effect cleanup and teardown test.
 
-The #26 fixture validates serialization/parsing only; it does not prove durable storage. WP-04 parent #6 is not complete: its acceptance includes saving, closing, and reopening a diagram, and S1 persistence work remains open. `PLANS.md` also lists grouping without a child issue; clarify that gap before closing #6 or claiming S2 exit.
+The #26 fixture validates serialization/parsing only; it does not prove durable storage. WP-04 parent #6 is not complete: its acceptance includes saving, closing, and reopening a diagram, and S1 persistence work remains open. `PLANS.md` also lists grouping without a child issue; reconcile that scope gap before closing #6 or claiming S2 exit. S2 therefore has one open parent issue and zero open child issues.
 
 ## Product boundary
 
@@ -47,5 +47,5 @@ Not implemented: durable save/open/recovery, page/layer deletion or reordering, 
 
 ## Next steps
 
-1. Confirm #26's live PR/issue/Project status before continuing.
-2. Keep the WP-04 parent and S2 milestone open until all child issues and the parent save/close/reopen acceptance pass.
+1. Refresh `main`, `dev`, issues, milestone, and Project Board before starting more work.
+2. Keep parent #6 and the S2 milestone open until its save/close/reopen acceptance passes and the planned grouping scope is reconciled. WP-03 persistence remains an unmet dependency.
