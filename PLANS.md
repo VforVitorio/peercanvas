@@ -196,7 +196,7 @@ S0 implementation and native evidence are complete. Promotion PR #74 (`d84cfce`)
 | S6     | Optional AI and model tools            | WP-09, WP-10 | provider fallback, preview/approval, MCP protocol and security tests                                                                      |
 | S7     | Hardening and ecosystem                | WP-11, WP-12 | release checklist, supported OS evidence, verified skill package                                                                          |
 
-S2 is in progress. Issue #25 is implemented and browser-verified; [PR #86](https://github.com/furancho-labs/Peer2Canvas/pull/86) is open from `feature/s2-selection-editing` to `dev`. Issue #26 remains Todo. The S1 milestone still has eight open issues in GitHub. Do not close WP-04 or claim S2 exit: parent issue #6 requires a saved, closed, and reopened diagram, and durable persistence remains unfinished.
+S2 is in progress. WP-04.1/#25 and WP-04.2/#26 cover the in-memory editor implementation. The S1 milestone still has eight open issues. Do not close WP-04 or claim S2 exit: parent issue #6 requires a saved, closed, and reopened diagram, and durable persistence remains unfinished. This WP plan mentions grouping, but child issues #25/#26 do not cover it; reconcile that gap before closing the parent. Check GitHub for live issue and PR status.
 
 ### Critical path and parallel work
 
@@ -214,21 +214,21 @@ The public [PeerCanvas Workflow Board](https://github.com/users/VforVitorio/proj
 
 The initial public backlog is now represented by 13 parent GitHub Issues, 41 native task sub-issues, and eight milestones. Each OpenSpec task has a child issue under its WP; the [sub-issue map](docs/planning/subissue-map.md) is the exact traceability index. The public [PeerCanvas Workflow Board](https://github.com/users/VforVitorio/projects/4/views/2) includes all 54 issues; the table view remains available from the project selector.
 
-| WP    | Issue                                                                                      | Milestone                     |
-| ----- | ------------------------------------------------------------------------------------------ | ----------------------------- |
-| WP-00 | [#1 Engineering foundation](https://github.com/VforVitorio/peercanvas/issues/1)            | S0 - Engineering Foundation   |
-| WP-01 | [#3 Tauri and Weave compatibility](https://github.com/VforVitorio/peercanvas/issues/3)     | S0 - Engineering Foundation   |
-| WP-02 | [#2 Canonical document model](https://github.com/VforVitorio/peercanvas/issues/2)          | S1 - Document and Persistence |
-| WP-03 | [#4 Local persistence and recovery](https://github.com/VforVitorio/peercanvas/issues/4)    | S1 - Document and Persistence |
-| WP-04 | [#6 Core diagram editing](https://github.com/VforVitorio/peercanvas/issues/6)              | S2 - Core Canvas Editor       |
-| WP-05 | [#5 Licensed shape catalog](https://github.com/VforVitorio/peercanvas/issues/5)            | S3 - Shapes and Interchange   |
-| WP-06 | [#7 draw.io import/export](https://github.com/VforVitorio/peercanvas/issues/7)             | S3 - Shapes and Interchange   |
-| WP-07 | [#8 Yjs and Trystero transport](https://github.com/VforVitorio/peercanvas/issues/8)        | S4 - P2P Collaboration        |
-| WP-08 | [#10 Secure sharing and participants](https://github.com/VforVitorio/peercanvas/issues/10) | S5 - Secure Sharing           |
-| WP-09 | [#9 Optional Codex assistant](https://github.com/VforVitorio/peercanvas/issues/9)          | S6 - Codex and MCP            |
-| WP-10 | [#13 MCP tools](https://github.com/VforVitorio/peercanvas/issues/13)                       | S6 - Codex and MCP            |
-| WP-11 | [#11 Cross-platform hardening](https://github.com/VforVitorio/peercanvas/issues/11)        | S7 - Hardening and Skills     |
-| WP-12 | [#12 Verified Codex skills](https://github.com/VforVitorio/peercanvas/issues/12)           | S7 - Hardening and Skills     |
+| WP    | Issue                                                                                         | Milestone                     |
+| ----- | --------------------------------------------------------------------------------------------- | ----------------------------- |
+| WP-00 | [#1 Engineering foundation](https://github.com/furancho-labs/Peer2Canvas/issues/1)            | S0 - Engineering Foundation   |
+| WP-01 | [#3 Tauri and Weave compatibility](https://github.com/furancho-labs/Peer2Canvas/issues/3)     | S0 - Engineering Foundation   |
+| WP-02 | [#2 Canonical document model](https://github.com/furancho-labs/Peer2Canvas/issues/2)          | S1 - Document and Persistence |
+| WP-03 | [#4 Local persistence and recovery](https://github.com/furancho-labs/Peer2Canvas/issues/4)    | S1 - Document and Persistence |
+| WP-04 | [#6 Core diagram editing](https://github.com/furancho-labs/Peer2Canvas/issues/6)              | S2 - Core Canvas Editor       |
+| WP-05 | [#5 Licensed shape catalog](https://github.com/furancho-labs/Peer2Canvas/issues/5)            | S3 - Shapes and Interchange   |
+| WP-06 | [#7 draw.io import/export](https://github.com/furancho-labs/Peer2Canvas/issues/7)             | S3 - Shapes and Interchange   |
+| WP-07 | [#8 Yjs and Trystero transport](https://github.com/furancho-labs/Peer2Canvas/issues/8)        | S4 - P2P Collaboration        |
+| WP-08 | [#10 Secure sharing and participants](https://github.com/furancho-labs/Peer2Canvas/issues/10) | S5 - Secure Sharing           |
+| WP-09 | [#9 Optional Codex assistant](https://github.com/furancho-labs/Peer2Canvas/issues/9)          | S6 - Codex and MCP            |
+| WP-10 | [#13 MCP tools](https://github.com/furancho-labs/Peer2Canvas/issues/13)                       | S6 - Codex and MCP            |
+| WP-11 | [#11 Cross-platform hardening](https://github.com/furancho-labs/Peer2Canvas/issues/11)        | S7 - Hardening and Skills     |
+| WP-12 | [#12 Verified Codex skills](https://github.com/furancho-labs/Peer2Canvas/issues/12)           | S7 - Hardening and Skills     |
 
 For implementation, create **feature/WP-xx-short-name** from **dev**, open a PR back to **dev**, and include the relevant FR, OpenSpec change, acceptance evidence, security impact, and issue-closing keyword. At sprint close, open one promotion PR from **dev** to **main** with the batch summary and all checks. Do not merge incomplete work to **main**.
 

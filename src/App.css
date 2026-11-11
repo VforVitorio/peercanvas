@@ -452,3 +452,67 @@ p {
     flex-wrap: wrap;
   }
 }
+
+.pc-history-controls {
+  display: flex;
+  gap: 6px;
+}
+.pc-structure {
+  display: grid;
+  gap: 8px;
+  margin-bottom: 24px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid #d5dde2;
+}
+.pc-structure form,
+.pc-inspector form {
+  display: grid;
+  gap: 8px;
+}
+.pc-structure label,
+.pc-inspector form > label,
+.pc-connection-form label {
+  display: block;
+  font-size: 12px;
+  color: #435a69;
+}
+.pc-structure input,
+.pc-structure select,
+.pc-inspector input,
+.pc-inspector select {
+  width: 100%;
+  min-width: 0;
+  min-height: 36px;
+  padding: 6px 8px;
+  border: 1px solid #aebfca;
+  border-radius: 5px;
+  background: #fff;
+  color: #17232d;
+  font: inherit;
+}
+select:focus-visible {
+  outline: 3px solid #1553ba;
+  outline-offset: 3px;
+}
+.pc-connections-title {
+  margin: 24px 0 12px;
+}
+.pc-connection-form fieldset {
+  display: grid;
+  gap: 8px;
+}
+.pc-connection-form .pc-empty {
+  margin: 4px 0;
+}
+.pc-style-summary {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px 12px;
+  margin: 16px 0;
+  font-size: 12px;
+  color: #435a69;
+}
+.pc-style-summary dd {
+  margin: 0;
+  text-align: right;
+}

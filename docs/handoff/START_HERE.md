@@ -5,26 +5,25 @@ Last updated: 2026-11-11.
 ## Current checkpoint
 
 - The repository is [furancho-labs/Peer2Canvas](https://github.com/furancho-labs/Peer2Canvas). The user moved it to the organization intentionally.
-- Remote `main` is `4463497f6c444abc5f97b9301f5d742f8d4b2f2b`; remote `dev` is `cd367f52a35ca715d3255c1870d4430081837bdb`.
+- Refresh the live `main` and `dev` refs before starting new work; GitHub is authoritative.
 - PRs [#83](https://github.com/furancho-labs/Peer2Canvas/pull/83), [#84](https://github.com/furancho-labs/Peer2Canvas/pull/84), and [#85](https://github.com/furancho-labs/Peer2Canvas/pull/85) are merged. They promote the UI demo checkpoint and synchronize `main`/`dev`; they did not close S1's milestone issues.
-- PR [#86](https://github.com/furancho-labs/Peer2Canvas/pull/86) is open from `feature/s2-selection-editing` to `dev`, authored through `VforVitorio`. Five Dependabot PRs are also open: #80, #69, #68, #67, and #66.
+- PR [#86](https://github.com/furancho-labs/Peer2Canvas/pull/86) merged into `dev` as `b5fb5c9`; issue #25 is closed and Done on the Project Board. Five Dependabot PRs are also open: #80, #69, #68, #67, and #66.
 - S1 milestone #2 still has eight open issues: #2, #4, and #19–#24. Do not report S1 complete or close its milestone without current acceptance evidence.
-- S2 milestone #3 contains WP-04 parent #6 and child issues #25/#26. Issue #25 is In Progress; #26 is Todo; supplementary issue #81 is closed.
-- Current checkout: `feature/s2-selection-editing`, based on `origin/dev` at `cd367f5`; its S2 implementation is published in PR #86 and remains unmerged.
+- S2 milestone #3 contains WP-04 parent #6 and child issues #25/#26. #25 is the completed selection/editing slice; #26 tracks connectors/properties/pages/layers/history. Parent #6 remains open; supplementary issue #81 is closed. Check the Project for current child status.
 
 ## S2 progress
 
-The current slice is issue [#25](https://github.com/furancho-labs/Peer2Canvas/issues/25), OpenSpec task 3.1: model-backed selection, movement, resizing, and deletion. The app uses Weave as a disposable renderer projection; accepted edits go through the canonical document command boundary. The example is only in memory and clearly warns that reload or close loses changes.
+WP-04.1/#25 is merged. The WP-04.2 implementation tracked by [#26](https://github.com/furancho-labs/Peer2Canvas/issues/26) adds in-memory connectors, property inspection/editing, page/layer switch/add/rename, and undo/redo. Weave remains a disposable projection. Durable save/open/recovery is still unimplemented.
 
-Local browser verification on this Mac covered pointer selection, movement, resizing, keyboard movement/resizing/deletion, canonical revision changes, focus retention after edits, and restoring the sample after testing. This was a Vite browser session, not a native Tauri WebView interaction test. Verification passed: `npm test` (151 tests), lint, typecheck, format, production and UI-demo builds, `npm run native-smoke -- --check-production`, `openspec validate --all --strict`, `git diff --check`, and `npm run tauri -- build --no-bundle`. The native build compiled the app but did not launch it. The JavaScript production bundles exceed Vite's 500 kB advisory threshold. An independent review found no remaining concrete findings in the editor interaction boundary.
+Local browser verification on this Mac covered the WP-04.1 pointer/keyboard flow. The browser service was unavailable during WP-04.2, so those UI flows have automated integration coverage only; no native Tauri WebView interaction was run. Verification passed: `npm test` (166 tests), lint, typecheck, format, production and UI-demo builds, `npm run native-smoke -- --check-production`, `openspec validate --all --strict`, `git diff --check`, and `npm run tauri -- build --no-bundle`. PR #86 passed all eight required checks. Gitleaks did not run because the organization requires `GITLEAKS_LICENSE`. The native build compiled the app but did not launch it. Vite reports bundles above 500 kB. React Doctor reports component-size and complexity warnings; its listener-cleanup warning is contradicted by the Weave effect cleanup and teardown test.
 
-Issue #26 remains the next child task: connectors, property inspection, pages/layers, and undo/redo. WP-04 parent #6 is not complete: its acceptance includes saving, closing, and reopening a diagram, and S1 persistence work remains open. Do not close #6 or claim S2 exit until that acceptance is supported by evidence.
+The #26 fixture validates serialization/parsing only; it does not prove durable storage. WP-04 parent #6 is not complete: its acceptance includes saving, closing, and reopening a diagram, and S1 persistence work remains open. `PLANS.md` also lists grouping without a child issue; clarify that gap before closing #6 or claiming S2 exit.
 
 ## Product boundary
 
-Implemented on the current feature branch: in-memory example document; add/select/move/resize/delete for rectangles; position/size inspector; keyboard equivalents; zoom controls. Selection and rendering state do not replace the canonical document.
+Implemented in the current S2 editor: in-memory example document; add/select/move/resize/delete rectangles; add/select/edit/remove straight connectors; node text and geometry editing; page/layer switch/add/rename; undo/redo; keyboard equivalents; zoom controls. Connection labels and endpoints appear in the list/inspector. Selection and rendering state do not replace the canonical document.
 
-Not implemented: durable save/open/recovery, connectors, pages/layers, undo/redo, draw.io, peer collaboration, invitations, real assistant/provider calls, MCP, and native WebView verification of the product editor. The S2 branch does not establish minimum supported OS versions or release readiness.
+Not implemented: durable save/open/recovery, page/layer deletion or reordering, connection-label rendering on the canvas, grouping, draw.io, peer collaboration, invitations, real assistant/provider calls, MCP, and native WebView interaction verification of the product editor. The S2 implementation does not establish minimum supported OS versions or release readiness.
 
 ## Repository workflow and current GitHub state
 
@@ -48,6 +47,5 @@ Not implemented: durable save/open/recovery, connectors, pages/layers, undo/redo
 
 ## Next steps
 
-1. Review required checks on PR #86 and merge it through the protected `dev` flow; issue #25 remains In Progress until that merge.
-2. After #25 is merged, start #26 from the then-current `dev`, refreshing `main`, `dev`, PRs, issues, milestone, and Project first.
-3. Keep the WP-04 parent and S2 milestone open until all child issues and the parent save/close/reopen acceptance pass.
+1. Confirm #26's live PR/issue/Project status before continuing.
+2. Keep the WP-04 parent and S2 milestone open until all child issues and the parent save/close/reopen acceptance pass.

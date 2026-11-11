@@ -349,4 +349,38 @@ describe("canonical geometry gesture boundary", () => {
     await act(async () => transformer.fire("transformend"));
     expect(commit).toHaveBeenCalledExactlyOnceWith(nodeId, { ...geometry, width: 180 });
   });
+  it("highlights the selected connector without changing its canonical style", async () => {
+    const layer = doc.pages[0].layers[0];
+    const targetId = "40000000-0000-4000-8000-000000000001";
+    const connectionId = "50000000-0000-4000-8000-000000000000";
+    layer.nodes.push({ ...layer.nodes[0], nodeId: targetId, geometry: { ...geometry, x: 300 } });
+    layer.connections.push({
+      connectionId,
+      sourceNodeId: nodeId,
+      targetNodeId: targetId,
+      routing: "straight",
+      label: "Link",
+      styleId: null,
+    });
+    const before = JSON.stringify(doc);
+    render(
+      <WeaveCanvas
+        document={doc}
+        pageId={doc.pages[0].pageId}
+        layerId={layer.layerId}
+        selection={null}
+        connectionSelection={connectionId}
+        zoom={1}
+        fitRequest={0}
+        onSelect={() => undefined}
+        onZoomChange={() => undefined}
+      />,
+    );
+    await waitFor(() => expect(screen.queryByText("Starting Weave canvas…")).toBeNull());
+    const arrow = harness
+      .latest()
+      .elements.find((value) => value.key === `pc-connection-${connectionId}`);
+    expect(arrow?.props.stroke).toBe("#005CBA");
+    expect(JSON.stringify(doc)).toBe(before);
+  });
 });
