@@ -57,4 +57,4 @@ The S7–S10 issues and OpenSpec proposals are planning only. No product impleme
 
 ## Next step
 
-Release PR #118 remains open for maintainer review; do not merge it without maintainer approval. WP-05.1/#27 is complete on `dev`, but WP-05/#5 remains open for #28 and #29, and WP-06/#7 remains open for #30–#34. Refresh both refs before choosing the next authorized S3 task; #28 is the next WP-05 child.
+Release PR #118 remains open for maintainer review; do not merge it without maintainer approval. The maintainer has authorized autonomous S3 completion: continue with WP-05.2/#28, WP-05.3/#29, and WP-06/#7 children #30–#34. Before implementation, refresh `main`/`dev`, issues, milestone, board, current OpenSpec, and linked ADRs; deliver focused PRs to `dev` and promote only after S3 acceptance criteria pass.
