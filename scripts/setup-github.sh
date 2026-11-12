@@ -79,11 +79,10 @@ JSON
 fi
 
 if "$DRY_RUN"; then
-  printf '[dry-run] keep default Actions permissions read-only; enable Release Please PR creation (setting also permits approvals)\n'
+  printf '[dry-run] keep default Actions permissions read-only; Release Please uses a repository-scoped GitHub App token\n'
 else
-  # This repository opt-in also permits approval APIs; only release-please requests PR writes, and it never approves or merges.
   gh api -X PUT "repos/$REPO/actions/permissions/workflow" --input - >/dev/null <<'JSON'
-{"default_workflow_permissions":"read","can_approve_pull_request_reviews":true}
+{"default_workflow_permissions":"read","can_approve_pull_request_reviews":false}
 JSON
 fi
 
