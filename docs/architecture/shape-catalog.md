@@ -1,25 +1,27 @@
 # Shape catalog design
 
-Status: proposed; no external shape or logo catalog is bundled.
+Status: schema v1 is defined and validated; no external shape or logo assets are bundled. Browse/search, SVG handling, and per-asset rights review remain in WP-05.2 and WP-05.3.
 
 ## Responsibilities
 
 The catalog resolves a stable shape identifier to a renderer-compatible shape definition and searchable metadata. It is separate from document storage: documents reference stable shape identifiers and record the version/schema needed to render them.
 
-## Manifest fields
+## Manifest schema v1
 
-Each asset entry should include:
+The bundled manifest is `src/shapes/manifest.json`. It currently has no entries because no shape assets have completed rights review. Each entry records:
 
-- stable identifier, display name, category, keywords and preview reference;
-- source project, source URL, repository commit/tag or release;
-- license identifier and license text/source;
-- required attribution and any trademark notice;
-- content hash and version;
-- supported renderer/model version;
-- review status, reviewer and review date;
-- whether redistribution, modification and commercial use are allowed.
+- a stable lowercase ID, display name, category, search keywords, and optional local preview path;
+- source project, HTTPS source URL, source revision, asset version, and lowercase SHA-256 content hash;
+- license identifier and HTTPS license text/source URL;
+- attribution text and an optional trademark notice;
+- explicit redistribution, modification, and commercial-use decisions (`permitted`, `prohibited`, or `unknown`);
+- review status, reviewer, and review date.
 
-An asset with unknown rights stays out of the bundled catalog. A permissive repository license does not automatically cover logos, brand marks, imported stencils, fonts, or user-contributed assets.
+Only structurally valid entries with an approved review and explicit redistribution permission are usable. Unreviewed, rejected, or rights-unknown entries are excluded and reported. Duplicate IDs exclude every occurrence so resolution cannot depend on array order. The validator checks manifest metadata and hash format; it does not fetch source URLs, verify legal claims, or recompute a digest without the asset file. Those checks belong to the per-asset review in WP-05.3.
+
+The schema does not bind an asset to renderer/model versions. No bundled asset currently requires that compatibility rule; add it when a reviewed asset has a concrete renderer/model constraint.
+
+A permissive repository license does not automatically cover logos, brand marks, imported stencils, fonts, or user-contributed assets. An asset with unknown rights stays out of the bundled catalog.
 
 ## Search and loading
 

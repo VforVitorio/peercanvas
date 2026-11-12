@@ -18,24 +18,24 @@
 
 PeerCanvas is an open-source desktop diagram editor for turning ideas into architecture, UML, BPMN, network, cloud, database, process, and workflow diagrams. The goal is a useful local editor that works without a network connection or an AI account, with optional peer collaboration, draw.io interchange, and Codex/MCP assistance.
 
-The project is in early development. S2 adds local `.peercanvas` save/open and recovery to the in-memory editor. The implementation is merged into `dev`; the sprint stays open through promotion to `main` and issue closeout. Collaboration, interchange, and AI/MCP features remain planned.
+The project is in early development. S0–S2 are complete on `main`; S3 has started on `dev`. WP-05.1 defines and validates an empty shape-manifest schema. Offline catalog browsing, SVG handling, bundled assets, and draw.io interoperability remain unimplemented.
 
 ## Project status
 
-**S0 is complete. S2 implementation is merged into `dev`; sprint closeout is pending promotion to `main`.** The renderer compatibility gate passed its bounded native fixture on Windows, macOS, and Linux. That evidence does not establish full native product support.
+**S0–S2 are complete on `main`. S3 is in progress on `dev`.** WP-05.1 adds a versioned shape manifest and validator but includes no shape assets. The renderer compatibility gate passed its bounded native fixture on Windows, macOS, and Linux; that evidence does not establish full native product support.
 
 | Area                                            | Current state                                                                                                                                               |
 | ----------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Core editing                                    | In-memory add, select, move, resize, and delete. [WP-04.1 / #25](https://github.com/furancho-labs/Peer2Canvas/issues/25) is merged into `dev`.              |
 | Connectors, properties, pages/layers, undo/redo | Included in the current S2 code under [WP-04.2 / #26](https://github.com/furancho-labs/Peer2Canvas/issues/26).                                              |
 | Local files and recovery                        | S2 adds `.peercanvas` Save, Save As, Open, Reopen last, migration, unsaved-change protection, and backup recovery; native UI evidence is recorded on macOS. |
-| Shape catalog and draw.io interchange           | Planned; no format compatibility or bundled catalog support claimed.                                                                                        |
+| Shape catalog and draw.io interchange           | WP-05.1 defines an empty schema-v1 manifest; offline browse/search, SVG handling, asset review, and draw.io compatibility remain unimplemented.             |
 | Peer collaboration                              | Planned around Yjs and Trystero/WebRTC; network behavior is unverified.                                                                                     |
 | Codex and MCP                                   | Optional integrations researched; not implemented.                                                                                                          |
 
-Local checks pass 191 TypeScript tests and 14 Rust tests; typecheck, lint, formatting, OpenSpec validation, and the macOS native build pass. PR #104 passed all eight required checks. The optional Gitleaks job could not scan because the organization has no license configured. See the [platform matrix](docs/support/platform-matrix.md) and [handoff](docs/handoff/START_HERE.md) for the scope of each result.
+Local WP-05.1 checks pass 203 TypeScript tests, typecheck, lint, formatting, the frontend build, and OpenSpec validation. CI PR [#112](https://github.com/furancho-labs/Peer2Canvas/pull/112) passed all eight required checks; its Gitleaks history scan also passed with the open-source CLI. Native checks for WP-05.1 run in its own PR. See the [platform matrix](docs/support/platform-matrix.md) and [handoff](docs/handoff/START_HERE.md) for the scope of each result.
 
-The [PeerCanvas Delivery Board](https://github.com/users/VforVitorio/projects/4) groups work by parent work-package issues, task sub-issues, and sprint milestones. Issues #25 and #26 are the WP-04 editing children. [Parent #6](https://github.com/furancho-labs/Peer2Canvas/issues/6) remains open through the `dev`→`main` promotion. Grouping is a separate S9 item under [WP-14/#91](https://github.com/furancho-labs/Peer2Canvas/issues/91), with discovery in [#89](https://github.com/furancho-labs/Peer2Canvas/issues/89).
+The [PeerCanvas Delivery Board](https://github.com/users/VforVitorio/projects/4) groups work by parent work-package issues, task sub-issues, and sprint milestones. WP-05 is tracked by [parent #5](https://github.com/furancho-labs/Peer2Canvas/issues/5); its manifest task is [#27](https://github.com/furancho-labs/Peer2Canvas/issues/27), while browse/search and rights review remain under #28 and #29. Grouping is a separate S9 item under [WP-14/#91](https://github.com/furancho-labs/Peer2Canvas/issues/91), with discovery in [#89](https://github.com/furancho-labs/Peer2Canvas/issues/89).
 
 ## What the editor is being built for
 
