@@ -160,13 +160,13 @@ Effort ranges are initial engineering estimates. They exclude release administra
 
 ### WP-11: Quality and product hardening
 
-- **Scope:** multiplatform validation, accessibility, performance baselines, dependency/security scanning, fault recovery, reproducible native icon packaging, and release readiness.
+- **Scope:** multiplatform validation, accessibility, performance baselines, dependency/security scanning, fault recovery, reproducible native icon packaging, CI feedback and cache reliability, and release readiness.
 - **Requirements/spec:** NFR-001..015; Cross-Platform Compatibility, Quality & Testing, Security & Privacy, Desktop Application.
 - **Dependencies/components:** WP-03..WP-10; all supported desktop targets.
 - **Acceptance:** no open critical/high security issue without maintainer disposition; all declared support platforms pass CI and a recorded manual smoke matrix; native bundles contain the authorized PeerCanvas icon; no performance claim lacks a named fixture and machine.
 - **Tests/DoD:** full CI plus manual release checklist, dependency and asset license review, vulnerability and recovery exercises.
 - **Effort/risk:** 10-18 PD; automated runners do not prove all real WebView, deep-link, or network behavior.
-- **Issue / PR:** WP-11 Harden cross-platform quality and security; [icon package task #90](https://github.com/furancho-labs/Peer2Canvas/issues/90); PR to **dev**.
+- **Issue / PR:** WP-11 Harden cross-platform quality and security; [CI pipeline task #111](https://github.com/furancho-labs/Peer2Canvas/issues/111), [icon package task #90](https://github.com/furancho-labs/Peer2Canvas/issues/90); PRs to **dev**.
 
 ### WP-12: User-facing Codex skills and ecosystem
 
@@ -250,7 +250,7 @@ Create one parent GitHub Issue for each WP, linked to the requirements and OpenS
 
 The public [PeerCanvas Workflow Board](https://github.com/users/VforVitorio/projects/4/views/2) contains all parent and child issues. Its board groups items by Status and shows Milestone and Parent issue fields; the table view remains available from the project selector.
 
-The public [PeerCanvas Workflow Board](https://github.com/users/VforVitorio/projects/4/views/2) contains 68 items across 16 WP parents, 51 child issues, and the supplementary #81, with 11 sprint milestones. The [sub-issue map](docs/planning/subissue-map.md) is the task-to-issue traceability index. S8–S10 planning issues are Todo; their presence does not authorize implementation.
+The public [PeerCanvas Workflow Board](https://github.com/users/VforVitorio/projects/4/views/2) contains 69 items across 16 WP parents, 52 child issues, and the supplementary #81, with 11 sprint milestones. The [sub-issue map](docs/planning/subissue-map.md) is the task-to-issue traceability index. S8–S10 planning issues are Todo; their presence does not authorize implementation.
 
 | WP    | Issue                                                                                                   | Milestone                     |
 | ----- | ------------------------------------------------------------------------------------------------------- | ----------------------------- |
