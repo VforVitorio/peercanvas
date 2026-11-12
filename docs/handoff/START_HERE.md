@@ -5,7 +5,7 @@ Last updated: 2026-11-12.
 ## Current checkpoint
 
 - The repository is [furancho-labs/Peer2Canvas](https://github.com/furancho-labs/Peer2Canvas). Its move to the organization was intentional. The GitHub Project remains under the personal account `VforVitorio`.
-- Before this infrastructure promotion, `main` was `035b02f` and `dev` was `d941ca6`. Refresh live refs, PRs, issues, milestones, and Project Board before beginning another task.
+- Before this Release Please format fix, `main` was `0dbb749` and `dev` was `d941ca6`. Refresh live refs, PRs, issues, milestones, and Project Board before beginning another task.
 - Promotion PR [#106](https://github.com/furancho-labs/Peer2Canvas/pull/106) merged S1 and S2 to `main` as `a2d9837`; docs promotion PR [#109](https://github.com/furancho-labs/Peer2Canvas/pull/109) records the closeout as `035b02f`.
 - S0, S1, and S2 are complete. Milestones #1, #2, and #3 are closed; S1 issues #2, #4, and #19–#24 and S2 issues #6, #25, #26, and #81 are closed and marked Done on the Project Board.
 - CI polish PR [#112](https://github.com/furancho-labs/Peer2Canvas/pull/112) merged into `dev` as `47e825f`. Its run [43191288824](https://github.com/furancho-labs/Peer2Canvas/actions/runs/43191288824) passed all eight required checks, CodeQL, OSV, and Gitleaks. The run took 12m37s overall; native jobs took Linux 9m35s, macOS 6m21s, and Windows 12m26s. The Rust cache now includes `src-tauri/Cargo.toml`, `Cargo.lock`, and `src-tauri/target`; this first run saved the cache and still ran the full S0 probe because it changed the CI workflow.
@@ -13,7 +13,8 @@ Last updated: 2026-11-12.
 - WP-05.1 PR [#114](https://github.com/furancho-labs/Peer2Canvas/pull/114) passed all eight required checks. Its initial run took 8m48s; native jobs took Linux 6m31s, macOS 8m15s, and Windows 8m36s with the S0 probe skipped. After manual CI run [43197023908](https://github.com/furancho-labs/Peer2Canvas/actions/runs/43197023908) warmed Rust caches on `dev`, native-only reruns restored exact cache-key matches and took Linux 3m07s, macOS 4m02s, and Windows 5m07s. The baseline native jobs on PR #109 took 7m53s, 7m41s, and 10m52s respectively; this first warm comparison benefits from both the cache and skipping an unrelated S0 probe.
 - Release Please token PR [#115](https://github.com/furancho-labs/Peer2Canvas/pull/115) merged into `dev` as `5f69146`. The organization-owned App `Peer2Canvas Release Automation` is installed only on `Peer2Canvas`; the repository variable and private-key secret are configured. `GITHUB_TOKEN` remains read-only and the organization policy is unchanged.
 - `scripts/setup-github.sh` completed successfully with `can_approve_pull_request_reviews=false`. Both protected branches retain the exact eight required contexts and strict checks.
-- CI tracking issue [#111](https://github.com/furancho-labs/Peer2Canvas/issues/111) remains open until a main-branch push verifies that Release Please creates its PR.
+- Main infrastructure promotion PR [#117](https://github.com/furancho-labs/Peer2Canvas/pull/117) merged as `0dbb749`. The App-backed run [43215202478](https://github.com/furancho-labs/Peer2Canvas/actions/runs/43215202478) succeeded and created release PR [#118](https://github.com/furancho-labs/Peer2Canvas/pull/118). Its `format` check failed because the generated release changelogs were not excluded from Prettier; #118 remains open while this is fixed.
+- CI tracking issue [#111](https://github.com/furancho-labs/Peer2Canvas/issues/111) is open/In Progress again until release PR #118 passes the eight required checks.
 - WP-05.1 PR [#114](https://github.com/furancho-labs/Peer2Canvas/pull/114) merged into `dev` as `246d6d3`; issue #27 is closed and Done. Its manifest code is not part of this main promotion. WP-05 remains open for #28 and #29.
 
 ## Delivered product behavior
@@ -55,4 +56,4 @@ The S7–S10 issues and OpenSpec proposals are planning only. No product impleme
 
 ## Next step
 
-This infrastructure-only promotion carries the CI and Release Please changes to `main` without WP-05.1/#27; keep WP-05.1 in `dev` until S3 closes. After the main push, verify Release Please creates its PR with the App token and leave that release PR open for maintainer review. Then refresh GitHub state before the next S3 task, currently WP-05.2/#28.
+Merge the generated-changelog format fix into `main`, then verify release PR #118 passes all eight required checks. Leave #118 open for maintainer review. WP-05.1/#27 remains in `dev`; S3 stays open for #28, #29, and WP-06.
