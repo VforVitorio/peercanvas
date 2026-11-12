@@ -5,7 +5,7 @@ Last updated: 2026-11-12.
 ## Current checkpoint
 
 - The repository is [furancho-labs/Peer2Canvas](https://github.com/furancho-labs/Peer2Canvas). Its move to the organization was intentional. The GitHub Project remains under the personal account `VforVitorio`.
-- Before this handoff update, `main` was `d97851b` and `dev` was `d941ca6`. Refresh live refs, PRs, issues, milestones, and Project Board before beginning another task.
+- Before this handoff update, `main` was `38a0ffa` and `dev` was `bab3140`. Refresh live refs, PRs, issues, milestones, and Project Board before beginning another task.
 - Promotion PR [#106](https://github.com/furancho-labs/Peer2Canvas/pull/106) merged S1 and S2 to `main` as `a2d9837`; docs promotion PR [#109](https://github.com/furancho-labs/Peer2Canvas/pull/109) records the closeout as `035b02f`.
 - S0, S1, and S2 are complete. Milestones #1, #2, and #3 are closed; S1 issues #2, #4, and #19–#24 and S2 issues #6, #25, #26, and #81 are closed and marked Done on the Project Board.
 - CI polish PR [#112](https://github.com/furancho-labs/Peer2Canvas/pull/112) merged into `dev` as `47e825f`. Its run [43191288824](https://github.com/furancho-labs/Peer2Canvas/actions/runs/43191288824) passed all eight required checks, CodeQL, OSV, and Gitleaks. The run took 12m37s overall; native jobs took Linux 9m35s, macOS 6m21s, and Windows 12m26s. The Rust cache now includes `src-tauri/Cargo.toml`, `Cargo.lock`, and `src-tauri/target`; this first run saved the cache and still ran the full S0 probe because it changed the CI workflow.
@@ -14,6 +14,7 @@ Last updated: 2026-11-12.
 - Release Please token PR [#115](https://github.com/furancho-labs/Peer2Canvas/pull/115) merged into `dev` as `5f69146`. The organization-owned App `Peer2Canvas Release Automation` is installed only on `Peer2Canvas`; the repository variable and private-key secret are configured. `GITHUB_TOKEN` remains read-only and the organization policy is unchanged.
 - `scripts/setup-github.sh` completed successfully with `can_approve_pull_request_reviews=false`. Both protected branches retain the exact eight required contexts and strict checks.
 - Main infrastructure promotion PR [#117](https://github.com/furancho-labs/Peer2Canvas/pull/117) merged as `0dbb749`. The App-backed run [43215202478](https://github.com/furancho-labs/Peer2Canvas/actions/runs/43215202478) succeeded and created release PR [#118](https://github.com/furancho-labs/Peer2Canvas/pull/118). The generated-changelog `format` failure was fixed by PR [#119](https://github.com/furancho-labs/Peer2Canvas/pull/119), merged as `d97851b`; all eight required checks now pass on #118, which remains open for maintainer review.
+- Main handoff PR [#120](https://github.com/furancho-labs/Peer2Canvas/pull/120) merged as `38a0ffa`. Main-to-dev history sync PR [#121](https://github.com/furancho-labs/Peer2Canvas/pull/121) merged as `bab3140`, so `main` is again an ancestor of `dev`.
 - CI tracking issue [#111](https://github.com/furancho-labs/Peer2Canvas/issues/111) is closed and Done after Release Please created #118 and its required checks passed.
 - WP-05.1 PR [#114](https://github.com/furancho-labs/Peer2Canvas/pull/114) merged into `dev` as `246d6d3`; issue #27 is closed and Done. Its manifest code is not part of this main promotion. WP-05 remains open for #28 and #29.
 
@@ -56,4 +57,4 @@ The S7–S10 issues and OpenSpec proposals are planning only. No product impleme
 
 ## Next step
 
-After this history-sync PR merges, `dev` will include the latest `main` ancestry and the generated-changelog format fix. Leave release PR #118 open for maintainer review; WP-05.1/#27 remains on `dev`, and S3 stays open for #28, #29, and WP-06. Refresh both refs before any future `dev`→`main` promotion.
+Release PR #118 remains open for maintainer review; do not merge it without maintainer approval. The maintainer has authorized autonomous S3 completion: continue with WP-05.2/#28, WP-05.3/#29, and WP-06/#7 children #30–#34. Before implementation, refresh `main`/`dev`, issues, milestone, board, current OpenSpec, and linked ADRs; deliver focused PRs to `dev` and promote only after S3 acceptance criteria pass.
