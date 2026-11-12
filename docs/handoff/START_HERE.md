@@ -5,7 +5,7 @@ Last updated: 2026-11-12.
 ## Current checkpoint
 
 - The repository is [furancho-labs/Peer2Canvas](https://github.com/furancho-labs/Peer2Canvas). Its move to the organization was intentional. The GitHub Project remains under the personal account `VforVitorio`.
-- At the latest refresh, `main` is `035b02f` and `dev` is `5f69146`. Refresh live refs, PRs, issues, milestones, and Project Board before beginning another task.
+- Before this handoff update, `main` was `035b02f` and `dev` was `5f69146`. Refresh live refs, PRs, issues, milestones, and Project Board before beginning another task.
 - Promotion PR [#106](https://github.com/furancho-labs/Peer2Canvas/pull/106) merged S1 and S2 to `main` as `a2d9837`; docs promotion PR [#109](https://github.com/furancho-labs/Peer2Canvas/pull/109) records the closeout as `035b02f`.
 - S0, S1, and S2 are complete. Milestones #1, #2, and #3 are closed; S1 issues #2, #4, and #19–#24 and S2 issues #6, #25, #26, and #81 are closed and marked Done on the Project Board.
 - CI polish PR [#112](https://github.com/furancho-labs/Peer2Canvas/pull/112) merged into `dev` as `47e825f`. Its run [43191288824](https://github.com/furancho-labs/Peer2Canvas/actions/runs/43191288824) passed all eight required checks, CodeQL, OSV, and Gitleaks. The run took 12m37s overall; native jobs took Linux 9m35s, macOS 6m21s, and Windows 12m26s. The Rust cache now includes `src-tauri/Cargo.toml`, `Cargo.lock`, and `src-tauri/target`; this first run saved the cache and still ran the full S0 probe because it changed the CI workflow.
@@ -55,4 +55,4 @@ The S7–S10 issues and OpenSpec proposals are planning only. No product impleme
 
 ## Next step
 
-Release Please is configured but untested until a push to `main`, and `dev` contains WP-05.1 while S3 remains open. Before promoting, confirm whether the main promotion should include the current `dev` state or wait for S3 closeout. After an authorized main push, verify the Release Please PR and leave it open for maintainer review; then refresh GitHub state before the next S3 task, currently WP-05.2/#28.
+Promote the CI and Release Please improvements to `main` without WP-05.1/#27; keep WP-05.1 in `dev` until S3 closes. After the main push, verify Release Please creates its PR with the App token and leave that release PR open for maintainer review. Then refresh GitHub state before the next S3 task, currently WP-05.2/#28.
