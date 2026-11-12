@@ -5,15 +5,16 @@ Last updated: 2026-11-12.
 ## Current checkpoint
 
 - The repository is [furancho-labs/Peer2Canvas](https://github.com/furancho-labs/Peer2Canvas). Its move to the organization was intentional. The GitHub Project remains under the personal account `VforVitorio`.
-- Before WP-05.1 promotion, `main` was `035b02f` and `dev` was `589e6bf` after PRs #112 and #113. Refresh live refs, PRs, issues, milestones, and Project Board before beginning another task.
+- At the latest refresh, `main` is `035b02f` and `dev` is `5f69146`. Refresh live refs, PRs, issues, milestones, and Project Board before beginning another task.
 - Promotion PR [#106](https://github.com/furancho-labs/Peer2Canvas/pull/106) merged S1 and S2 to `main` as `a2d9837`; docs promotion PR [#109](https://github.com/furancho-labs/Peer2Canvas/pull/109) records the closeout as `035b02f`.
 - S0, S1, and S2 are complete. Milestones #1, #2, and #3 are closed; S1 issues #2, #4, and #19–#24 and S2 issues #6, #25, #26, and #81 are closed and marked Done on the Project Board.
 - CI polish PR [#112](https://github.com/furancho-labs/Peer2Canvas/pull/112) merged into `dev` as `47e825f`. Its run [43191288824](https://github.com/furancho-labs/Peer2Canvas/actions/runs/43191288824) passed all eight required checks, CodeQL, OSV, and Gitleaks. The run took 12m37s overall; native jobs took Linux 9m35s, macOS 6m21s, and Windows 12m26s. The Rust cache now includes `src-tauri/Cargo.toml`, `Cargo.lock`, and `src-tauri/target`; this first run saved the cache and still ran the full S0 probe because it changed the CI workflow.
 - Documentation PR [#113](https://github.com/furancho-labs/Peer2Canvas/pull/113) merged into `dev` as `589e6bf`, recording that the organization policy blocks Actions PR creation. Its eight required checks passed; native builds were skipped while all three required contexts stayed green.
 - WP-05.1 PR [#114](https://github.com/furancho-labs/Peer2Canvas/pull/114) passed all eight required checks. Its initial run took 8m48s; native jobs took Linux 6m31s, macOS 8m15s, and Windows 8m36s with the S0 probe skipped. After manual CI run [43197023908](https://github.com/furancho-labs/Peer2Canvas/actions/runs/43197023908) warmed Rust caches on `dev`, native-only reruns restored exact cache-key matches and took Linux 3m07s, macOS 4m02s, and Windows 5m07s. The baseline native jobs on PR #109 took 7m53s, 7m41s, and 10m52s respectively; this first warm comparison benefits from both the cache and skipping an unrelated S0 probe.
-- `scripts/setup-github.sh` could not enable repository Actions PR creation: the organization returned HTTP 409 because its policy blocks GitHub Actions from creating or approving pull requests. The repository still has the exact eight required contexts on both protected branches; the repo-level setting remains disabled.
-- CI tracking issue [#111](https://github.com/furancho-labs/Peer2Canvas/issues/111) remains open until Release Please creates a PR with the selected GitHub App token. The app, repository variable, and private-key secret still need setup before promoting `dev` to `main`.
-- WP-05.1/#27 changes in this PR define and validate an empty schema-v1 manifest, with no assets or catalog UI; WP-05 remains open for #28 and #29.
+- Release Please token PR [#115](https://github.com/furancho-labs/Peer2Canvas/pull/115) merged into `dev` as `5f69146`. The organization-owned App `Peer2Canvas Release Automation` is installed only on `Peer2Canvas`; the repository variable and private-key secret are configured. `GITHUB_TOKEN` remains read-only and the organization policy is unchanged.
+- `scripts/setup-github.sh` completed successfully with `can_approve_pull_request_reviews=false`. Both protected branches retain the exact eight required contexts and strict checks.
+- CI tracking issue [#111](https://github.com/furancho-labs/Peer2Canvas/issues/111) remains open until a main-branch push verifies that Release Please creates its PR.
+- WP-05.1 PR [#114](https://github.com/furancho-labs/Peer2Canvas/pull/114) merged into `dev` as `246d6d3`; issue #27 is closed and Done. WP-05 remains open for #28 and #29; no shape assets or catalog UI are included.
 
 ## Delivered product behavior
 
@@ -54,4 +55,4 @@ The S7–S10 issues and OpenSpec proposals are planning only. No product impleme
 
 ## Next step
 
-Pause before any `dev`→`main` promotion and create/install the repository-scoped Release Please GitHub App. Add repository variable `RELEASE_PLEASE_APP_CLIENT_ID` and secret `RELEASE_PLEASE_APP_PRIVATE_KEY`; after the promotion pushes to `main`, verify Release Please creates its PR and leave it open for maintainer review. Then refresh GitHub state before the next S3 task, currently WP-05.2/#28.
+Release Please is configured but untested until a push to `main`, and `dev` contains WP-05.1 while S3 remains open. Before promoting, confirm whether the main promotion should include the current `dev` state or wait for S3 closeout. After an authorized main push, verify the Release Please PR and leave it open for maintainer review; then refresh GitHub state before the next S3 task, currently WP-05.2/#28.
