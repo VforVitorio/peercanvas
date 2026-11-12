@@ -14,7 +14,7 @@ Last updated: 2026-11-12.
 - Release Please token PR [#115](https://github.com/furancho-labs/Peer2Canvas/pull/115) merged into `dev` as `5f69146`. The organization-owned App `Peer2Canvas Release Automation` is installed only on `Peer2Canvas`; the repository variable and private-key secret are configured. `GITHUB_TOKEN` remains read-only and the organization policy is unchanged.
 - `scripts/setup-github.sh` completed successfully with `can_approve_pull_request_reviews=false`. Both protected branches retain the exact eight required contexts and strict checks.
 - CI tracking issue [#111](https://github.com/furancho-labs/Peer2Canvas/issues/111) remains open until a main-branch push verifies that Release Please creates its PR.
-- WP-05.1 PR [#114](https://github.com/furancho-labs/Peer2Canvas/pull/114) merged into `dev` as `246d6d3`; issue #27 is closed and Done. WP-05 remains open for #28 and #29; no shape assets or catalog UI are included.
+- WP-05.1 PR [#114](https://github.com/furancho-labs/Peer2Canvas/pull/114) merged into `dev` as `246d6d3`; issue #27 is closed and Done. Its manifest code is not part of this main promotion. WP-05 remains open for #28 and #29.
 
 ## Delivered product behavior
 
@@ -24,11 +24,11 @@ This was a source promotion. It did not publish an installer, declare minimum su
 
 ## Not implemented
 
-Grouping, draw.io import/export, catalog browsing/search, safe SVG rendering, bundled shape assets, peer collaboration, invitations, real assistant/provider calls, and MCP are not delivered. WP-05.1 defines an empty manifest schema and validator; it adds no assets. The app does not render connection labels on the canvas or support page/layer deletion and reordering. Icon packaging remains open under WP-11.6/#90. Do not describe planned S7–S10 work as implemented.
+Grouping, draw.io import/export, catalog browsing/search, safe SVG rendering, bundled shape assets, peer collaboration, invitations, real assistant/provider calls, and MCP are not delivered on `main`. WP-05.1 defines an empty manifest schema and validator on `dev`; it adds no assets and is not part of this promotion. The app does not render connection labels on the canvas or support page/layer deletion and reordering. Icon packaging remains open under WP-11.6/#90. Do not describe planned S7–S10 work as implemented.
 
 ## Roadmap after S2
 
-- S3 covers WP-05 (shape catalog) and WP-06 (draw.io interoperability). After WP-05.1/#27 merges to `dev`, WP-05.2/#28 (offline browse/search and SVG safety), WP-05.3/#29 (asset-rights audit), and WP-06/#7 with children #30–#34 remain open.
+- S3 covers WP-05 (shape catalog) and WP-06 (draw.io interoperability). WP-05.1/#27 is complete on `dev`; WP-05.2/#28 (offline browse/search and SVG safety), WP-05.3/#29 (asset-rights audit), and WP-06/#7 with children #30–#34 remain open.
 - S7: native icon packaging, WP-11.6/#90.
 - S8: desktop preferences and English/Spanish resources, WP-13/#93.
 - S9: grouping, WP-14/#91; discovery issue #89 defines the semantics before implementation tasks are opened.
