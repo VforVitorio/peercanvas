@@ -47,6 +47,10 @@ describe("native CI change scope", () => {
     ).toEqual({ native: false, smoke: false });
   });
 
+  it("skips native builds for formatter configuration", () => {
+    expect(classifyChangedFiles([".prettierignore"])).toEqual({ native: false, smoke: false });
+  });
+
   it("runs the native probe for changes to its Tauri, canvas, or harness dependencies", () => {
     for (const path of [
       "src-tauri/src/lib.rs",

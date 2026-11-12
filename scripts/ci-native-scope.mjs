@@ -16,6 +16,7 @@ const NON_NATIVE_SCRIPTS = [
   "scripts/ci-native-scope.mjs",
   "scripts/ci-native-scope.test.mjs",
 ];
+const NON_NATIVE_SETTINGS = [".prettierignore"];
 
 const isNonNativeChange = (file) =>
   file.startsWith("docs/") ||
@@ -26,6 +27,7 @@ const isNonNativeChange = (file) =>
   file.startsWith(".github/PULL_REQUEST_TEMPLATE/") ||
   NON_NATIVE_WORKFLOWS.includes(file) ||
   NON_NATIVE_SCRIPTS.includes(file) ||
+  NON_NATIVE_SETTINGS.includes(file) ||
   /\.(?:test|spec)\.[cm]?[jt]sx?$/.test(file) ||
   /\.mdx?$/.test(file) ||
   ["LICENSE", "NOTICE", "THIRD_PARTY_NOTICES"].includes(file);
