@@ -18,24 +18,24 @@
 
 PeerCanvas is an open-source desktop diagram editor for turning ideas into architecture, UML, BPMN, network, cloud, database, process, and workflow diagrams. The goal is a useful local editor that works without a network connection or an AI account, with optional peer collaboration, draw.io interchange, and Codex/MCP assistance.
 
-The project is in early development. S0–S2 are complete on `main`; S3 has started on `dev`. WP-05.1 defines and validates an empty shape-manifest schema. Offline catalog browsing, SVG handling, bundled assets, and draw.io interoperability remain unimplemented.
+The project is in early development. S0–S2 are complete on `main`; S3 is in progress on `dev`. WP-05.1 defined the manifest, and WP-05.2 adds offline catalog search, a first-party rectangle shape, safe SVG previews, and schema-v2 catalog references. The dependency/asset audit and draw.io interchange remain in S3.
 
 ## Project status
 
-**S0–S2 are complete on `main`. S3 is in progress on `dev`.** WP-05.1 adds a versioned shape manifest and validator but includes no shape assets. The renderer compatibility gate passed its bounded native fixture on Windows, macOS, and Linux; that evidence does not establish full native product support.
+**S0–S2 are complete on `main`. S3 is in progress on `dev`.** WP-05.2 adds one reviewed first-party rectangle preview and a versioned shape reference on inserted nodes. The renderer compatibility gate passed its bounded native fixture on Windows, macOS, and Linux; that evidence does not establish full native product support.
 
 | Area                                            | Current state                                                                                                                                               |
 | ----------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Core editing                                    | In-memory add, select, move, resize, and delete. [WP-04.1 / #25](https://github.com/furancho-labs/Peer2Canvas/issues/25) is merged into `dev`.              |
 | Connectors, properties, pages/layers, undo/redo | Included in the current S2 code under [WP-04.2 / #26](https://github.com/furancho-labs/Peer2Canvas/issues/26).                                              |
 | Local files and recovery                        | S2 adds `.peercanvas` Save, Save As, Open, Reopen last, migration, unsaved-change protection, and backup recovery; native UI evidence is recorded on macOS. |
-| Shape catalog and draw.io interchange           | WP-05.1 defines an empty schema-v1 manifest; offline browse/search, SVG handling, asset review, and draw.io compatibility remain unimplemented.             |
+| Shape catalog and draw.io interchange           | WP-05.2 adds offline browse/search, stable node references, and safe SVG previews; #29 rights/dependency review and WP-06 draw.io interchange remain open.  |
 | Peer collaboration                              | Planned around Yjs and Trystero/WebRTC; network behavior is unverified.                                                                                     |
 | Codex and MCP                                   | Optional integrations researched; not implemented.                                                                                                          |
 
-Local WP-05.1 checks pass 203 TypeScript tests, typecheck, lint, formatting, the frontend build, and OpenSpec validation. CI PR [#112](https://github.com/furancho-labs/Peer2Canvas/pull/112) passed all eight required checks; its Gitleaks history scan also passed with the open-source CLI. Native checks for WP-05.1 run in its own PR. See the [platform matrix](docs/support/platform-matrix.md) and [handoff](docs/handoff/START_HERE.md) for the scope of each result.
+Local WP-05.2/WP-05.3 checks pass 222 TypeScript tests, typecheck, lint, formatting, the frontend build, and OpenSpec validation. CI PR [#123](https://github.com/furancho-labs/Peer2Canvas/pull/123) passed all eight required checks and the security scans before the additional asset-hash test. These builds do not replace manual native UI verification. See the [platform matrix](docs/support/platform-matrix.md) and [handoff](docs/handoff/START_HERE.md) for the scope of each result.
 
-The [PeerCanvas Delivery Board](https://github.com/users/VforVitorio/projects/4) groups work by parent work-package issues, task sub-issues, and sprint milestones. WP-05 is tracked by [parent #5](https://github.com/furancho-labs/Peer2Canvas/issues/5); its manifest task is [#27](https://github.com/furancho-labs/Peer2Canvas/issues/27), while browse/search and rights review remain under #28 and #29. Grouping is a separate S9 item under [WP-14/#91](https://github.com/furancho-labs/Peer2Canvas/issues/91), with discovery in [#89](https://github.com/furancho-labs/Peer2Canvas/issues/89).
+The [PeerCanvas Delivery Board](https://github.com/users/VforVitorio/projects/4) groups work by parent work-package issues, task sub-issues, and sprint milestones. WP-05 is tracked by [parent #5](https://github.com/furancho-labs/Peer2Canvas/issues/5); manifest and catalog tasks [#27](https://github.com/furancho-labs/Peer2Canvas/issues/27) and [#28](https://github.com/furancho-labs/Peer2Canvas/issues/28) are complete on `dev`, while the rights/dependency review is [#29](https://github.com/furancho-labs/Peer2Canvas/issues/29). WP-06 interchange remains under [parent #7](https://github.com/furancho-labs/Peer2Canvas/issues/7) and children #30–#34. Grouping is a separate S9 item under [WP-14/#91](https://github.com/furancho-labs/Peer2Canvas/issues/91), with discovery in [#89](https://github.com/furancho-labs/Peer2Canvas/issues/89).
 
 ## What the editor is being built for
 
@@ -123,7 +123,7 @@ Contributions follow `feature/*` → `dev` → `main`. Focused task PRs target `
 
 ## Acknowledgments and third-party notices
 
-The following projects inform the implementation and roadmap. Adopted sources, revisions, licenses, and retained notices are recorded in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
+The following projects inform the implementation and roadmap. Adopted sources, revisions, licenses, and retained notices are recorded in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md). The direct/transitive license snapshot for the locked npm and Cargo dependency graphs is in [the dependency inventory](LICENSES/dependency-inventory-2026-11.csv).
 
 | Project or documentation                                                                                                                                            | Use in PeerCanvas                                                           |
 | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------- |

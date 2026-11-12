@@ -26,11 +26,11 @@ This was a source promotion. It did not publish an installer, declare minimum su
 
 ## Not implemented
 
-Grouping, draw.io import/export, catalog browsing/search, safe SVG rendering, bundled shape assets, peer collaboration, invitations, real assistant/provider calls, and MCP are not delivered on `main`. WP-05.1 defines an empty manifest schema and validator on `dev`; it adds no assets and is not part of this promotion. The app does not render connection labels on the canvas or support page/layer deletion and reordering. Icon packaging remains open under WP-11.6/#90. Do not describe planned S7–S10 work as implemented.
+On `main`, grouping, draw.io import/export, catalog browsing/search, safe SVG rendering, peer collaboration, invitations, real assistant/provider calls, and MCP are not delivered. `dev` includes WP-05.1/#27 and WP-05.2/#28: the catalog has one reviewed first-party rectangle preview, offline search, safe SVG rendering, and schema-v2 references. Asset/dependency review #29 and draw.io WP-06/#30–#34 remain open. The app does not render connection labels on the canvas or support page/layer deletion and reordering. Icon packaging remains open under WP-11.6/#90. Do not describe planned S4–S10 work as implemented.
 
 ## Roadmap after S2
 
-- S3 covers WP-05 (shape catalog) and WP-06 (draw.io interoperability). WP-05.1/#27 is complete on `dev`; WP-05.2/#28 (offline browse/search and SVG safety), WP-05.3/#29 (asset-rights audit), and WP-06/#7 with children #30–#34 remain open.
+- S3 covers WP-05 (shape catalog) and WP-06 (draw.io interoperability). WP-05.1/#27 and WP-05.2/#28 are complete on `dev`; WP-05.3/#29 (asset/dependency license audit) is in progress; WP-06/#7 with children #30–#34 remains open.
 - S7: native icon packaging, WP-11.6/#90.
 - S8: desktop preferences and English/Spanish resources, WP-13/#93.
 - S9: grouping, WP-14/#91; discovery issue #89 defines the semantics before implementation tasks are opened.
@@ -57,4 +57,4 @@ The S7–S10 issues and OpenSpec proposals are planning only. No product impleme
 
 ## Next step
 
-Release PR #118 remains open for maintainer review; do not merge it without maintainer approval. The maintainer has authorized autonomous S3 completion: continue with WP-05.2/#28, WP-05.3/#29, and WP-06/#7 children #30–#34. Before implementation, refresh `main`/`dev`, issues, milestone, board, current OpenSpec, and linked ADRs; deliver focused PRs to `dev` and promote only after S3 acceptance criteria pass.
+Release PR #118 remains open for maintainer review; do not merge it without maintainer approval. The maintainer has authorized autonomous S3 completion: continue with WP-05.3/#29 and WP-06/#7 children #30–#34. PR #123 has merged to `dev`; issue #28 is closed and marked Done. Before implementation, refresh `main`/`dev`, issues, milestone, board, current OpenSpec, and linked ADRs; deliver focused PRs to `dev` and promote only after S3 acceptance criteria pass.

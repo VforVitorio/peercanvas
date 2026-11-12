@@ -2,18 +2,32 @@
 
 PeerCanvas is an independent project. References to upstream projects do not imply endorsement or official affiliation.
 
-## Current scaffold
+## Dependency license inventory (2026-11-12)
 
-An initial metadata scan covered 254 installed npm packages and found license metadata for all of them. It identified these additional notice obligations in the current dependency tree:
+[`LICENSES/dependency-inventory-2026-11.csv`](LICENSES/dependency-inventory-2026-11.csv) records the locked dependency license expressions, upstream source URLs, and metadata sources. It contains 344 npm entries (8 direct runtime, 19 direct build/test, 317 transitive) and 448 Cargo entries (4 direct runtime, 1 direct build, 1 optional direct, 441 transitive, and the project crate). The inventory includes all locked platform variants; 40 npm entries are not installed on this macOS host (mostly platform-specific packages) but have license metadata in `package-lock.json`. The root package and Cargo crate both identify the project's Apache-2.0 license. All 792 inventory records have license metadata across 34 distinct expressions; no `UNKNOWN` entries remain.
 
-- **caniuse-lite 1.0.30001823**, used through Browserslist/Autoprefixer for browser support data, is licensed under CC BY 4.0. See its [package repository](https://github.com/browserslist/caniuse-lite) and [license text](LICENSES/CC-BY-4.0.txt).
-- **lightningcss 1.33.0** and its installed macOS native package are licensed under MPL-2.0. See the [upstream repository](https://github.com/parcel-bundler/lightningcss) and [license text](LICENSES/MPL-2.0.txt).
+Special license and attribution records:
 
-This is not a complete transitive dependency or binary-content audit. Cargo/Rust licenses, packaged runtime contents, and all direct/transitive notice obligations must be reviewed before a public release; produce a versioned SBOM and record required notices at that point.
+- **caniuse-lite 1.0.30001823 — CC-BY-4.0.** Its attribution and license text are retained in [`LICENSES/CC-BY-4.0.txt`](LICENSES/CC-BY-4.0.txt); the upstream attribution is **caniuse.com**. The package is part of the CSS/browser-support toolchain. Source: [caniuse-lite](https://github.com/browserslist/caniuse-lite).
+- **lightningcss 1.33.0 and platform bindings — MPL-2.0.** The license text is retained in [`LICENSES/MPL-2.0.txt`](LICENSES/MPL-2.0.txt). This npm subtree is in the build toolchain; several Cargo dependencies also declare MPL-2.0. Sources: [Lightning CSS](https://github.com/parcel-bundler/lightningcss) and [`cssparser`](https://github.com/servo/rust-cssparser).
+- **ICU4X crates and unicode-ident — Unicode-3.0.** Both copyright notices and permission texts are retained in [`LICENSES/Unicode-3.0.txt`](LICENSES/Unicode-3.0.txt); see the [Unicode license](https://www.unicode.org/license.txt).
+- **argparse 2.0.1 — Python-2.0.** This is a transitive development dependency; its package license file is retained at [`LICENSES/Python-2.0.txt`](LICENSES/Python-2.0.txt). Source: [nodeca/argparse](https://github.com/nodeca/argparse).
+- **minimatch 10.2.6 and lru-cache 11.5.3 — BlueOak-1.0.0.** The license text is retained at [`LICENSES/BlueOak-1.0.0.txt`](LICENSES/BlueOak-1.0.0.txt), with the [official license](https://blueoakcouncil.org/license/1.0.0) linked for reference.
+- **0BSD** appears as one option for adler2 and as the metadata license for a lock-only tslib entry; its zero-clause terms require no additional notice. SPDX `OR` expressions are recorded verbatim in the inventory. For r-efi, PeerCanvas selects the Apache-2.0 option from `MIT OR Apache-2.0 OR LGPL-2.1-or-later`.
+
+The inventory preserves combined expressions rather than flattening them. In particular, brotli uses `BSD-3-Clause AND MIT`, dpi uses `Apache-2.0 AND MIT`, matchit uses `MIT AND BSD-3-Clause`, and unicode-ident combines a permissive option with `Unicode-3.0`. LLVM-exception expressions are recorded for linux-raw-sys, rustix, target-lexicon, wasi, wasip2, and wit-bindgen. Their package versions and metadata sources are listed in the CSV; the release artifact review must carry forward any package-specific copyright or notice files required by the selected expression.
+
+The inventory is based on `package-lock.json` and `cargo metadata --all-features --offline --locked`; it records declared metadata rather than scanning final application binaries. It does not scan package contents for bundled license files or generated/minified payloads. WP-11.3/#50 remains responsible for release-package contents, security findings, and the final binary notice review.
+
+## Shape and branding assets
+
+| Asset                             | Source and version                                                                                                            | License and attribution                             | Rights review                                                                   |
+| --------------------------------- | ----------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------- | ------------------------------------------------------------------------------- |
+| `src/shapes/assets/rectangle.svg` | Original PeerCanvas artwork, `asset-v1` / `1.0.0`; SHA-256 `4d6734d996faaac492a34fc2d470bef63a40f9cc417988c8db85dccc944e88e7` | Apache-2.0; original preview created for PeerCanvas | Redistribution, modification, and commercial use permitted; reviewed 2026-11-12 |
+
+The logo, symbol, and app icon PNGs were supplied by the maintainer and are recorded separately in [the brand guide](docs/branding/brand-guide.md). Their rights are separate from the Apache-2.0 project-code license. The shape catalog includes no third-party stencils, logos, fonts, or draw.io library assets.
 
 The local document workflow uses **tauri-plugin-dialog 2.7.3**, dual-licensed MIT or Apache-2.0, for native file selection from Rust commands. It does not expose the filesystem plugin's general JavaScript API. See the [plugin source](https://github.com/tauri-apps/plugins-workspace/tree/v2/plugins/dialog) and [license metadata](https://crates.io/crates/tauri-plugin-dialog/2.7.3).
-
-The logo, symbol, and app icon PNGs are first-party brand assets supplied by the maintainer and recorded in [the brand guide](docs/branding/brand-guide.md). Their rights are separate from the Apache-2.0 project-code license. No third-party stencil or shape catalog assets are bundled in the current scaffold; the future catalog must keep per-asset provenance and license records.
 
 ## S0 native compatibility probe
 
