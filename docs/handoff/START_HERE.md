@@ -24,17 +24,17 @@ Last updated: 2026-11-12.
 
 ## Delivered product behavior
 
-On `main`, the desktop app supports a canonical diagram document, model-backed editing, selection and transforms, straight connectors, property inspection, pages and layers, undo/redo, versioned `.peercanvas` save/open, migration, and non-destructive recovery. A native macOS save, close, and reopen flow was exercised. `dev` additionally contains the completed S3 shape catalog and declared draw.io import/export subset. Required native CI builds passed on Windows, macOS, and Linux; this is not a manual UI smoke test on each operating system.
+The desktop app supports a canonical diagram document, model-backed editing, selection and transforms, straight connectors, property inspection, pages and layers, undo/redo, versioned `.peercanvas` save/open, migration, and non-destructive recovery. A native macOS save, close, and reopen flow was exercised. S3 adds the licensed shape catalog and declared draw.io import/export subset. Required native CI builds passed on Windows, macOS, and Linux; this is not a manual UI smoke test on each operating system.
 
 This was a source promotion. It did not publish an installer, declare minimum supported OS versions, or establish release readiness. The macOS Cmd+Q path was not manually rechecked while the Mac was locked; risk R-13 records the remaining native quit-path uncertainty.
 
 ## Not implemented
 
-On `main`, S3 behavior (shape catalog and draw.io interchange), grouping, peer collaboration, invitations, real assistant/provider calls, and MCP are not delivered. `dev` includes completed WP-05 and WP-06: one reviewed first-party rectangle preview, offline search, safe SVG rendering, schema-v2 references, the asset/dependency license inventory, and the declared draw.io subset. The app does not render connection labels on the canvas or support page/layer deletion and reordering. Icon packaging remains open under WP-11.6/#90. Do not describe planned S4–S10 work as implemented.
+The product still lacks grouping, peer collaboration, invitations, real assistant/provider calls, and MCP. Delivered S3 behavior includes one reviewed first-party rectangle preview, offline search, safe SVG rendering, schema-v2 references, the asset/dependency license inventory, and the declared draw.io subset. Check live branch and board state before describing release availability. The app does not render connection labels on the canvas or support page/layer deletion and reordering. Icon packaging remains open under WP-11.6/#90. Do not describe planned S4–S10 work as implemented.
 
 ## Roadmap after S2
 
-- S3 covers WP-05 (shape catalog) and WP-06 (draw.io interoperability). Both work packages and all child issues are complete on `dev`; the `dev`→`main` promotion is pending.
+- S3 covers WP-05 (shape catalog) and WP-06 (draw.io interoperability). Both work packages and all child issues are complete; the board and milestone record the current promotion state.
 - S7: native icon packaging, WP-11.6/#90.
 - S8: desktop preferences and English/Spanish resources, WP-13/#93.
 - S9: grouping, WP-14/#91; discovery issue #89 defines the semantics before implementation tasks are opened.
@@ -61,4 +61,4 @@ The S7–S10 issues and OpenSpec proposals are planning only. No product impleme
 
 ## Next step
 
-Release PR #118 remains open for maintainer review; do not merge it without maintainer approval. The next authorized step is the S3 promotion PR from `dev` to protected `main`. All S3 issues are closed; leave milestone #4 open until the promotion merges, then close it and sync `main` history into `dev` if required. Do not start a later sprint without maintainer direction.
+Release PR #118 remains open for maintainer review; do not merge it without maintainer approval. At resume, refresh the live S3 promotion PR and milestone #4: if promotion to protected `main` is still pending, complete it only after required checks pass; if it has merged, close the milestone and sync `main` history into `dev` if required. Do not start a later sprint without maintainer direction.
