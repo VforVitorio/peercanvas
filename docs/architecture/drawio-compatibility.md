@@ -26,24 +26,24 @@ Unknown safe cells are preserved as source fragments, never rendered or executed
 
 The parser rejects malformed XML, DTDs and entity declarations, namespaced XML, embedded HTML/SVG, event handlers, external references, and inputs over the configured limits. The fixture corpus includes malformed XML, a DTD/entity payload, and an unsafe embedded SVG with an event handler.
 
-| Limit                           | Maximum |
-| ------------------------------- | ------: |
-| Encoded input file              |  10 MiB |
-| Total decoded page XML          |  10 MiB |
-| Compressed page expansion ratio |   100:1 |
-| XML elements                    | 250,000 |
-| XML nesting depth               |      64 |
-| Pages                           |     100 |
-| Layers                          |   1,000 |
-| Nodes and connections           | 100,000 |
-| Node and connection labels      | 100,000 characters each |
-| Page, layer, and document titles | 256 characters each |
-| Source cell identifiers         | 256 UTF-8 bytes each |
-| Styles                          |  10,000 |
-| Source ID mappings              | 100,000 |
-| Preserved fragments             |   1,000 |
-| One preserved fragment          |  64 KiB |
-| All preserved fragments         |   1 MiB |
+| Limit                            |                 Maximum |
+| -------------------------------- | ----------------------: |
+| Encoded input file               |                  10 MiB |
+| Total decoded page XML           |                  10 MiB |
+| Compressed page expansion ratio  |                   100:1 |
+| XML elements                     |                 250,000 |
+| XML nesting depth                |                      64 |
+| Pages                            |                     100 |
+| Layers                           |                   1,000 |
+| Nodes and connections            |                 100,000 |
+| Node and connection labels       | 100,000 characters each |
+| Page, layer, and document titles |     256 characters each |
+| Source cell identifiers          |    256 UTF-8 bytes each |
+| Styles                           |                  10,000 |
+| Source ID mappings               |                 100,000 |
+| Preserved fragments              |                   1,000 |
+| One preserved fragment           |                  64 KiB |
+| All preserved fragments          |                   1 MiB |
 
 ## Export and file safety
 
