@@ -1,6 +1,6 @@
 # Shape catalog design
 
-Status: manifest schema v1 is validated. S3 adds a local catalog with one first-party rectangle preview under Apache-2.0, offline search, stable node references, and a bounded SVG sanitizer.
+Status: manifest schema v1 is validated. S3 adds a local catalog with one first-party rectangle preview under Apache-2.0, offline search, stable node references, and a bounded SVG sanitizer. WP-05.3's locked npm/Cargo metadata review is recorded in [`LICENSES/dependency-inventory-2026-11.csv`](../../LICENSES/dependency-inventory-2026-11.csv).
 
 ## Responsibilities
 
@@ -31,7 +31,7 @@ The preview sanitizer rebuilds SVG using an allowlist of basic vector elements a
 
 ## Verification
 
-Catalog tests cover local deterministic search, shape insertion, schema-v2 reference round trips, and empty results. SVG fixtures cover active content and each input bound. WP-05.3 separately reviews direct and transitive dependency license metadata and all bundled assets.
+Catalog tests cover local deterministic search, shape insertion, schema-v2 reference round trips, and empty results. SVG fixtures cover active content and each input bound. WP-05.3 reviewed 344 npm lock entries and 448 Cargo packages across all features/targets; every entry has declared license metadata. The inventory is not a scan of final application binaries; WP-11.3/#50 owns that release-package review.
 
 ## Asset review
 

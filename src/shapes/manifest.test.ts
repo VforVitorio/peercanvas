@@ -1,4 +1,6 @@
+import { createHash } from "node:crypto";
 import { describe, expect, it } from "vitest";
+import rectanglePreview from "./assets/rectangle.svg?raw";
 import { bundledShapeManifest, parseShapeManifest } from "./manifest";
 
 const reviewedEntry = (overrides: Record<string, unknown> = {}) => ({
@@ -31,6 +33,19 @@ describe("shape manifest", () => {
   it("loads only the reviewed first-party rectangle asset", () => {
     expect(bundledShapeManifest.entries.map((entry) => entry.id)).toEqual(["basic-rectangle"]);
     expect(bundledShapeManifest.issues).toEqual([]);
+  });
+
+  it("matches the bundled asset bytes to its reviewed rights record", () => {
+    const entry = bundledShapeManifest.entries[0];
+
+    expect(createHash("sha256").update(rectanglePreview).digest("hex")).toBe(entry.sha256);
+    expect(entry.license.identifier).toBe("Apache-2.0");
+    expect(entry.rights).toEqual({
+      redistribution: "permitted",
+      modification: "permitted",
+      commercialUse: "permitted",
+    });
+    expect(entry.review.status).toBe("approved");
   });
 
   it("includes only approved entries with explicit redistribution permission", () => {

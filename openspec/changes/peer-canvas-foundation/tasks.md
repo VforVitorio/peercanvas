@@ -27,7 +27,7 @@ S0 comprises tasks 1.1–1.5 and 8.2. Its compatibility probe is test-only and e
 - [x] 3.2 Implement connectors, property inspection, pages/layers, and undo/redo; verify each operation through integration tests and a reopen fixture. — GitHub Issue [#26](https://github.com/furancho-labs/Peer2Canvas/issues/26)
 - [x] 3.3 Define a shape manifest with source, version, license, attribution, and review fields; verify invalid and unreviewed entries are excluded. — GitHub Issue [#27](https://github.com/furancho-labs/Peer2Canvas/issues/27)
 - [x] 3.4 Implement offline catalog browse/search, stable node references, shape insertion, and safe SVG handling; verify deterministic results, reference round trips, accessibility, and malicious SVG rejection. — GitHub Issue [#28](https://github.com/furancho-labs/Peer2Canvas/issues/28)
-- [ ] 3.5 Record each bundled asset's provenance and rights, review direct/transitive dependency licenses, and verify the release inventory contains no unreviewed asset. — GitHub Issue [#29](https://github.com/furancho-labs/Peer2Canvas/issues/29)
+- [x] 3.5 Record each bundled asset's provenance and rights, review direct/transitive dependency licenses, and verify the release inventory contains no unreviewed asset. — GitHub Issue [#29](https://github.com/furancho-labs/Peer2Canvas/issues/29)
 
 ## 4. draw.io interchange (WP-06)
 
