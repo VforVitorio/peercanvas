@@ -5,7 +5,7 @@ Last updated: 2026-11-12.
 ## Current checkpoint
 
 - The repository is [furancho-labs/Peer2Canvas](https://github.com/furancho-labs/Peer2Canvas). Its move to the organization was intentional. The GitHub Project remains under the personal account `VforVitorio`.
-- Before this handoff update, `main` was `38a0ffa` and `dev` was `bab3140`. Refresh live refs, PRs, issues, milestones, and Project Board before beginning another task.
+- Current refs at the latest S3 checkpoint: `main` is `38a0ffa` and `dev` is `2d29f4f`. Refresh live refs, PRs, issues, milestones, and Project Board before beginning another task.
 - Promotion PR [#106](https://github.com/furancho-labs/Peer2Canvas/pull/106) merged S1 and S2 to `main` as `a2d9837`; docs promotion PR [#109](https://github.com/furancho-labs/Peer2Canvas/pull/109) records the closeout as `035b02f`.
 - S0, S1, and S2 are complete. Milestones #1, #2, and #3 are closed; S1 issues #2, #4, and #19–#24 and S2 issues #6, #25, #26, and #81 are closed and marked Done on the Project Board.
 - CI polish PR [#112](https://github.com/furancho-labs/Peer2Canvas/pull/112) merged into `dev` as `47e825f`. Its run [43191288824](https://github.com/furancho-labs/Peer2Canvas/actions/runs/43191288824) passed all eight required checks, CodeQL, OSV, and Gitleaks. The run took 12m37s overall; native jobs took Linux 9m35s, macOS 6m21s, and Windows 12m26s. The Rust cache now includes `src-tauri/Cargo.toml`, `Cargo.lock`, and `src-tauri/target`; this first run saved the cache and still ran the full S0 probe because it changed the CI workflow.
@@ -16,7 +16,10 @@ Last updated: 2026-11-12.
 - Main infrastructure promotion PR [#117](https://github.com/furancho-labs/Peer2Canvas/pull/117) merged as `0dbb749`. The App-backed run [43215202478](https://github.com/furancho-labs/Peer2Canvas/actions/runs/43215202478) succeeded and created release PR [#118](https://github.com/furancho-labs/Peer2Canvas/pull/118). The generated-changelog `format` failure was fixed by PR [#119](https://github.com/furancho-labs/Peer2Canvas/pull/119), merged as `d97851b`; all eight required checks now pass on #118, which remains open for maintainer review.
 - Main handoff PR [#120](https://github.com/furancho-labs/Peer2Canvas/pull/120) merged as `38a0ffa`. Main-to-dev history sync PR [#121](https://github.com/furancho-labs/Peer2Canvas/pull/121) merged as `bab3140`, so `main` is again an ancestor of `dev`.
 - CI tracking issue [#111](https://github.com/furancho-labs/Peer2Canvas/issues/111) is closed and Done after Release Please created #118 and its required checks passed.
-- WP-05.1 PR [#114](https://github.com/furancho-labs/Peer2Canvas/pull/114) merged into `dev` as `246d6d3`; issue #27 is closed and Done. Its manifest code is not part of this main promotion. WP-05 remains open for #28 and #29.
+- WP-05.1 PR [#114](https://github.com/furancho-labs/Peer2Canvas/pull/114) merged into `dev` as `246d6d3`; issue #27 is closed and Done. WP-05.2 PR [#123](https://github.com/furancho-labs/Peer2Canvas/pull/123) merged as `5839019`, and WP-05.3 PR [#124](https://github.com/furancho-labs/Peer2Canvas/pull/124) merged as `2d29f4f`. Issues #28 and #29 and parent WP-05/#5 are closed and Done; the WP-05 inventory is current through PR #124.
+- WP-06/#7 and children #30–#34 are open and In Progress on Project #4. The current local branch `feature/wp-06-drawio-interchange` contains the implementation and seven synthetic fixtures; it has no PR yet.
+- Local WP-06 checks: 231 TypeScript tests, 33 Rust tests, typecheck, lint, formatting, Clippy, strict OpenSpec validation, and optimized Rust compile all pass. The Vite build succeeds with a JavaScript chunk over 500 kB.
+- A local macOS Tauri bundle attempt failed while generating the configured app icon (`No matching IconType`); no native file-dialog UI smoke was completed. Do not implement the separate icon-packaging work in S3.
 
 ## Delivered product behavior
 
@@ -26,11 +29,11 @@ This was a source promotion. It did not publish an installer, declare minimum su
 
 ## Not implemented
 
-On `main`, grouping, draw.io import/export, catalog browsing/search, safe SVG rendering, peer collaboration, invitations, real assistant/provider calls, and MCP are not delivered. `dev` includes WP-05.1/#27 and WP-05.2/#28: the catalog has one reviewed first-party rectangle preview, offline search, safe SVG rendering, and schema-v2 references. Asset/dependency review #29 and draw.io WP-06/#30–#34 remain open. The app does not render connection labels on the canvas or support page/layer deletion and reordering. Icon packaging remains open under WP-11.6/#90. Do not describe planned S4–S10 work as implemented.
+On `main`, grouping, draw.io import/export, catalog browsing/search, safe SVG rendering, peer collaboration, invitations, real assistant/provider calls, and MCP are not delivered. `dev` includes completed WP-05: one reviewed first-party rectangle preview, offline search, safe SVG rendering, schema-v2 references, and the asset/dependency license inventory. Draw.io WP-06/#30–#34 is implemented locally on `feature/wp-06-drawio-interchange` but is not merged. The app does not render connection labels on the canvas or support page/layer deletion and reordering. Icon packaging remains open under WP-11.6/#90. Do not describe planned S4–S10 work as implemented.
 
 ## Roadmap after S2
 
-- S3 covers WP-05 (shape catalog) and WP-06 (draw.io interoperability). WP-05.1/#27 and WP-05.2/#28 are complete on `dev`; WP-05.3/#29 (asset/dependency license audit) is in progress; WP-06/#7 with children #30–#34 remains open.
+- S3 covers WP-05 (shape catalog) and WP-06 (draw.io interoperability). WP-05/#5 and children #27–#29 are complete on `dev`; WP-06/#7 and children #30–#34 are the only remaining S3 work.
 - S7: native icon packaging, WP-11.6/#90.
 - S8: desktop preferences and English/Spanish resources, WP-13/#93.
 - S9: grouping, WP-14/#91; discovery issue #89 defines the semantics before implementation tasks are opened.
@@ -57,4 +60,4 @@ The S7–S10 issues and OpenSpec proposals are planning only. No product impleme
 
 ## Next step
 
-Release PR #118 remains open for maintainer review; do not merge it without maintainer approval. The maintainer has authorized autonomous S3 completion: continue with WP-05.3/#29 and WP-06/#7 children #30–#34. PR #123 has merged to `dev`; issue #28 is closed and marked Done. Before implementation, refresh `main`/`dev`, issues, milestone, board, current OpenSpec, and linked ADRs; deliver focused PRs to `dev` and promote only after S3 acceptance criteria pass.
+Release PR #118 remains open for maintainer review; do not merge it without maintainer approval. The maintainer has authorized autonomous completion of S3 only. Finish WP-06/#7 tasks #30–#34 on `feature/wp-06-drawio-interchange`; WP-05 is closed. The local WP-06 changes are uncommitted and have no PR yet. Do not start work from a later sprint. Refresh `main`/`dev`, issues, milestone, board, current OpenSpec, and linked ADRs before resuming; deliver a focused PR to `dev`, close S3 issues and milestone after acceptance, then promote to `main` after required checks pass.

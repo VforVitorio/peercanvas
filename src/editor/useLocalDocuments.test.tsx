@@ -11,6 +11,10 @@ const files = vi.hoisted(() => ({
   acceptOpen: vi.fn(),
   discardOpen: vi.fn(),
   save: vi.fn(),
+  importDrawio: vi.fn(),
+  prepareDrawioExport: vi.fn(),
+  exportDrawio: vi.fn(),
+  discardDrawioExport: vi.fn(),
   close: vi.fn(),
 }));
 const windowState = vi.hoisted(() => ({
@@ -77,6 +81,10 @@ describe("useLocalDocuments", () => {
       warning: null,
       recentUpdated: true,
     });
+    files.importDrawio.mockReset();
+    files.prepareDrawioExport.mockReset();
+    files.exportDrawio.mockReset();
+    files.discardDrawioExport.mockReset().mockResolvedValue(undefined);
     files.close.mockReset().mockResolvedValue(undefined);
     windowState.onClose = undefined;
     windowState.close.mockReset().mockResolvedValue(undefined);
@@ -342,5 +350,103 @@ describe("useLocalDocuments", () => {
     unmount();
     await act(async () => finishListening(eventState.unlisten));
     expect(eventState.unlisten).toHaveBeenCalledOnce();
+  });
+
+  it("stages a draw.io import for review before replacing the active document", async () => {
+    const original = current.document;
+    const imported = createSample("2026-11-11T10:05:00.000Z");
+    files.importDrawio.mockResolvedValue({
+      displayName: "import.drawio",
+      document: imported.document,
+      losses: ["A custom cell was kept as source data."],
+      preservedFragmentCount: 1,
+    });
+    const { result } = renderSession();
+
+    act(() => result.current.importDrawio());
+    expect(result.current.pendingAction).toBe("import");
+    await act(async () => result.current.discardAndContinue());
+
+    await waitFor(() => expect(result.current.drawioImport?.displayName).toBe("import.drawio"));
+    expect(current.document).toBe(original);
+    expect(result.current.isEditingLocked()).toBe(true);
+    expect(result.current.drawioImport?.losses).toEqual(["A custom cell was kept as source data."]);
+    act(() => result.current.acceptDrawioImport());
+
+    expect(current.document).toEqual(imported.document);
+    expect(result.current.fileName).toBeNull();
+    expect(result.current.dirty).toBe(true);
+    expect(result.current.drawioImport).toBeNull();
+  });
+
+  it("keeps the active document when draw.io import review is canceled or invalid", async () => {
+    const original = current.document;
+    const imported = createSample("2026-11-11T10:06:00.000Z");
+    files.importDrawio.mockResolvedValue({
+      displayName: "import.drawio",
+      document: imported.document,
+      losses: [],
+      preservedFragmentCount: 0,
+    });
+    const { result } = renderSession();
+
+    act(() => result.current.importDrawio());
+    await act(async () => result.current.discardAndContinue());
+    await waitFor(() => expect(result.current.drawioImport).not.toBeNull());
+    act(() => result.current.cancelDrawioImport());
+    expect(current.document).toBe(original);
+    expect(result.current.isEditingLocked()).toBe(false);
+
+    files.importDrawio.mockResolvedValue({
+      displayName: "invalid.drawio",
+      document: { schemaVersion: 2 },
+      losses: [],
+      preservedFragmentCount: 0,
+    });
+    act(() => result.current.importDrawio());
+    await act(async () => result.current.discardAndContinue());
+    await waitFor(() => expect(reportError).toHaveBeenCalled());
+    expect(current.document).toBe(original);
+    expect(result.current.drawioImport).toBeNull();
+  });
+
+  it("holds an export snapshot for review and requires explicit loss confirmation", async () => {
+    files.prepareDrawioExport.mockResolvedValue({
+      token: "export-1",
+      losses: ["One deleted-cell reference cannot be exported."],
+      preservedFragmentCount: 1,
+    });
+    files.exportDrawio.mockResolvedValue({ displayName: "diagram.drawio", warning: null });
+    const { result } = renderSession();
+
+    await act(async () => result.current.prepareDrawioExport());
+    expect(result.current.drawioExport?.token).toBe("export-1");
+    expect(result.current.isEditingLocked()).toBe(true);
+    expect(files.prepareDrawioExport).toHaveBeenCalledWith(
+      expect.stringContaining('"schemaVersion": 2'),
+    );
+    await act(async () => result.current.confirmDrawioExport());
+
+    expect(files.exportDrawio).toHaveBeenCalledWith("export-1", true);
+    expect(result.current.drawioExport).toBeNull();
+    expect(result.current.isEditingLocked()).toBe(false);
+    expect(reportFeedback).toHaveBeenCalledWith("Exported diagram.drawio.");
+  });
+
+  it("discards an export review without writing a file", async () => {
+    files.prepareDrawioExport.mockResolvedValue({
+      token: "export-2",
+      losses: [],
+      preservedFragmentCount: 0,
+    });
+    const { result } = renderSession();
+
+    await act(async () => result.current.prepareDrawioExport());
+    await act(async () => result.current.cancelDrawioExport());
+
+    expect(files.discardDrawioExport).toHaveBeenCalledWith("export-2");
+    expect(files.exportDrawio).not.toHaveBeenCalled();
+    expect(result.current.drawioExport).toBeNull();
+    expect(result.current.isEditingLocked()).toBe(false);
   });
 });

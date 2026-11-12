@@ -10,7 +10,7 @@ use std::{
     time::SystemTime,
 };
 use tauri::Manager;
-use tauri_plugin_dialog::DialogExt;
+use tauri_plugin_dialog::{DialogExt, MessageDialogButtons, MessageDialogKind};
 
 const MAX_BYTES: u64 = 10 * 1024 * 1024;
 static TEMP_ID: AtomicU64 = AtomicU64::new(0);
@@ -55,6 +55,13 @@ pub struct SaveOutcome {
     display_name: String,
     warning: Option<String>,
     recent_updated: bool,
+}
+
+#[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct DrawioSaveOutcome {
+    display_name: String,
+    warning: Option<String>,
 }
 
 #[derive(Deserialize)]
@@ -113,6 +120,89 @@ fn document_path(path: PathBuf) -> Result<PathBuf> {
     }
 }
 
+fn drawio_path(mut path: PathBuf) -> Result<PathBuf> {
+    if path.extension().is_none() {
+        path.set_extension("drawio");
+    }
+    if !path.extension().is_some_and(|extension| {
+        extension.eq_ignore_ascii_case("drawio") || extension.eq_ignore_ascii_case("xml")
+    }) {
+        return Err("Choose a .drawio or .xml export file.".into());
+    }
+    match fs::symlink_metadata(&path) {
+        Ok(metadata) if metadata.file_type().is_symlink() => {
+            Err("Choose a regular file, not a symbolic link.".into())
+        }
+        Ok(metadata) if !metadata.is_file() => Err("Choose a regular file.".into()),
+        Ok(_) => fs::canonicalize(path).map_err(io_error),
+        Err(error) if error.kind() == io::ErrorKind::NotFound => {
+            let parent = fs::canonicalize(path.parent().ok_or("Choose a valid export location.")?)
+                .map_err(io_error)?;
+            Ok(parent.join(path.file_name().ok_or("Choose a valid export name.")?))
+        }
+        Err(error) => Err(io_error(error)),
+    }
+}
+
+pub async fn export_drawio_file(
+    app: tauri::AppHandle,
+    contents: String,
+) -> Result<Option<DrawioSaveOutcome>> {
+    with_store(app, move |app, _| {
+        let selected = app
+            .dialog()
+            .file()
+            .add_filter("draw.io", &["drawio", "xml"])
+            .set_file_name("Diagram.drawio")
+            .blocking_save_file()
+            .map(|path| {
+                path.into_path()
+                    .map_err(|_| "Choose a local export file.".to_string())
+            })
+            .transpose()?;
+        let Some(selected) = selected else {
+            return Ok(None);
+        };
+        let path = drawio_path(selected)?;
+        let expected = match fs::symlink_metadata(&path) {
+            Ok(metadata) if metadata.file_type().is_symlink() => {
+                return Err("Choose a regular file, not a symbolic link.".into());
+            }
+            Ok(metadata) if !metadata.is_file() => return Err("Choose a regular file.".into()),
+            Ok(_) => Some(read_snapshot(&path)?),
+            Err(error) if error.kind() == io::ErrorKind::NotFound => None,
+            Err(error) => return Err(io_error(error)),
+        };
+        if expected.is_some()
+            && !app
+                .dialog()
+                .message("A file with this name already exists. Replace it?")
+                .title("Replace existing file?")
+                .kind(MessageDialogKind::Warning)
+                .buttons(MessageDialogButtons::OkCancelCustom(
+                    "Replace".into(),
+                    "Cancel".into(),
+                ))
+                .blocking_show()
+        {
+            return Ok(None);
+        }
+        let warning = publish_with_validator(
+            &path,
+            &contents,
+            expected.as_ref(),
+            || Ok(()),
+            crate::drawio::validate_drawio_xml,
+            false,
+        )?;
+        Ok(Some(DrawioSaveOutcome {
+            display_name: display_name(&path),
+            warning,
+        }))
+    })
+    .await
+}
+
 fn read_snapshot(path: &Path) -> Result<Snapshot> {
     let file = File::open(path).map_err(io_error)?;
     let metadata = file.metadata().map_err(io_error)?;
@@ -138,7 +228,12 @@ fn read_snapshot(path: &Path) -> Result<Snapshot> {
 
 fn unchanged(path: &Path, expected: Option<&Snapshot>) -> Result<()> {
     let matches = match expected {
-        Some(snapshot) => read_snapshot(path).is_ok_and(|current| current == *snapshot),
+        Some(snapshot) => {
+            matches!(
+                fs::symlink_metadata(path),
+                Ok(metadata) if metadata.is_file() && !metadata.file_type().is_symlink()
+            ) && read_snapshot(path).is_ok_and(|current| current == *snapshot)
+        }
         None => {
             matches!(fs::symlink_metadata(path), Err(error) if error.kind() == io::ErrorKind::NotFound)
         }
@@ -169,21 +264,46 @@ fn publish(
     expected: Option<&Snapshot>,
     before_publish: impl FnOnce() -> io::Result<()>,
 ) -> Result<Option<String>> {
+    publish_with_validator(
+        path,
+        text,
+        expected,
+        before_publish,
+        |value| {
+            serde_json::from_str::<serde_json::Value>(value)
+                .map(|_| ())
+                .map_err(|_| "The document is not valid JSON.".to_string())
+        },
+        true,
+    )
+}
+
+fn publish_with_validator(
+    path: &Path,
+    text: &str,
+    expected: Option<&Snapshot>,
+    before_publish: impl FnOnce() -> io::Result<()>,
+    validate_content: impl FnOnce(&str) -> Result<()>,
+    keep_backup: bool,
+) -> Result<Option<String>> {
     if text.len() as u64 > MAX_BYTES {
         return Err("The document exceeds the 10 MiB limit.".into());
     }
-    serde_json::from_str::<serde_json::Value>(text)
-        .map_err(|_| "The document is not valid JSON.".to_string())?;
+    validate_content(text)?;
     unchanged(path, expected)?;
+    let temporary_id = TEMP_ID.fetch_add(1, Ordering::Relaxed);
     let temporary = sibling(
         path,
-        &format!(
-            ".{}.{}.tmp",
-            std::process::id(),
-            TEMP_ID.fetch_add(1, Ordering::Relaxed)
-        ),
+        &format!(".{}.{}.tmp", std::process::id(), temporary_id),
     );
-    let backup = sibling(path, ".bak");
+    let backup = if keep_backup {
+        sibling(path, ".bak")
+    } else {
+        sibling(
+            path,
+            &format!(".{}.{}.bak", std::process::id(), temporary_id),
+        )
+    };
     let mut rotated = false;
     let mut owns_temporary = false;
     let staged = (|| -> Result<()> {
@@ -201,11 +321,17 @@ fn publish(
         file.sync_all().map_err(io_error)?;
         unchanged(path, expected)?;
         if expected.is_some() {
-            // Retire the old backup while the complete primary still exists.
-            match fs::remove_file(&backup) {
-                Ok(()) => (),
-                Err(error) if error.kind() == io::ErrorKind::NotFound => (),
-                Err(error) => return Err(io_error(error)),
+            if keep_backup {
+                // Retire the old recovery snapshot while the complete primary still exists.
+                match fs::remove_file(&backup) {
+                    Ok(()) => (),
+                    Err(error) if error.kind() == io::ErrorKind::NotFound => (),
+                    Err(error) => return Err(io_error(error)),
+                }
+            } else if fs::symlink_metadata(&backup).is_ok() {
+                return Err(
+                    "The temporary export backup already exists. Try another destination.".into(),
+                );
             }
             unchanged(path, expected)?;
             fs::rename(path, &backup).map_err(io_error)?;
@@ -215,26 +341,48 @@ fn publish(
         }
         before_publish().map_err(io_error)?;
         unchanged(path, None)?;
-        // shortcut: std::fs has no atomic compare-and-rename; use platform primitives if simultaneous writers must be coordinated.
-        fs::rename(&temporary, path).map_err(io_error)?;
+        if keep_backup {
+            // shortcut: document saves use std::fs rename; coordinate concurrent writers with platform primitives if needed.
+            fs::rename(&temporary, path).map_err(io_error)?;
+        } else {
+            fs::hard_link(&temporary, path).map_err(io_error)?;
+        }
         Ok(())
     })();
     if let Err(error) = staged {
-        if rotated {
-            // Only attempt rollback while the original location is absent.
-            if unchanged(path, None).is_ok() && fs::rename(&backup, path).is_ok() {
-                let _ = sync_parent(path);
-            }
+        let backup_retained =
+            rotated && (unchanged(path, None).is_err() || fs::rename(&backup, path).is_err());
+        if rotated && !backup_retained {
+            let _ = sync_parent(path);
         }
         if owns_temporary {
             let _ = fs::remove_file(&temporary);
         }
-        return Err(error);
+        return Err(if backup_retained {
+            "Export failed; the previous file remains in a recovery backup in the same folder."
+                .into()
+        } else {
+            error
+        });
     }
     let durable = sync_parent(path).is_ok();
     let _ = fs::remove_file(&temporary);
-    Ok((!durable)
-        .then(|| "Saved, but the filesystem could not confirm directory durability.".into()))
+    let mut warning = (!durable)
+        .then(|| "Saved, but the filesystem could not confirm directory durability.".to_string());
+    if rotated && !keep_backup {
+        if let Err(error) = fs::remove_file(&backup) {
+            if error.kind() != io::ErrorKind::NotFound {
+                warning.get_or_insert_with(|| {
+                    "Exported, but the previous file backup remains.".into()
+                });
+            }
+        } else if sync_parent(path).is_err() {
+            warning.get_or_insert_with(|| {
+                "Exported, but the filesystem could not confirm directory durability.".into()
+            });
+        }
+    }
+    Ok(warning)
 }
 
 fn preferences_path(app: &tauri::AppHandle) -> Result<PathBuf> {
@@ -630,6 +778,106 @@ mod tests {
                 .extension()
                 .is_some_and(|extension| extension == "tmp")
         }));
+    }
+
+    #[test]
+    fn failed_drawio_export_restores_the_destination_without_touching_existing_backup() {
+        let fixture = Fixture::new();
+        let path = fixture.0.join("diagram.drawio");
+        let backup = sibling(&path, ".bak");
+        fs::write(&path, FIRST).unwrap();
+        fs::write(&backup, "unrelated backup").unwrap();
+        let snapshot = read_snapshot(&path).unwrap();
+
+        let error = publish_with_validator(
+            &path,
+            SECOND,
+            Some(&snapshot),
+            || Err(io::Error::other("injected interruption")),
+            |_| Ok(()),
+            false,
+        );
+
+        assert!(error.is_err());
+        assert_eq!(fs::read_to_string(&path).unwrap(), FIRST);
+        assert_eq!(fs::read_to_string(&backup).unwrap(), "unrelated backup");
+        assert_eq!(
+            fs::read_dir(&fixture.0)
+                .unwrap()
+                .filter_map(|entry| entry.ok())
+                .filter(|entry| entry.path().extension().is_some_and(|ext| ext == "bak"))
+                .count(),
+            1
+        );
+        assert!(fs::read_dir(&fixture.0).unwrap().all(|entry| {
+            !entry
+                .unwrap()
+                .path()
+                .extension()
+                .is_some_and(|extension| extension == "tmp")
+        }));
+    }
+
+    #[test]
+    fn successful_drawio_export_replaces_only_the_confirmed_destination() {
+        let fixture = Fixture::new();
+        let path = fixture.0.join("diagram.drawio");
+        let backup = sibling(&path, ".bak");
+        let previous = "<mxfile><diagram id=\"previous\"/></mxfile>";
+        let contents = "<mxfile><diagram id=\"current\"/></mxfile>";
+        fs::write(&path, previous).unwrap();
+        fs::write(&backup, "unrelated backup").unwrap();
+        let snapshot = read_snapshot(&path).unwrap();
+
+        let warning = publish_with_validator(
+            &path,
+            contents,
+            Some(&snapshot),
+            || Ok(()),
+            crate::drawio::validate_drawio_xml,
+            false,
+        )
+        .unwrap();
+
+        assert_eq!(warning, None);
+        assert_eq!(fs::read_to_string(path).unwrap(), contents);
+        assert_eq!(fs::read_to_string(backup).unwrap(), "unrelated backup");
+    }
+
+    #[test]
+    fn drawio_export_keeps_an_external_destination_and_reports_the_recovery_backup() {
+        let fixture = Fixture::new();
+        let path = fixture.0.join("diagram.drawio");
+        let previous = "<mxfile><diagram id=\"previous\"/></mxfile>";
+        let external = "<mxfile><diagram id=\"external\"/></mxfile>";
+        let contents = "<mxfile><diagram id=\"current\"/></mxfile>";
+        fs::write(&path, previous).unwrap();
+        let snapshot = read_snapshot(&path).unwrap();
+
+        let error = publish_with_validator(
+            &path,
+            contents,
+            Some(&snapshot),
+            || fs::write(&path, external),
+            crate::drawio::validate_drawio_xml,
+            false,
+        )
+        .unwrap_err();
+
+        assert!(error.contains("recovery backup"));
+        assert_eq!(fs::read_to_string(&path).unwrap(), external);
+        let backups = fs::read_dir(&fixture.0)
+            .unwrap()
+            .filter_map(|entry| entry.ok())
+            .filter(|entry| {
+                entry
+                    .path()
+                    .extension()
+                    .is_some_and(|extension| extension == "bak")
+            })
+            .collect::<Vec<_>>();
+        assert_eq!(backups.len(), 1);
+        assert_eq!(fs::read_to_string(backups[0].path()).unwrap(), previous);
     }
 
     #[test]

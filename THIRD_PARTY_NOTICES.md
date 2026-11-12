@@ -4,7 +4,7 @@ PeerCanvas is an independent project. References to upstream projects do not imp
 
 ## Dependency license inventory (2026-11-12)
 
-[`LICENSES/dependency-inventory-2026-11.csv`](LICENSES/dependency-inventory-2026-11.csv) records the locked dependency license expressions, upstream source URLs, and metadata sources. It contains 344 npm entries (8 direct runtime, 19 direct build/test, 317 transitive) and 448 Cargo entries (4 direct runtime, 1 direct build, 1 optional direct, 441 transitive, and the project crate). The inventory includes all locked platform variants; 40 npm entries are not installed on this macOS host (mostly platform-specific packages) but have license metadata in `package-lock.json`. The root package and Cargo crate both identify the project's Apache-2.0 license. All 792 inventory records have license metadata across 34 distinct expressions; no `UNKNOWN` entries remain.
+[`LICENSES/dependency-inventory-2026-11.csv`](LICENSES/dependency-inventory-2026-11.csv) records the locked dependency license expressions, upstream source URLs, and metadata sources. It contains 344 npm entries (8 direct runtime, 19 direct build/test, 317 transitive) and 448 Cargo entries (9 direct runtime, 1 direct build, 1 optional direct, 436 transitive, and the project crate). The inventory includes all locked platform variants; 40 npm entries are not installed on this macOS host (mostly platform-specific packages) but have license metadata in `package-lock.json`. The root package and Cargo crate both identify the project's Apache-2.0 license. All 792 inventory records have license metadata across 34 distinct expressions; no `UNKNOWN` entries remain.
 
 Special license and attribution records:
 

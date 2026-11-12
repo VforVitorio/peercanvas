@@ -1,6 +1,8 @@
 #[cfg(all(feature = "native-smoke", not(debug_assertions)))]
 compile_error!("native-smoke feature cannot be used in a release build");
 
+mod drawio;
+mod interchange;
 mod persistence;
 
 #[cfg(not(target_os = "linux"))]
@@ -65,6 +67,7 @@ pub fn run() {
     let builder = tauri::Builder::default()
         .plugin(tauri_plugin_dialog::init())
         .manage(persistence::PersistenceState::default())
+        .manage(interchange::InterchangeState::default())
         .invoke_handler(tauri::generate_handler![
             persistence::load_recent_document,
             persistence::get_recent_document_name,
@@ -73,6 +76,10 @@ pub fn run() {
             persistence::discard_open,
             persistence::save_document,
             persistence::close_document,
+            interchange::import_drawio,
+            interchange::prepare_drawio_export,
+            interchange::export_drawio,
+            interchange::discard_drawio_export,
             quit_application,
         ]);
 

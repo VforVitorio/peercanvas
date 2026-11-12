@@ -1,0 +1,6 @@
+<!DOCTYPE mxfile [<!ENTITY external SYSTEM "file:///not-read.txt">]>
+<mxfile host="app.diagrams.net" type="device">
+  <diagram id="page-hostile" name="Entity is never expanded">
+    <mxGraphModel><root><mxCell id="0" /><mxCell id="1" parent="0" /><mxCell id="2" value="&external;" vertex="1" parent="1" /></root></mxGraphModel>
+  </diagram>
+</mxfile>

@@ -20,6 +20,7 @@ import {
 } from "./document";
 import { createSample } from "./editor/sample";
 import { createDocumentHistory } from "./document/history";
+import DrawioReviewDialog, { type DrawioReview } from "./editor/DrawioReviewDialog";
 import UnsavedChangesDialog from "./editor/UnsavedChangesDialog";
 import { useLocalDocuments } from "./editor/useLocalDocuments";
 import { searchShapes, shapeNodeType, shapePreviewDataUri } from "./shapes/catalog";
@@ -136,6 +137,20 @@ export default function App() {
     reportFeedback: setFeedback,
   });
   const editingLocked = documents.isEditingLocked();
+  const drawioReview: DrawioReview | null = documents.drawioImport
+    ? {
+        kind: "import",
+        displayName: documents.drawioImport.displayName,
+        losses: documents.drawioImport.losses,
+        preservedFragmentCount: documents.drawioImport.preservedFragmentCount,
+      }
+    : documents.drawioExport
+      ? {
+          kind: "export",
+          losses: documents.drawioExport.losses,
+          preservedFragmentCount: documents.drawioExport.preservedFragmentCount,
+        }
+      : null;
 
   useEffect(() => {
     textForm.current?.reset();
@@ -551,6 +566,14 @@ export default function App() {
           <button
             type="button"
             className="pc-btn"
+            disabled={!documents.available || editingLocked || renamingDocument}
+            onClick={documents.importDrawio}
+          >
+            Import draw.io
+          </button>
+          <button
+            type="button"
+            className="pc-btn"
             disabled={
               !documents.available || editingLocked || renamingDocument || !documents.recentName
             }
@@ -574,6 +597,14 @@ export default function App() {
             onClick={documents.saveAs}
           >
             Save as
+          </button>
+          <button
+            type="button"
+            className="pc-btn"
+            disabled={!documents.available || editingLocked || renamingDocument}
+            onClick={documents.prepareDrawioExport}
+          >
+            Export draw.io
           </button>
           <button
             type="button"
@@ -1184,6 +1215,22 @@ export default function App() {
           onCancel={documents.cancelReplacement}
           busy={documents.busy}
           error={documents.promptError}
+        />
+      )}
+      {drawioReview && (
+        <DrawioReviewDialog
+          review={drawioReview}
+          busy={documents.busy}
+          onConfirm={
+            drawioReview.kind === "import"
+              ? documents.acceptDrawioImport
+              : documents.confirmDrawioExport
+          }
+          onCancel={
+            drawioReview.kind === "import"
+              ? documents.cancelDrawioImport
+              : documents.cancelDrawioExport
+          }
         />
       )}
       <footer className="pc-statusbar">
