@@ -12,7 +12,7 @@ Last updated: 2026-11-12.
 - Documentation PR [#113](https://github.com/furancho-labs/Peer2Canvas/pull/113) merged into `dev` as `589e6bf`, recording that the organization policy blocks Actions PR creation. Its eight required checks passed; native builds were skipped while all three required contexts stayed green.
 - WP-05.1 PR [#114](https://github.com/furancho-labs/Peer2Canvas/pull/114) passed all eight required checks. Its initial run took 8m48s; native jobs took Linux 6m31s, macOS 8m15s, and Windows 8m36s with the S0 probe skipped. After manual CI run [43197023908](https://github.com/furancho-labs/Peer2Canvas/actions/runs/43197023908) warmed Rust caches on `dev`, native-only reruns restored exact cache-key matches and took Linux 3m07s, macOS 4m02s, and Windows 5m07s. The baseline native jobs on PR #109 took 7m53s, 7m41s, and 10m52s respectively; this first warm comparison benefits from both the cache and skipping an unrelated S0 probe.
 - `scripts/setup-github.sh` could not enable repository Actions PR creation: the organization returned HTTP 409 because its policy blocks GitHub Actions from creating or approving pull requests. The repository still has the exact eight required contexts on both protected branches; the repo-level setting remains disabled.
-- CI tracking issue [#111](https://github.com/furancho-labs/Peer2Canvas/issues/111) remains open until Release Please can create a PR under an approved credential or policy.
+- CI tracking issue [#111](https://github.com/furancho-labs/Peer2Canvas/issues/111) remains open until Release Please creates a PR with the selected GitHub App token. The app, repository variable, and private-key secret still need setup before promoting `dev` to `main`.
 - WP-05.1/#27 changes in this PR define and validate an empty schema-v1 manifest, with no assets or catalog UI; WP-05 remains open for #28 and #29.
 
 ## Delivered product behavior
@@ -54,4 +54,4 @@ The S7–S10 issues and OpenSpec proposals are planning only. No product impleme
 
 ## Next step
 
-Pause before any `dev`→`main` promotion and configure an approved credential route for Release Please and any other workflows that need PR-creation tokens. The built-in `GITHUB_TOKEN` is blocked by the organization policy; do not attempt the main promotion until the maintainer resolves that configuration. Then refresh GitHub state before choosing the next S3 task, currently WP-05.2/#28.
+Pause before any `dev`→`main` promotion and create/install the repository-scoped Release Please GitHub App. Add repository variable `RELEASE_PLEASE_APP_CLIENT_ID` and secret `RELEASE_PLEASE_APP_PRIVATE_KEY`; after the promotion pushes to `main`, verify Release Please creates its PR and leave it open for maintainer review. Then refresh GitHub state before the next S3 task, currently WP-05.2/#28.
