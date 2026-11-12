@@ -18,24 +18,24 @@
 
 PeerCanvas is an open-source desktop diagram editor for turning ideas into architecture, UML, BPMN, network, cloud, database, process, and workflow diagrams. The goal is a useful local editor that works without a network connection or an AI account, with optional peer collaboration, draw.io interchange, and Codex/MCP assistance.
 
-The project is in early development. S2 adds local `.peercanvas` save/open and recovery to the in-memory editor. The implementation is merged into `dev`; the sprint stays open through promotion to `main` and issue closeout. Collaboration, interchange, and AI/MCP features remain planned.
+The project is in early development. S0–S2 are implemented on `main`; S3 implementation is complete and its promotion state is tracked on the delivery board. S3 adds a licensed offline shape catalog, safe SVG previews, schema-v2 catalog references, and local draw.io import/export for a declared subset. Full draw.io parity is not claimed.
 
 ## Project status
 
-**S0 is complete. S2 implementation is merged into `dev`; sprint closeout is pending promotion to `main`.** The renderer compatibility gate passed its bounded native fixture on Windows, macOS, and Linux. That evidence does not establish full native product support.
+**S0–S2 are implemented on `main`; S3 implementation is complete. Check the delivery board for promotion status.** S3 includes one reviewed first-party rectangle preview, a versioned shape reference on inserted nodes, and a tested draw.io subset with loss reports and safe source-fragment preservation. The renderer compatibility gate passed its bounded native fixture on Windows, macOS, and Linux; that evidence does not establish full native product support.
 
-| Area                                            | Current state                                                                                                                                               |
-| ----------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Core editing                                    | In-memory add, select, move, resize, and delete. [WP-04.1 / #25](https://github.com/furancho-labs/Peer2Canvas/issues/25) is merged into `dev`.              |
-| Connectors, properties, pages/layers, undo/redo | Included in the current S2 code under [WP-04.2 / #26](https://github.com/furancho-labs/Peer2Canvas/issues/26).                                              |
-| Local files and recovery                        | S2 adds `.peercanvas` Save, Save As, Open, Reopen last, migration, unsaved-change protection, and backup recovery; native UI evidence is recorded on macOS. |
-| Shape catalog and draw.io interchange           | Planned; no format compatibility or bundled catalog support claimed.                                                                                        |
-| Peer collaboration                              | Planned around Yjs and Trystero/WebRTC; network behavior is unverified.                                                                                     |
-| Codex and MCP                                   | Optional integrations researched; not implemented.                                                                                                          |
+| Area                                            | Current state                                                                                                                                                                    |
+| ----------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Core editing                                    | In-memory add, select, move, resize, and delete. [WP-04.1 / #25](https://github.com/furancho-labs/Peer2Canvas/issues/25) is merged into `dev`.                                   |
+| Connectors, properties, pages/layers, undo/redo | Included in the current S2 code under [WP-04.2 / #26](https://github.com/furancho-labs/Peer2Canvas/issues/26).                                                                   |
+| Local files and recovery                        | S2 adds `.peercanvas` Save, Save As, Open, Reopen last, migration, unsaved-change protection, and backup recovery; native UI evidence is recorded on macOS.                      |
+| Shape catalog and draw.io interchange           | WP-05 and WP-06 implementation is complete; the catalog, safe SVG previews, schema-v2 references, and declared draw.io subset are implemented. Promotion status is on the board. |
+| Peer collaboration                              | Planned around Yjs and Trystero/WebRTC; network behavior is unverified.                                                                                                          |
+| Codex and MCP                                   | Optional integrations researched; not implemented.                                                                                                                               |
 
-Local checks pass 191 TypeScript tests and 14 Rust tests; typecheck, lint, formatting, OpenSpec validation, and the macOS native build pass. PR #104 passed all eight required checks. The optional Gitleaks job could not scan because the organization has no license configured. See the [platform matrix](docs/support/platform-matrix.md) and [handoff](docs/handoff/START_HERE.md) for the scope of each result.
+WP-05 and WP-06 are complete on `dev`. Local checks pass 231 TypeScript tests and 33 Rust tests, typecheck, lint, formatting, Clippy, the optimized Rust check, and OpenSpec validation. PR [#125](https://github.com/furancho-labs/Peer2Canvas/pull/125) passed all eight required checks, CodeQL, OSV, Gitleaks, and native jobs. A local macOS bundle attempt could not generate the configured app icon, so native file-dialog interaction remains unverified. See the [platform matrix](docs/support/platform-matrix.md) and [handoff](docs/handoff/START_HERE.md) for the scope of each result.
 
-The [PeerCanvas Delivery Board](https://github.com/users/VforVitorio/projects/4) groups work by parent work-package issues, task sub-issues, and sprint milestones. Issues #25 and #26 are the WP-04 editing children. [Parent #6](https://github.com/furancho-labs/Peer2Canvas/issues/6) remains open through the `dev`→`main` promotion. Grouping is a separate S9 item under [WP-14/#91](https://github.com/furancho-labs/Peer2Canvas/issues/91), with discovery in [#89](https://github.com/furancho-labs/Peer2Canvas/issues/89).
+The [PeerCanvas Delivery Board](https://github.com/users/VforVitorio/projects/4) groups work by parent work-package issues, task sub-issues, and sprint milestones. WP-05/#5 and its children #27–#29, plus WP-06/#7 and its children #30–#34, are closed and Done on the board. S3 milestone #4 records sprint closeout. Grouping is a separate S9 item under [WP-14/#91](https://github.com/furancho-labs/Peer2Canvas/issues/91), with discovery in [#89](https://github.com/furancho-labs/Peer2Canvas/issues/89).
 
 ## What the editor is being built for
 
@@ -123,7 +123,7 @@ Contributions follow `feature/*` → `dev` → `main`. Focused task PRs target `
 
 ## Acknowledgments and third-party notices
 
-The following projects inform the implementation and roadmap. Adopted sources, revisions, licenses, and retained notices are recorded in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
+The following projects inform the implementation and roadmap. Adopted sources, revisions, licenses, and retained notices are recorded in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md). The direct/transitive license snapshot for the locked npm and Cargo dependency graphs is in [the dependency inventory](LICENSES/dependency-inventory-2026-11.csv).
 
 | Project or documentation                                                                                                                                            | Use in PeerCanvas                                                           |
 | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------- |

@@ -38,6 +38,8 @@ Create one OpenSpec spec file per capability listed by the proposal. Keep the pr
 
 Treat pages, layers, nodes, connections, styles, and supported metadata as one semantic document. UI gestures, import, remote collaboration, Codex, and MCP mutations must resolve to validated commands. Selection, renderer state, presence, and conversation history remain separate or derived.
 
+S3 uses schema v2 for nullable per-node catalog references and bounded inert draw.io fragments. Schema-v0 and schema-v1 files migrate in memory to v2 and are rewritten only after a successful user save. The concrete contract and limits are recorded in [ADR-0007](../../../docs/architecture/decisions/ADR-0007-document-schema-v2-compatibility.md).
+
 **Alternative considered:** use renderer state or Yjs transport state as the independent document authority. Rejected because it can diverge from durable content or let external inputs bypass validation.
 
 ### Adapter boundaries for renderer, storage, and transport

@@ -103,6 +103,7 @@ function makeFixture(fixture: Fixture): ModelState {
     geometry: { x, y, width: 180, height: 90, rotation: 0 },
     text,
     styleId: style,
+    catalogReference: null,
   });
   const nodes = [
     node(20, "Web client", 100, 160),
@@ -528,6 +529,7 @@ export function createDemoService() {
       text: source === "import" ? "Imported service" : "Review queue",
       geometry: { x: 390, y: 370, width: 180, height: 90, rotation: 0 },
       styleId: null,
+      catalogReference: null,
     };
     proposalCommands = [
       {
@@ -862,6 +864,7 @@ export function createDemoService() {
           rotation: 0,
         },
         styleId: null,
+        catalogReference: null,
       };
       if (
         apply({

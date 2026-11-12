@@ -1,7 +1,7 @@
 # ADR-0006: Explicit draw.io compatibility subset
 
-- **Status:** Proposed, gated on WP-06 fixtures.
-- **Date:** 2026-11-07.
+- **Status:** Accepted by the maintainer for S3.
+- **Date:** 2026-11-12.
 
 ## Context
 
@@ -23,4 +23,4 @@ An isolated adapter keeps the canonical model independent from an external file 
 
 ## Risks and validation
 
-WP-06 must test compressed/uncompressed inputs, multiple pages, geometry, labels, edges, unsupported styles, malformed XML, decompression limits, SVG sanitization, and round-trip semantics.
+WP-06 was merged to `dev` in PR [#125](https://github.com/furancho-labs/Peer2Canvas/pull/125). The versioned first-party corpus and tests cover compressed and uncompressed input, bare and multiple pages, geometry, labels, edges, safe fragments, malformed and hostile XML/SVG, parser limits, and semantic round trips. Required PR checks passed; promotion to `main` remains pending. A local macOS bundle attempt failed while generating the configured app icon, so native file-dialog interaction is not yet verified.

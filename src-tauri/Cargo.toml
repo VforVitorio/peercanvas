@@ -2,6 +2,7 @@
 name = "peer-canvas"
 version = "0.1.0"
 description = "Local-first desktop diagram editor"
+license = "Apache-2.0"
 edition = "2024"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
@@ -20,11 +21,16 @@ tauri-build = { version = "2.7.2", features = [] }
 native-smoke = ["dep:tauri-plugin-wdio-webdriver"]
 
 [dependencies]
+base64 = "=0.23.1"
+flate2 = "=1.1.11"
+percent-encoding = "=2.3.2"
+quick-xml = { version = "=0.42.0", default-features = false }
 tauri = { version = "2.12.5", features = [] }
 tauri-plugin-dialog = "=2.7.3"
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 tauri-plugin-wdio-webdriver = { version = "=1.5.1", optional = true }
+uuid = { version = "=1.29.1", features = ["v4"] }
 
 # Read the optimization guideline for more details: https://tauri.app/concept/size/#cargo-configuration
 [profile.release]

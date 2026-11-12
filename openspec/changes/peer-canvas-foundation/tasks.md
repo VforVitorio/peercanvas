@@ -25,17 +25,17 @@ S0 comprises tasks 1.1–1.5 and 8.2. Its compatibility probe is test-only and e
 
 - [x] 3.1 Implement model-backed selection, movement, resizing, and deletion; verify pointer and keyboard workflows and model assertions. — GitHub Issue [#25](https://github.com/furancho-labs/Peer2Canvas/issues/25)
 - [x] 3.2 Implement connectors, property inspection, pages/layers, and undo/redo; verify each operation through integration tests and a reopen fixture. — GitHub Issue [#26](https://github.com/furancho-labs/Peer2Canvas/issues/26)
-- [ ] 3.3 Define a shape manifest with source, version, license, attribution, and review fields; verify invalid and unreviewed entries are excluded. — GitHub Issue [#27](https://github.com/furancho-labs/Peer2Canvas/issues/27)
-- [ ] 3.4 Implement offline catalog browse/search and safe SVG handling; verify deterministic search and malicious SVG rejection fixtures. — GitHub Issue [#28](https://github.com/furancho-labs/Peer2Canvas/issues/28)
-- [ ] 3.5 Document bundled shape provenance and run a direct/transitive license and asset-rights review; verify the release inventory contains no unreviewed asset. — GitHub Issue [#29](https://github.com/furancho-labs/Peer2Canvas/issues/29)
+- [x] 3.3 Define a shape manifest with source, version, license, attribution, and review fields; verify invalid and unreviewed entries are excluded. — GitHub Issue [#27](https://github.com/furancho-labs/Peer2Canvas/issues/27)
+- [x] 3.4 Implement offline catalog browse/search, stable node references, shape insertion, and safe SVG handling; verify deterministic results, reference round trips, accessibility, and malicious SVG rejection. — GitHub Issue [#28](https://github.com/furancho-labs/Peer2Canvas/issues/28)
+- [x] 3.5 Record each bundled asset's provenance and rights, review direct/transitive dependency licenses, and verify the release inventory contains no unreviewed asset. — GitHub Issue [#29](https://github.com/furancho-labs/Peer2Canvas/issues/29)
 
 ## 4. draw.io interchange (WP-06)
 
-- [ ] 4.1 Build a versioned draw.io fixture corpus and compatibility matrix; verify each fixture records source, permission, supported semantics, and expected loss report. — GitHub Issue [#30](https://github.com/furancho-labs/Peer2Canvas/issues/30)
-- [ ] 4.2 Implement bounded draw.io parsing into temporary state; verify XML, compressed inputs, malicious entities, decompression limits, and malformed-file cases. — GitHub Issue [#31](https://github.com/furancho-labs/Peer2Canvas/issues/31)
-- [ ] 4.3 Implement import mappings and loss reporting for the declared subset; verify supported semantic fields against golden fixtures. — GitHub Issue [#32](https://github.com/furancho-labs/Peer2Canvas/issues/32)
-- [ ] 4.4 Implement export to a new destination with overwrite confirmation; verify round-trip fixtures and that cancellation/failure preserves existing files. — GitHub Issue [#33](https://github.com/furancho-labs/Peer2Canvas/issues/33)
-- [ ] 4.5 Document unsupported features and safe preservation behavior; verify the user-facing compatibility note matches the fixture results. — GitHub Issue [#34](https://github.com/furancho-labs/Peer2Canvas/issues/34)
+- [x] 4.1 Build a versioned, first-party draw.io fixture corpus and compatibility matrix; verify source, license, feature coverage, and expected loss for each fixture. — GitHub Issue [#30](https://github.com/furancho-labs/Peer2Canvas/issues/30)
+- [x] 4.2 Implement bounded draw.io parsing and schema-v2 migration into temporary state; verify XML and compressed inputs, DTD/entity rejection, parser limits, and malformed-file recovery. — GitHub Issue [#31](https://github.com/furancho-labs/Peer2Canvas/issues/31)
+- [x] 4.3 Map the declared subset, retain safe source fragments and mapped cell IDs, and report content that can no longer round-trip before export; verify golden fixtures. — GitHub Issue [#32](https://github.com/furancho-labs/Peer2Canvas/issues/32)
+- [x] 4.4 Export supported semantics and safe fragments to a user-selected destination; verify explicit overwrite confirmation, round trips, and failure preservation. — GitHub Issue [#33](https://github.com/furancho-labs/Peer2Canvas/issues/33)
+- [x] 4.5 Document unsupported features, parser limits, and safe preservation behavior; verify the note against fixture results. — GitHub Issue [#34](https://github.com/furancho-labs/Peer2Canvas/issues/34)
 
 ## 5. Peer collaboration, invitations, and presence (WP-07, WP-08)
 

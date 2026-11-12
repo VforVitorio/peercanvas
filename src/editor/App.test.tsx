@@ -75,6 +75,12 @@ describe("in-memory model-backed editor", () => {
     expect((fileActions.getByRole("button", { name: "Save" }) as HTMLButtonElement).disabled).toBe(
       true,
     );
+    expect(
+      (fileActions.getByRole("button", { name: "Import draw.io" }) as HTMLButtonElement).disabled,
+    ).toBe(true);
+    expect(
+      (fileActions.getByRole("button", { name: "Export draw.io" }) as HTMLButtonElement).disabled,
+    ).toBe(true);
     selectIdea();
     expect(screen.getByRole("button", { name: /Idea/ }).getAttribute("aria-pressed")).toBe("true");
     expect(canvas.props!.selection).toBe(nodes()[0].nodeId);
@@ -101,6 +107,22 @@ describe("in-memory model-backed editor", () => {
           added.geometry.y + added.geometry.height <= node.geometry.y,
       ),
     ).toBe(true);
+  });
+
+  it("searches the approved local catalog and adds a stable shape reference", () => {
+    render(<App />);
+    const search = screen.getByRole("searchbox", { name: "Search shapes" });
+    fireEvent.change(search, { target: { value: "  RECTANGLE " } });
+    const addShape = screen.getByRole("button", { name: "Add rectangle" });
+    expect(screen.getByText("Source and license")).toBeTruthy();
+    fireEvent.click(addShape);
+
+    expect(nodes().at(-1)?.catalogReference).toEqual({
+      shapeId: "basic-rectangle",
+      version: "1.0.0",
+    });
+    fireEvent.change(search, { target: { value: "no such shape" } });
+    expect(screen.getByText("No approved shapes match this search.")).toBeTruthy();
   });
 
   it("routes add, move, resize and delete through canonical commands", () => {

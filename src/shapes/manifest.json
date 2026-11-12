@@ -1,0 +1,37 @@
+{
+  "schemaVersion": 1,
+  "entries": [
+    {
+      "id": "basic-rectangle",
+      "displayName": "Rectangle",
+      "category": "Basic",
+      "keywords": ["box", "process", "shape"],
+      "previewPath": "assets/rectangle.svg",
+      "source": {
+        "project": "PeerCanvas",
+        "url": "https://github.com/furancho-labs/Peer2Canvas/blob/dev/src/shapes/assets/rectangle.svg",
+        "revision": "asset-v1"
+      },
+      "version": "1.0.0",
+      "sha256": "4d6734d996faaac492a34fc2d470bef63a40f9cc417988c8db85dccc944e88e7",
+      "license": {
+        "identifier": "Apache-2.0",
+        "sourceUrl": "https://github.com/furancho-labs/Peer2Canvas/blob/main/LICENSE"
+      },
+      "attribution": {
+        "text": "Original shape preview created for PeerCanvas and distributed under Apache-2.0.",
+        "trademarkNotice": null
+      },
+      "rights": {
+        "redistribution": "permitted",
+        "modification": "permitted",
+        "commercialUse": "permitted"
+      },
+      "review": {
+        "status": "approved",
+        "reviewer": "PeerCanvas maintainer",
+        "reviewedAt": "2026-11-12"
+      }
+    }
+  ]
+}

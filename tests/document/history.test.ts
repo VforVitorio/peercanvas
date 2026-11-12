@@ -10,6 +10,7 @@ const node = (n: number): Node => ({
   text: `Node ${n}`,
   geometry: { x: 0, y: 0, width: 100, height: 60, rotation: 0 },
   styleId: null,
+  catalogReference: null,
 });
 const connection = (n: number, source = 4, target = 5) => ({
   connectionId: id(n),

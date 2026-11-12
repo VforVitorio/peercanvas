@@ -23,6 +23,8 @@ Status: planning baseline reviewed on 2026-11-10 after the S0 compatibility prob
 | R-15 | Onboarding targets become stale or tutorial actions affect live user work       | Medium / High       | Audit actual PMV workflows; isolate an inert preview; test target fallback, focus restoration, and unchanged document/route/drafts                            | WP-15       |
 | R-16 | Grouping rules break model invariants, persistence, or undo/redo                | Medium / High       | Resolve membership, nesting, page/layer, connector, serialization, and history rules in discovery before implementation                                       | WP-14       |
 
+2026-11-12 WP-05.3 inventory check: the bundled rectangle preview is first-party, hashed, and Apache-2.0; no third-party shape assets or unknown redistribution rights are present. The lockfile license inventory is recorded in `LICENSES/dependency-inventory-2026-11.csv`. Release-package and binary notice inspection remains under WP-11.3/#50.
+
 Review this register when the corresponding experiment runs or a new failure mode appears. Do not lower a rating without evidence.
 
 ## Current dependency alerts

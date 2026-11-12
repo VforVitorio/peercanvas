@@ -37,6 +37,7 @@ describe("in-memory demo service", () => {
         text: "test",
         geometry: { x: 0, y: 0, width: 10, height: 10, rotation: 0 },
         styleId: null,
+        catalogReference: null,
       },
     };
   };
@@ -214,6 +215,7 @@ describe("in-memory demo service", () => {
             text: "endpoint",
             geometry: { x: 5, y: 5, width: 20, height: 20, rotation: 0 },
             styleId: null,
+            catalogReference: null,
           },
         ],
         connections: [],

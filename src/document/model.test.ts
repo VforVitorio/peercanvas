@@ -4,8 +4,10 @@ import {
   executeCommand,
   parseDocument,
   serializeDocument,
+  validateDocument,
   type Node,
 } from "./index";
+import { createDocumentHistory } from "./history";
 
 const id = (value: number) => `00000000-0000-4000-8000-${value.toString(16).padStart(12, "0")}`;
 const createdAt = "2026-11-11T10:00:00.000Z";
@@ -29,6 +31,7 @@ function rectangle(nodeId: string, text = "API"): Node {
     geometry: { x: 20, y: 30, width: 180, height: 90, rotation: 0 },
     text,
     styleId: null,
+    catalogReference: null,
   };
 }
 
@@ -39,7 +42,7 @@ describe("canonical document contract", () => {
 
     expect(state).toMatchObject({ revision: 0 });
     expect(state.document).toMatchObject({
-      schemaVersion: 1,
+      schemaVersion: 2,
       documentId: id(1),
       metadata: { title: "Architecture", createdAt, updatedAt: createdAt },
     });
@@ -133,7 +136,7 @@ describe("canonical document contract", () => {
     expect(oldText).toContain('"schemaVersion":0');
 
     const unsupported = parseDocument(
-      source.value.replace('"schemaVersion": 1', '"schemaVersion": 99'),
+      source.value.replace('"schemaVersion": 2', '"schemaVersion": 99'),
     );
     expect(unsupported.ok).toBe(false);
     expect(unsupported.ok ? [] : unsupported.errors.map((error) => error.code)).toContain(
@@ -170,5 +173,149 @@ describe("canonical document contract", () => {
       id(5),
     ]);
     expect(serializeDocument(reopened.value.document)).toEqual(encoded);
+  });
+
+  it("migrates schema v1 nodes without inventing catalog references", () => {
+    const state = emptyDocument();
+    const withNode = {
+      ...state.document,
+      pages: state.document.pages.map((page) => ({
+        ...page,
+        layers: page.layers.map((layer) => ({ ...layer, nodes: [rectangle(id(4))] })),
+      })),
+    };
+    const serialized = serializeDocument(withNode);
+    if (!serialized.ok) throw new Error("Valid document serialization failed.");
+    const document = JSON.parse(serialized.value) as {
+      schemaVersion: number;
+      pages: { layers: { nodes: Record<string, unknown>[] }[] }[];
+    };
+    document.schemaVersion = 1;
+    delete document.pages[0].layers[0].nodes[0].catalogReference;
+    const migrated = parseDocument(JSON.stringify(document));
+
+    expect(migrated.ok).toBe(true);
+    if (!migrated.ok) return;
+    expect(migrated.value).toMatchObject({ sourceVersion: 1, migrated: true });
+    expect(migrated.value.document.schemaVersion).toBe(2);
+    expect(migrated.value.document.pages[0].layers[0].nodes[0].catalogReference).toBeNull();
+  });
+
+  it("retains a stable catalog reference and bounded source fragments", () => {
+    const state = emptyDocument();
+    const document = {
+      ...state.document,
+      pages: state.document.pages.map((page) => ({
+        ...page,
+        layers: page.layers.map((layer) => ({
+          ...layer,
+          nodes: [
+            {
+              ...rectangle(id(4)),
+              catalogReference: { shapeId: "basic-rectangle", version: "1.0.0" },
+            },
+          ],
+        })),
+      })),
+      sourceCompatibility: {
+        format: "drawio" as const,
+        version: 1 as const,
+        pages: [
+          {
+            pageId: id(2),
+            sourcePageId: "source-page-1",
+            cellIdMap: [{ sourceId: "source-node-1", elementId: id(4) }],
+            fragments: ['<mxCell id="legacy" parent="1" />'],
+          },
+        ],
+      },
+    };
+    const encoded = serializeDocument(document);
+
+    expect(encoded.ok).toBe(true);
+    if (!encoded.ok) return;
+    const reopened = parseDocument(encoded.value);
+    expect(reopened.ok).toBe(true);
+    if (!reopened.ok) return;
+    expect(reopened.value.document.pages[0].layers[0].nodes[0].catalogReference).toEqual({
+      shapeId: "basic-rectangle",
+      version: "1.0.0",
+    });
+    expect(reopened.value.document.sourceCompatibility?.pages[0].fragments[0]).toBe(
+      '<mxCell id="legacy" parent="1" />',
+    );
+  });
+
+  it("serializes catalog reference keys canonically for semantic no-op detection", () => {
+    const state = emptyDocument();
+    const node = {
+      ...rectangle(id(4)),
+      catalogReference: { shapeId: "basic-rectangle", version: "1.0.0" },
+    };
+    const added = executeCommand(
+      state,
+      { type: "node.add", pageId: id(2), layerId: id(3), node, index: 0 },
+      { expectedRevision: 0, now: createdAt },
+    );
+    if (!added.ok) throw new Error("Valid catalog node was rejected.");
+
+    const updated = executeCommand(
+      added.value.state,
+      {
+        type: "node.update",
+        pageId: id(2),
+        layerId: id(3),
+        node: { ...node, catalogReference: { version: "1.0.0", shapeId: "basic-rectangle" } },
+      },
+      { expectedRevision: added.value.state.revision, now: createdAt },
+    );
+
+    expect(updated).toMatchObject({ ok: true, value: { changed: false, affectedIds: [] } });
+    expect(updated.ok ? updated.value.state : null).toBe(added.value.state);
+  });
+
+  it("removes page-owned source fragments and restores them on undo", () => {
+    const initial = emptyDocument();
+    const pageToRemove = {
+      pageId: id(4),
+      name: "Other",
+      layers: [{ layerId: id(5), name: "Layer 1", nodes: [], connections: [] }],
+    };
+    const validated = validateDocument({
+      ...initial.document,
+      pages: [...initial.document.pages, pageToRemove],
+      sourceCompatibility: {
+        format: "drawio",
+        version: 1,
+        pages: [
+          {
+            pageId: id(2),
+            sourcePageId: "source-page-1",
+            cellIdMap: [],
+            fragments: ['<mxCell id="page-one" parent="1" />'],
+          },
+          {
+            pageId: id(4),
+            sourcePageId: "source-page-2",
+            cellIdMap: [{ sourceId: "mapped-node", elementId: id(6) }],
+            fragments: ['<mxCell id="page-two" parent="1" />'],
+          },
+        ],
+      },
+    });
+    if (!validated.ok) throw new Error("Valid fixture document was rejected.");
+    const state = { document: validated.value, revision: 0 };
+    const command = { type: "page.remove", pageId: id(4) };
+    const history = createDocumentHistory();
+    history.record(state, command);
+    const removed = executeCommand(state, command, { expectedRevision: 0, now: createdAt });
+    if (!removed.ok) throw new Error("Page removal was rejected.");
+    expect(removed.value.state.document.sourceCompatibility?.pages).toHaveLength(1);
+    expect(removed.value.state.document.sourceCompatibility?.pages[0].pageId).toBe(id(2));
+
+    const restored = history.undo(removed.value.state, { expectedRevision: 1, now: createdAt });
+    expect(restored?.ok).toBe(true);
+    if (!restored?.ok) return;
+    expect(restored.value.state.document).toEqual(state.document);
   });
 });

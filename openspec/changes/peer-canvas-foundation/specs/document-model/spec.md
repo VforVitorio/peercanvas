@@ -56,3 +56,27 @@ Persisted documents SHALL identify their schema version, and the system SHALL re
 
 - **WHEN** the document schema is not supported and no migration exists
 - **THEN** the system leaves the source unchanged and explains that it cannot safely open the document
+
+#### Scenario: Migrate schema v1
+
+- **WHEN** the system opens a valid schema-v1 document
+- **THEN** it migrates to schema v2, preserves all supported content, initializes catalog references to null, and reports that saving will update the document format
+
+### Requirement: Retain catalog references and safe interchange fragments
+
+Schema v2 SHALL store an optional stable shape identifier and asset version on each catalog-backed node, and SHALL retain bounded inert draw.io source fragments with source page/cell IDs separately from rendered document content.
+
+#### Scenario: Reopen a catalog-backed shape
+
+- **WHEN** a schema-v2 document is saved and reopened
+- **THEN** each catalog-backed node retains its stable shape identifier and asset version
+
+#### Scenario: Reopen preserved draw.io fragments
+
+- **WHEN** a schema-v2 document with safe draw.io source fragments is saved and reopened
+- **THEN** the fragments and source-ID mappings remain available to the interchange exporter and are never rendered or executed
+
+#### Scenario: Reject invalid compatibility data
+
+- **WHEN** compatibility data has an unsupported format, invalid page reference, or exceeds its documented bounds
+- **THEN** document validation fails without partially loading the document

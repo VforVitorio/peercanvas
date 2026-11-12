@@ -2,14 +2,32 @@ import { invoke } from "@tauri-apps/api/core";
 import { listen } from "@tauri-apps/api/event";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
-import { createDocument, parseDocument, serializeDocument, type ModelState } from "../document";
-import { localDocumentFiles, type LocalDocumentCandidate } from "./local-document-files";
+import {
+  createDocument,
+  parseDocument,
+  serializeDocument,
+  validateDocument,
+  type ModelState,
+} from "../document";
+import {
+  localDocumentFiles,
+  type DrawioExportReview,
+  type LocalDocumentCandidate,
+} from "./local-document-files";
 
-export type DocumentReplacement = "new" | "open" | "reopen" | "close" | "quit" | "quit-app";
+export type DocumentReplacement =
+  "new" | "open" | "import" | "reopen" | "close" | "quit" | "quit-app";
 
 type RecoveryCandidate = {
   candidate: LocalDocumentCandidate;
   state: ModelState;
+};
+
+type DrawioImportReview = {
+  displayName: string;
+  state: ModelState;
+  losses: string[];
+  preservedFragmentCount: number;
 };
 
 type Options = {
@@ -44,6 +62,8 @@ export function useLocalDocuments(options: Options) {
   const allowWindowClose = useRef(false);
   const pendingActionRef = useRef<DocumentReplacement | null>(null);
   const recoveryRef = useRef<RecoveryCandidate | null>(null);
+  const drawioImportRef = useRef<DrawioImportReview | null>(null);
+  const drawioExportRef = useRef<DrawioExportReview | null>(null);
   const [dirty, setDirtyState] = useState(true);
   const [busy, setBusyState] = useState(false);
   const [fileName, setFileName] = useState<string | null>(null);
@@ -51,6 +71,8 @@ export function useLocalDocuments(options: Options) {
   const [pendingAction, setPendingActionState] = useState<DocumentReplacement | null>(null);
   const [promptError, setPromptError] = useState<string | null>(null);
   const [recovery, setRecovery] = useState<RecoveryCandidate | null>(null);
+  const [drawioImport, setDrawioImport] = useState<DrawioImportReview | null>(null);
+  const [drawioExport, setDrawioExport] = useState<DrawioExportReview | null>(null);
   const [recovered, setRecovered] = useState(false);
 
   const setDirty = useCallback((value: boolean) => {
@@ -68,8 +90,23 @@ export function useLocalDocuments(options: Options) {
     setRecovery(value);
   }, []);
 
+  const stageDrawioImport = useCallback((value: DrawioImportReview | null) => {
+    drawioImportRef.current = value;
+    setDrawioImport(value);
+  }, []);
+
+  const stageDrawioExport = useCallback((value: DrawioExportReview | null) => {
+    drawioExportRef.current = value;
+    setDrawioExport(value);
+  }, []);
+
   const isEditingLocked = useCallback(
-    () => busyRef.current || pendingActionRef.current !== null || recoveryRef.current !== null,
+    () =>
+      busyRef.current ||
+      pendingActionRef.current !== null ||
+      recoveryRef.current !== null ||
+      drawioImportRef.current !== null ||
+      drawioExportRef.current !== null,
     [],
   );
 
@@ -246,6 +283,26 @@ export function useLocalDocuments(options: Options) {
         return;
       }
 
+      if (action === "import") {
+        const candidate = await localDocumentFiles.importDrawio(new Date().toISOString());
+        if (!candidate) {
+          optionsRef.current.reportFeedback("draw.io import canceled.");
+          return;
+        }
+        const document = validateDocument(candidate.document);
+        if (!document.ok) {
+          optionsRef.current.reportError(diagnosticText(document.errors));
+          return;
+        }
+        stageDrawioImport({
+          displayName: candidate.displayName,
+          state: { document: document.value, revision: 0 },
+          losses: candidate.losses,
+          preservedFragmentCount: candidate.preservedFragmentCount,
+        });
+        return;
+      }
+
       const candidate =
         action === "open" ? await localDocumentFiles.open() : await localDocumentFiles.loadRecent();
       if (!candidate) {
@@ -306,6 +363,95 @@ export function useLocalDocuments(options: Options) {
     setPendingActionState(null);
     setPromptError(null);
   }
+
+  function acceptDrawioImport() {
+    const candidate = drawioImportRef.current;
+    if (!candidate || busyRef.current) return;
+    stageDrawioImport(null);
+    installDocument(candidate.state, null, true);
+    optionsRef.current.reportFeedback(
+      `Imported ${candidate.displayName} as an unsaved document; the source file is unchanged.`,
+    );
+  }
+
+  function cancelDrawioImport() {
+    if (!drawioImportRef.current || busyRef.current) return;
+    stageDrawioImport(null);
+    optionsRef.current.reportFeedback(
+      "draw.io import canceled; the current document remains open.",
+    );
+  }
+
+  const prepareDrawioExport = useCallback(async () => {
+    if (!available) {
+      optionsRef.current.reportError("draw.io export is available in the PeerCanvas desktop app.");
+      return;
+    }
+    if (isEditingLocked()) return;
+    const session = sessionRef.current;
+    const snapshot = optionsRef.current.getModel();
+    const serialized = serializeDocument(snapshot.document);
+    if (!serialized.ok) {
+      optionsRef.current.reportError(diagnosticText(serialized.errors));
+      return;
+    }
+    setBusy(true);
+    try {
+      const review = await localDocumentFiles.prepareDrawioExport(serialized.value);
+      if (
+        session !== sessionRef.current ||
+        optionsRef.current.getModel().revision !== snapshot.revision
+      ) {
+        await localDocumentFiles.discardDrawioExport(review.token).catch(() => undefined);
+        optionsRef.current.reportError(
+          "The document changed while preparing the export. Try again.",
+        );
+        return;
+      }
+      stageDrawioExport(review);
+    } catch (error) {
+      optionsRef.current.reportError(errorText(error));
+    } finally {
+      setBusy(false);
+    }
+  }, [available, isEditingLocked, setBusy, stageDrawioExport]);
+
+  const confirmDrawioExport = useCallback(async () => {
+    const review = drawioExportRef.current;
+    if (!review || busyRef.current) return;
+    setBusy(true);
+    try {
+      const result = await localDocumentFiles.exportDrawio(review.token, review.losses.length > 0);
+      stageDrawioExport(null);
+      if (!result) {
+        optionsRef.current.reportFeedback("draw.io export canceled.");
+        return;
+      }
+      if (result.warning) optionsRef.current.reportError(result.warning);
+      else optionsRef.current.reportFeedback(`Exported ${result.displayName}.`);
+    } catch (error) {
+      optionsRef.current.reportError(errorText(error));
+      await localDocumentFiles.discardDrawioExport(review.token).catch(() => undefined);
+      stageDrawioExport(null);
+    } finally {
+      setBusy(false);
+    }
+  }, [setBusy, stageDrawioExport]);
+
+  const cancelDrawioExport = useCallback(async () => {
+    const review = drawioExportRef.current;
+    if (!review || busyRef.current) return;
+    setBusy(true);
+    try {
+      await localDocumentFiles.discardDrawioExport(review.token);
+      optionsRef.current.reportFeedback("draw.io export canceled.");
+    } catch (error) {
+      optionsRef.current.reportError(errorText(error));
+    } finally {
+      stageDrawioExport(null);
+      setBusy(false);
+    }
+  }, [setBusy, stageDrawioExport]);
 
   async function recoverBackup() {
     if (!recovery || busyRef.current) return;
@@ -396,10 +542,13 @@ export function useLocalDocuments(options: Options) {
     pendingAction,
     promptError,
     recovery,
+    drawioImport,
+    drawioExport,
     isEditingLocked,
     markDirty: () => setDirty(true),
     newDocument: () => request("new"),
     openDocument: () => request("open"),
+    importDrawio: () => request("import"),
     reopenLast: () => request("reopen"),
     closeDocument: () => request("close"),
     saveDocument: () => save(false),
@@ -409,5 +558,10 @@ export function useLocalDocuments(options: Options) {
     cancelReplacement,
     recoverBackup,
     dismissRecovery,
+    acceptDrawioImport,
+    cancelDrawioImport,
+    prepareDrawioExport,
+    confirmDrawioExport,
+    cancelDrawioExport,
   };
 }

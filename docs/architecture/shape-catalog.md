@@ -1,41 +1,41 @@
 # Shape catalog design
 
-Status: proposed; no external shape or logo catalog is bundled.
+Status: manifest schema v1 is validated. S3 adds a local catalog with one first-party rectangle preview under Apache-2.0, offline search, stable node references, and a bounded SVG sanitizer. WP-05.3's locked npm/Cargo metadata review is recorded in [`LICENSES/dependency-inventory-2026-11.csv`](../../LICENSES/dependency-inventory-2026-11.csv).
 
 ## Responsibilities
 
-The catalog resolves a stable shape identifier to a renderer-compatible shape definition and searchable metadata. It is separate from document storage: documents reference stable shape identifiers and record the version/schema needed to render them.
+The catalog resolves stable shape identifiers to renderer-supported node types and searchable metadata. It stays separate from document storage. Schema-v2 nodes retain `catalogReference: { shapeId, version } | null`; the current renderer mapping supports `basic-rectangle` as a rectangle node. Entries without a renderer mapping are not offered as usable shapes.
 
-## Manifest fields
+## Manifest schema v1
 
-Each asset entry should include:
+The bundled manifest is `src/shapes/manifest.json`. Each entry records:
 
-- stable identifier, display name, category, keywords and preview reference;
-- source project, source URL, repository commit/tag or release;
-- license identifier and license text/source;
-- required attribution and any trademark notice;
-- content hash and version;
-- supported renderer/model version;
-- review status, reviewer and review date;
-- whether redistribution, modification and commercial use are allowed.
+- a stable lowercase ID, display name, category, search keywords, and optional local preview path;
+- source project, HTTPS source URL, source revision, asset version, and lowercase SHA-256 content hash;
+- license identifier and HTTPS license text/source URL;
+- attribution text and an optional trademark notice;
+- explicit redistribution, modification, and commercial-use decisions (`permitted`, `prohibited`, or `unknown`);
+- review status, reviewer, and review date.
 
-An asset with unknown rights stays out of the bundled catalog. A permissive repository license does not automatically cover logos, brand marks, imported stencils, fonts, or user-contributed assets.
+Only structurally valid entries with an approved review and explicit redistribution permission are usable. Unreviewed, rejected, or rights-unknown entries are excluded. Duplicate IDs exclude every occurrence so resolution cannot depend on array order. The validator checks manifest metadata and hash format; it does not fetch source URLs or verify legal claims.
+
+The bundled `assets/rectangle.svg` was authored for PeerCanvas. Its SHA-256 is `4d6734d996faaac492a34fc2d470bef63a40f9cc417988c8db85dccc944e88e7`; the manifest records its source path, asset version, Apache-2.0 license, attribution, rights, and review date. It contains no upstream artwork.
 
 ## Search and loading
 
-Search is local and works offline. The first catalog can be a static manifest plus lazy asset loading. Do not add a remote catalog service unless the product later needs updates that cannot be shipped with a release.
+Search is local and works offline. It trims the query, matches case-insensitive substrings in display name, category, and keywords, then sorts by lowercased display name and stable ID. The static bundled manifest is sufficient for S3; there is no remote catalog service.
 
 ## SVG boundary
 
-Treat SVG as untrusted structured input. Parse and sanitize it before rendering. Reject scripts, event handlers, external network references, embedded HTML, unsafe CSS and oversized data. Keep a canonical asset entry and renderer-safe representation; do not mutate the original file in place.
+The preview sanitizer rebuilds SVG using an allowlist of basic vector elements and attributes. It rejects scripts, event handlers, external references, CSS, embedded HTML, unsupported namespaces/elements/attributes, DTD/entity declarations, and input above 256 KiB, 2,000 elements, 32 nesting levels, or 4,096 characters per attribute value. The original bundled file stays unchanged; only the sanitized result is loaded through an image data URL.
 
 ## Verification
 
-WP-05 must add manifest schema validation, deterministic search fixtures, sanitizer tests, and a license audit. Release review checks that each distributed shape is traceable to an allowed source and that notices are shipped where required.
+Catalog tests cover local deterministic search, shape insertion, schema-v2 reference round trips, and empty results. SVG fixtures cover active content and each input bound. WP-05.3 reviewed 344 npm lock entries and 448 Cargo packages across all features/targets; every entry has declared license metadata. The inventory is not a scan of final application binaries; WP-11.3/#50 owns that release-package review.
 
-## Initial rights review
+## Asset review
 
-- [Simple Icons](https://github.com/simple-icons/simple-icons) describes its icon assets as CC0, but brand/trademark policies still apply.
-- Cloud vendor architecture assets have individual terms; do not infer unrestricted redistribution from public download access.
-- draw.io source code licensing does not automatically grant redistribution rights to every icon or stencil included in the project.
-- No third-party icon/logo assets are present in the current scaffold. This is a planning record, not a completed license audit.
+- The catalog bundles no third-party icons, logos, fonts, stencils, or draw.io library assets.
+- Cloud vendor architecture assets have individual terms; public download access does not establish redistribution permission.
+- draw.io source licensing does not automatically grant rights to every icon or stencil in draw.io.
+- The only current shape preview is original first-party artwork under Apache-2.0; its file hash matches the manifest.

@@ -42,8 +42,8 @@ The isolated UI demonstration has shared-core and simulated-service tests, Claud
 
 - Document: schema migration, invalid command, stable serialization, undo/redo, partial mutation rollback.
 - Persistence: interrupted save, disk-full/permission error, corrupt snapshot, recovery, old schema migration.
-- Catalog: deterministic search, invalid manifest, malicious SVG, attribution display, offline behavior.
-- draw.io: valid XML, compression, unsupported feature report, hostile XML, decompression budget, lossless supported subset.
+- Catalog: deterministic search, invalid manifest, malicious SVG, attribution display, offline behavior, schema-v0/v1 migration, and stable-reference reopen.
+- draw.io: valid XML, compression, source-ID relationships, unsupported feature report, hostile XML, decompression budget, safe-fragment round trips, and lossless supported subset.
 - Collaboration: concurrent Yjs updates, initial state, offline edits, reconnection, host disconnect, viewer mutation rejection, malformed peer input.
 - Invitation: entropy source, expiry, deep-link parsing, invalid secret, approval/denial, revoke, secret redaction, copied-data limitation.
 - AI/MCP: context opt-in, stream failure, cancellation, usage limit, malformed tool payload, preview diff, approve/reject, audit, token redaction.
