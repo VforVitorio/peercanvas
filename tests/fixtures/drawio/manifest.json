@@ -1,0 +1,144 @@
+{
+  "schemaVersion": 1,
+  "fixtures": [
+    {
+      "id": "basic-uncompressed",
+      "path": "basic-uncompressed.drawio",
+      "fixtureVersion": "1.0.0",
+      "sha256": "4de385c30af4298db934f6ec15f8d2254f6cd2402bf62dd3847c441a9a595be7",
+      "source": {
+        "project": "PeerCanvas synthetic fixture corpus",
+        "url": "https://github.com/furancho-labs/Peer2Canvas/tree/dev/tests/fixtures/drawio",
+        "revision": "fixture-v1",
+        "license": "Apache-2.0",
+        "redistribution": "permitted",
+        "attribution": "Hand-authored synthetic XML; no third-party diagram or artwork used."
+      },
+      "format": "uncompressed-mxfile",
+      "expectedOutcome": "import",
+      "supportedSemantics": [
+        "one-page",
+        "rectangle",
+        "plain-text",
+        "basic-style",
+        "straight-connection"
+      ],
+      "expectedPreservedFragments": 0,
+      "expectedLosses": []
+    },
+    {
+      "id": "compressed-page",
+      "path": "compressed-page.drawio",
+      "fixtureVersion": "1.0.0",
+      "sha256": "1b44e8ae53b2e4b31a04c4d5e5e4ab7f16f858c3659523dfb53f120200135688",
+      "source": {
+        "project": "PeerCanvas synthetic fixture corpus",
+        "url": "https://github.com/furancho-labs/Peer2Canvas/tree/dev/tests/fixtures/drawio",
+        "revision": "fixture-v1",
+        "license": "Apache-2.0",
+        "redistribution": "permitted",
+        "attribution": "Hand-authored synthetic XML; no third-party diagram or artwork used."
+      },
+      "format": "compressed-page-uri-encoded-raw-deflate-base64",
+      "expectedOutcome": "import",
+      "supportedSemantics": ["one-page", "compressed-page", "rectangle", "plain-text"],
+      "expectedPreservedFragments": 0,
+      "expectedLosses": []
+    },
+    {
+      "id": "safe-linked-unsupported",
+      "path": "safe-linked-unsupported.drawio",
+      "fixtureVersion": "1.0.0",
+      "sha256": "82fc8df9934be6139005f72be1b335bbd5eab3fd252bda90b566337175b1cd6e",
+      "source": {
+        "project": "PeerCanvas synthetic fixture corpus",
+        "url": "https://github.com/furancho-labs/Peer2Canvas/tree/dev/tests/fixtures/drawio",
+        "revision": "fixture-v1",
+        "license": "Apache-2.0",
+        "redistribution": "permitted",
+        "attribution": "Hand-authored synthetic XML; no third-party diagram or artwork used."
+      },
+      "format": "uncompressed-mxfile",
+      "expectedOutcome": "import",
+      "supportedSemantics": ["one-page", "rectangle", "plain-text", "source-cell-id-map"],
+      "expectedPreservedFragments": 1,
+      "expectedLosses": []
+    },
+    {
+      "id": "unsupported-setting",
+      "path": "unsupported-setting.drawio",
+      "fixtureVersion": "1.0.0",
+      "sha256": "895b7c7fab97614f5130547cf5e992d32a5be1939b333089c0f285fff6f6dfc7",
+      "source": {
+        "project": "PeerCanvas synthetic fixture corpus",
+        "url": "https://github.com/furancho-labs/Peer2Canvas/tree/dev/tests/fixtures/drawio",
+        "revision": "fixture-v1",
+        "license": "Apache-2.0",
+        "redistribution": "permitted",
+        "attribution": "Hand-authored synthetic XML; no third-party diagram or artwork used."
+      },
+      "format": "uncompressed-mxfile",
+      "expectedOutcome": "import",
+      "supportedSemantics": ["one-page", "rectangle", "plain-text"],
+      "expectedPreservedFragments": 0,
+      "expectedLosses": ["mxGraphModel.grid"]
+    },
+    {
+      "id": "doctype-entity",
+      "path": "doctype-entity.drawio",
+      "fixtureVersion": "1.0.0",
+      "sha256": "16dc88518cddd002887225da83ebbc468ffc67a7be49a49eedbb2bf60b7e157d",
+      "source": {
+        "project": "PeerCanvas synthetic fixture corpus",
+        "url": "https://github.com/furancho-labs/Peer2Canvas/tree/dev/tests/fixtures/drawio",
+        "revision": "fixture-v1",
+        "license": "Apache-2.0",
+        "redistribution": "permitted",
+        "attribution": "Hand-authored hostile-input fixture; no third-party diagram or artwork used."
+      },
+      "format": "uncompressed-mxfile",
+      "expectedOutcome": "reject",
+      "supportedSemantics": [],
+      "expectedPreservedFragments": 0,
+      "expectedLosses": ["DTD/entity declarations"]
+    },
+    {
+      "id": "malformed-xml",
+      "path": "malformed.drawio",
+      "fixtureVersion": "1.0.0",
+      "sha256": "a43ccef8dd9d4616216dbbd6dbf1ad7cabdc963fbdd727a4c310536652ad69b8",
+      "source": {
+        "project": "PeerCanvas synthetic fixture corpus",
+        "url": "https://github.com/furancho-labs/Peer2Canvas/tree/dev/tests/fixtures/drawio",
+        "revision": "fixture-v1",
+        "license": "Apache-2.0",
+        "redistribution": "permitted",
+        "attribution": "Hand-authored malformed-input fixture; no third-party diagram or artwork used."
+      },
+      "format": "uncompressed-mxfile",
+      "expectedOutcome": "reject",
+      "supportedSemantics": [],
+      "expectedPreservedFragments": 0,
+      "expectedLosses": ["malformed XML"]
+    },
+    {
+      "id": "unsafe-svg",
+      "path": "unsafe-svg.drawio",
+      "fixtureVersion": "1.0.0",
+      "sha256": "e3179d9b7fd8e0f886aaa49b81a56d7a01f264102c70be10e2c541e45ba31c52",
+      "source": {
+        "project": "PeerCanvas synthetic fixture corpus",
+        "url": "https://github.com/furancho-labs/Peer2Canvas/tree/dev/tests/fixtures/drawio",
+        "revision": "fixture-v1",
+        "license": "Apache-2.0",
+        "redistribution": "permitted",
+        "attribution": "Hand-authored hostile-input fixture; no third-party diagram or artwork used."
+      },
+      "format": "uncompressed-mxfile",
+      "expectedOutcome": "reject",
+      "supportedSemantics": [],
+      "expectedPreservedFragments": 0,
+      "expectedLosses": ["embedded SVG and event handler"]
+    }
+  ]
+}

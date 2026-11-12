@@ -75,6 +75,12 @@ describe("in-memory model-backed editor", () => {
     expect((fileActions.getByRole("button", { name: "Save" }) as HTMLButtonElement).disabled).toBe(
       true,
     );
+    expect(
+      (fileActions.getByRole("button", { name: "Import draw.io" }) as HTMLButtonElement).disabled,
+    ).toBe(true);
+    expect(
+      (fileActions.getByRole("button", { name: "Export draw.io" }) as HTMLButtonElement).disabled,
+    ).toBe(true);
     selectIdea();
     expect(screen.getByRole("button", { name: /Idea/ }).getAttribute("aria-pressed")).toBe("true");
     expect(canvas.props!.selection).toBe(nodes()[0].nodeId);
