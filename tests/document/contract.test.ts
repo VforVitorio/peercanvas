@@ -17,6 +17,7 @@ const node = (n: number, text = `Node ${n}`) => ({
   geometry: { x: 0, y: 0, width: 20, height: 10, rotation: 0 },
   text,
   styleId: null,
+  catalogReference: null,
 });
 
 describe("shared document contract", () => {
@@ -27,7 +28,7 @@ describe("shared document contract", () => {
     expect(result.value).toEqual({
       revision: 0,
       document: {
-        schemaVersion: 1,
+        schemaVersion: 2,
         documentId: id(1),
         metadata: { title: "Demo", description: "", createdAt: now, updatedAt: now },
         pages: [
@@ -78,7 +79,7 @@ describe("shared document contract", () => {
     expect(serialized.value.endsWith("\r\n")).toBe(false);
     expect(parseDocument(serialized.value)).toEqual({
       ok: true,
-      value: { document: start.value.document, sourceVersion: 1, migrated: false },
+      value: { document: start.value.document, sourceVersion: 2, migrated: false },
     });
     const old = structuredClone(start.value.document) as unknown as {
       schemaVersion: number;
@@ -118,7 +119,7 @@ describe("shared document contract", () => {
       ok: false,
       errors: [{ code: "INVALID_SCHEMA", path: "/extra" }],
     });
-    expect(parseDocument('{"schemaVersion":2}')).toMatchObject({
+    expect(parseDocument('{"schemaVersion":99}')).toMatchObject({
       ok: false,
       errors: [{ code: "UNSUPPORTED_VERSION" }],
     });
@@ -663,7 +664,7 @@ describe("shared document contract", () => {
       ],
       metadata: { updatedAt: now, createdAt: now, description: "", title: "Demo" },
       documentId: id(1),
-      schemaVersion: 1,
+      schemaVersion: 2,
     };
     expect(serializeDocument(reverse)).toEqual(serializeDocument(doc));
   });

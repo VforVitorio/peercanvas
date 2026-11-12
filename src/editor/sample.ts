@@ -22,6 +22,7 @@ export function createSample(now = new Date().toISOString()): ModelState {
     text,
     geometry: { x, y, width: 180, height: 90, rotation: 0 },
     styleId: null,
+    catalogReference: null,
   }));
   const seeded = executeCommand(
     created.value,
@@ -60,6 +61,7 @@ export function createSample(now = new Date().toISOString()): ModelState {
                 text: "Explore, refine, review",
                 geometry: { x: 220, y: 450, width: 260, height: 60, rotation: 0 },
                 styleId: "00000000-0000-4000-8000-00000000000a",
+                catalogReference: null,
               },
             ],
             connections: [],
@@ -110,6 +112,7 @@ export function createSample(now = new Date().toISOString()): ModelState {
                     text: "Build",
                     geometry: { x: 80, y: 100, width: 180, height: 90, rotation: 0 },
                     styleId: "00000000-0000-4000-8000-00000000000a",
+                    catalogReference: null,
                   },
                   {
                     nodeId: "00000000-0000-4000-8000-00000000000e",
@@ -117,6 +120,7 @@ export function createSample(now = new Date().toISOString()): ModelState {
                     text: "Share",
                     geometry: { x: 360, y: 100, width: 180, height: 90, rotation: 0 },
                     styleId: null,
+                    catalogReference: null,
                   },
                 ],
                 connections: [

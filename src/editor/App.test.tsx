@@ -103,6 +103,22 @@ describe("in-memory model-backed editor", () => {
     ).toBe(true);
   });
 
+  it("searches the approved local catalog and adds a stable shape reference", () => {
+    render(<App />);
+    const search = screen.getByRole("searchbox", { name: "Search shapes" });
+    fireEvent.change(search, { target: { value: "  RECTANGLE " } });
+    const addShape = screen.getByRole("button", { name: "Add rectangle" });
+    expect(screen.getByText("Source and license")).toBeTruthy();
+    fireEvent.click(addShape);
+
+    expect(nodes().at(-1)?.catalogReference).toEqual({
+      shapeId: "basic-rectangle",
+      version: "1.0.0",
+    });
+    fireEvent.change(search, { target: { value: "no such shape" } });
+    expect(screen.getByText("No approved shapes match this search.")).toBeTruthy();
+  });
+
   it("routes add, move, resize and delete through canonical commands", () => {
     const commands = vi.spyOn(core, "executeCommand");
     render(<App />);

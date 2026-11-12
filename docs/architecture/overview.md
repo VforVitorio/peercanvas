@@ -71,7 +71,7 @@ The model command boundary is the security and consistency boundary for UI, peer
 
 ## Canonical document model
 
-Proposed top-level shape:
+Schema-v2 top-level shape:
 
 ```text
 Document
@@ -91,7 +91,7 @@ Document
   sourceCompatibility
 ```
 
-Each node or connection has a stable ID, a declared type, validated properties, and optional extension data. The final schema, normalization rules, and serialized format are WP-02 deliverables. Imported extension data must be bounded and treated as untrusted.
+Each node or connection has a stable ID, a declared type, and validated properties. A catalog-backed node stores its stable shape ID and asset version. `sourceCompatibility` can store only bounded, inert draw.io fragments; the importer never renders them. Migration and bounds are recorded in [ADR-0007](decisions/ADR-0007-document-schema-v2-compatibility.md). Imported extension data remains untrusted.
 
 ## Core data flows
 

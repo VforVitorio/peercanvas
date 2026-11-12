@@ -98,13 +98,13 @@ The OpenSpec capability names below are the planned canonical capability contrac
 | FR-015 | The application shall detect incomplete/corrupt recovery state and offer a non-destructive recovery path.              | History & Recovery             |
 | FR-016 | Local preferences shall be stored separately from diagram content.                                                     | Local Persistence              |
 | FR-017 | Shape libraries shall be described by a manifest with stable IDs and categories.                                       | Shape Catalog                  |
-| FR-018 | Users shall search and browse installed shapes without requiring a remote service.                                     | Shape Catalog                  |
+| FR-018 | Users shall browse and add approved offline shapes with stable catalog references.                                     | Shape Catalog                  |
 | FR-019 | Every bundled asset shall record source, version, license, attribution, and review status.                             | Shape Catalog                  |
-| FR-020 | Imported SVG content shall be validated/sanitized before rendering or export.                                          | Security & Privacy             |
-| FR-021 | The application shall import a documented subset of draw.io XML/compressed documents.                                  | draw.io Compatibility          |
+| FR-020 | SVG previews and imported SVG content shall be sanitized before use.                                                   | Security & Privacy             |
+| FR-021 | The application shall import a declared subset of draw.io XML and compressed pages.                                    | draw.io Compatibility          |
 | FR-022 | The application shall export supported document semantics to draw.io format.                                           | Import & Export                |
 | FR-023 | The application shall report unsupported or lossy transformations before the user confirms them.                       | draw.io Compatibility          |
-| FR-024 | The adapter shall retain original unsupported source data when safe and technically feasible.                          | draw.io Compatibility          |
+| FR-024 | The adapter shall preserve safe, bounded unsupported draw.io source fragments.                                         | draw.io Compatibility          |
 | FR-025 | Concurrent document edits shall synchronize through Yjs updates.                                                       | P2P Collaboration              |
 | FR-026 | The proposed peer transport shall use a replaceable adapter and support Trystero/WebRTC as the initial candidate.      | P2P Collaboration              |
 | FR-027 | Joining a peer session shall receive an initial document state before declaring the peer ready.                        | P2P Collaboration              |
@@ -206,7 +206,7 @@ UC-11 and UC-12 are planned for S8 and S10. UC-13 remains proposed until WP-14.1
 - **Actors/roles:** local user as editor; catalog is a local data source.
 - **Preconditions:** catalog manifest is valid and the requested library is installed.
 - **Trigger/input:** user searches by name, category, or tag.
-- **Main flow:** filter installed entries; show provenance/license information; add selected shape.
+- **Main flow:** search locally by name, category, or keyword; show provenance/license information; add the selected shape through the command boundary and store its stable identifier and asset version.
 - **Alternatives:** no result offers a clear empty state; unreviewed assets are hidden from the default catalog.
 - **Errors:** invalid SVG or manifest entry is rejected and logged without document secrets.
 - **Postconditions:** the selected shape is added with a stable catalog reference.
@@ -217,8 +217,8 @@ UC-11 and UC-12 are planned for S8 and S10. UC-13 remains proposed until WP-14.1
 - **Actors/roles:** local user as document owner/editor.
 - **Preconditions:** source file is readable; importer supports the declared format variant.
 - **Trigger/input:** user opens or imports a draw.io XML/compressed document.
-- **Main flow:** parse in a bounded/safe way; map supported content; report unsupported fields; show the resulting diagram; ask before discarding unsupported data.
-- **Alternatives:** malformed/unsupported files are rejected with a diagnostic; safe original source may be retained for round-trip.
+- **Main flow:** parse a bounded `.drawio` or `.xml` file; map supported content; report unsupported and safely preserved fragments; ask before discarding unsupported data.
+- **Alternatives:** malformed/unsupported files are rejected with a diagnostic; safe independent cell fragments may be retained for round-trip.
 - **Errors:** parser limits, invalid XML, or unsafe SVG leave the destination document unchanged.
 - **Postconditions:** imported document and loss report are available; the original file is not overwritten implicitly.
 - **Acceptance:** FR-021, FR-023, FR-024 and NFR-011.
@@ -228,7 +228,7 @@ UC-11 and UC-12 are planned for S8 and S10. UC-13 remains proposed until WP-14.1
 - **Actors/roles:** local user as document owner/editor.
 - **Preconditions:** an open document has content.
 - **Trigger/input:** user chooses Export and a destination path.
-- **Main flow:** serialize supported fields; show unsupported/lossy items; confirm; write to a new target or explicitly chosen destination.
+- **Main flow:** serialize supported fields and retained safe fragments; show unsupported/lossy items; confirm; write to a new target or explicitly chosen destination.
 - **Alternatives:** cancellation leaves the original untouched; overwrite requires confirmation.
 - **Errors:** permission or disk failure leaves the original diagram and any previous export intact.
 - **Postconditions:** exported file opens as a draw.io document for the supported subset.

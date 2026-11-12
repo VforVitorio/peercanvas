@@ -8,7 +8,7 @@ Defines the supported draw.io document subset and how the application reports un
 
 ### Requirement: Publish the supported draw.io subset
 
-The system SHALL document the draw.io formats and semantic features it supports for each release.
+The system SHALL document the draw.io formats and semantic features it supports for each release. The initial importer SHALL accept UTF-8 `.drawio` or `.xml` files with an `<mxfile>` root or a bare `<mxGraphModel>` root, including uncompressed pages and pages encoded as URI-encoded raw DEFLATE and Base64 text. It SHALL map at most 100 pages and the supported rectangle, plain-text, basic-style, and straight-connection semantics.
 
 #### Scenario: Import a supported document
 
@@ -31,7 +31,7 @@ The system SHALL identify unsupported or lossy constructs before the user confir
 
 ### Requirement: Preserve safe unsupported source content
 
-The system SHALL preserve unsupported source fragments for possible round-trip only when doing so is safe and within documented resource limits.
+The system SHALL preserve unsupported `<mxCell>` fragments for possible round-trip when their content is inert, their internal IDs and references are safe, and they fit within the documented resource limits. Source IDs for mapped cells SHALL be retained so safe fragments can keep their references. Preserved fragments SHALL remain inert and SHALL NOT be rendered or executed by PeerCanvas.
 
 #### Scenario: Preserve an unknown safe fragment
 
@@ -40,7 +40,7 @@ The system SHALL preserve unsupported source fragments for possible round-trip o
 
 ### Requirement: Reject unsafe or over-limit files
 
-The system SHALL reject files that exceed documented parser, decompression, nesting, or resource limits without partially changing the active document.
+The system SHALL reject files that exceed 10 MiB encoded size, 10 MiB total decoded XML, a 100:1 page expansion ratio, 250,000 XML nodes, 64 levels of nesting, or 100 pages without partially changing the active document. It SHALL reject DTDs, entity declarations, malformed XML, scripts, embedded HTML/SVG, event handlers, and external resource references. Safe unsupported fragments retained in a document SHALL be limited to 1,000 fragments, 64 KiB per fragment, and 1 MiB total.
 
 #### Scenario: Input exceeds a limit
 

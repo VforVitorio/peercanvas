@@ -37,8 +37,16 @@ function inverseFor(command: Command, document: Document): Command[] {
       return p ? [{ type, pageId: p.pageId, layerIds: p.layers.map((l) => l.layerId) }] : [];
     case "page.add":
       return [{ type: "page.remove", pageId: (command.page as Page).pageId }];
-    case "page.remove":
-      return p ? [{ type: "page.add", page: p, index: document.pages.indexOf(p) }] : [];
+    case "page.remove": {
+      if (!p) return [];
+      const inverse: Command[] = [{ type: "page.add", page: p, index: document.pages.indexOf(p) }];
+      if (document.sourceCompatibility?.pages.some((sourcePage) => sourcePage.pageId === p.pageId))
+        inverse.push({
+          type: "document.setSourceCompatibility",
+          sourceCompatibility: document.sourceCompatibility,
+        });
+      return inverse;
+    }
     case "page.rename":
       return p ? [{ type, pageId: p.pageId, name: p.name }] : [];
     case "layer.add":

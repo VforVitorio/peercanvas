@@ -25,6 +25,11 @@ The system SHALL allow users to undo and redo supported accepted document mutati
 - **WHEN** the user undoes an accepted connector, page, or layer mutation
 - **THEN** the supported entities, stable identifiers, endpoint references, and ordering return to the prior valid state
 
+#### Scenario: Undo removal of a page with preserved source data
+
+- **WHEN** the user undoes removal of a page that had retained draw.io source data
+- **THEN** the page and its source page ID, cell mappings, and fragments return to the prior valid document state
+
 ### Requirement: Create durable recovery checkpoints
 
 The system SHALL retain the last complete saved document and one prior complete recovery candidate according to the policy in ADR-0003. Unsaved edits are not autosaved and remain visibly unsaved.
