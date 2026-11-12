@@ -1,6 +1,6 @@
 # draw.io compatibility
 
-Status: Implemented on `feature/wp-06-drawio-interchange`; local tests pass. This work is not merged or released.
+Status: Implemented on `dev` by PR [#125](https://github.com/furancho-labs/Peer2Canvas/pull/125); not yet promoted to `main` or released.
 
 ## Scope
 
@@ -55,7 +55,7 @@ The exporter validates the generated XML before writing. Temporary export backup
 
 ## Verification
 
-The first-party corpus is in [`tests/fixtures/drawio/`](../../tests/fixtures/drawio/). Its manifest records the synthetic source, Apache-2.0 permission, version, hash, feature coverage, and expected outcome for each fixture. Rust unit tests also exercise bare and multiple pages, hostile content, round trips, stale fragment references, XML limits, and decompression limits.
+The seven-fixture first-party corpus is in [`tests/fixtures/drawio/`](../../tests/fixtures/drawio/). Its manifest records the synthetic source, Apache-2.0 permission, version, hash, feature coverage, and expected outcome for each fixture. Rust unit tests also exercise bare and multiple pages, hostile content, round trips, stale fragment references, XML limits, and decompression limits.
 
 The local Rust release check is a compile check, not a native UI smoke test. The local Tauri bundle attempt failed while generating the macOS app icon (`No matching IconType` for the configured PNG), so native file-dialog interaction remains unverified. Cross-platform required CI is separate evidence.
 
