@@ -23,4 +23,4 @@ An isolated adapter keeps the canonical model independent from an external file 
 
 ## Risks and validation
 
-WP-06 implements the subset on `feature/wp-06-drawio-interchange`. The versioned first-party corpus and local tests cover compressed and uncompressed input, bare and multiple pages, geometry, labels, edges, safe fragments, malformed and hostile XML/SVG, parser limits, and semantic round trips. Required CI and promotion to `main` remain pending. A local macOS bundle attempt failed while generating the configured app icon, so native file-dialog interaction is not yet verified.
+WP-06 was merged to `dev` in PR [#125](https://github.com/furancho-labs/Peer2Canvas/pull/125). The versioned first-party corpus and tests cover compressed and uncompressed input, bare and multiple pages, geometry, labels, edges, safe fragments, malformed and hostile XML/SVG, parser limits, and semantic round trips. Required PR checks passed; promotion to `main` remains pending. A local macOS bundle attempt failed while generating the configured app icon, so native file-dialog interaction is not yet verified.
