@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-REPO="${GITHUB_REPOSITORY:-VforVitorio/peercanvas}"
+REPO="${GITHUB_REPOSITORY:-furancho-labs/Peer2Canvas}"
 BRANCHES=(main dev)
 REQUIRED_CONTEXTS=(
   "lint"
@@ -79,7 +79,7 @@ JSON
 fi
 
 if "$DRY_RUN"; then
-  printf '[dry-run] set Actions workflow permissions to read-only\n'
+  printf '[dry-run] keep default Actions permissions read-only; Release Please uses a repository-scoped GitHub App token\n'
 else
   gh api -X PUT "repos/$REPO/actions/permissions/workflow" --input - >/dev/null <<'JSON'
 {"default_workflow_permissions":"read","can_approve_pull_request_reviews":false}
