@@ -1,5 +1,5 @@
 blank_issues_enabled: false
 contact_links:
   - name: Security vulnerability
-    url: https://github.com/VforVitorio/peercanvas/security/advisories/new
+    url: https://github.com/furancho-labs/Peer2Canvas/security/advisories/new
     about: Report vulnerabilities privately through GitHub's security reporting flow.

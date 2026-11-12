@@ -38,7 +38,9 @@ The setup script is the only path for repository settings, labels, alert toggles
 
 ## CI and security
 
-- CI runs separate frontend format, lint, typecheck, test, and build checks, plus a normal Tauri build and test-only WebDriver canvas smoke on Ubuntu, macOS, and Windows. The smoke verifies one isolated fixture; it does not prove product document workflows or release accessibility.
+- CI runs separate frontend format, lint, typecheck, test, and build checks on pull requests to **dev** and **main**, plus on pushes to **main**. It no longer repeats the full matrix on every push to `dev`; merged PRs have already passed the required PR checks. The native matrix preserves the required `native-linux`, `native-macos`, and `native-windows` contexts. It runs persistence tests and production Tauri builds on all three systems for application, Tauri, dependency, and workflow changes. Documentation, history, test-only, UI-mock, and unrelated workflow/settings changes keep those contexts green while skipping expensive native steps; an unknown event or failed change classification falls back to full checks.
+- The test-only WebDriver canvas probe runs on changes to its Tauri/Weave/canvas harness, native dependencies/build configuration, or through `workflow_dispatch`; unrelated application/documentation changes skip it. It validates one isolated fixture, not product document workflows or release accessibility. The production isolation check remains part of every native-sensitive build.
+- GitHub Actions cancels an older run only when a newer commit updates the same pull request. Main-branch validation and manual dispatches are not cancelled.
 - CodeQL scans Rust, JavaScript/TypeScript, and GitHub Actions. It remains advisory until its baseline is reviewed.
 - OSV-Scanner checks pull requests; gitleaks checks repository history and pull requests.
 - GitHub Dependabot vulnerability alerts, automated security fixes, secret scanning, push protection, and private vulnerability reporting are enabled.
@@ -46,13 +48,14 @@ The setup script is the only path for repository settings, labels, alert toggles
 - Every third-party GitHub Action is pinned to a full commit SHA with a release-version comment for Dependabot.
 - Labeler runs only for same-repository pull requests; pull requests from forks must be labeled manually.
 - No workflow uses **pull_request_target**.
-- Release-please uses GitHub's built-in token. GitHub does not trigger a new workflow run for pull requests created with that token, so CI checks on a release PR may need a maintainer to dispatch CI on that PR branch. A dedicated GitHub App or narrowly scoped token can be added later if unattended checks are required; do not store a personal credential in the repository.
+- Release-please uses GitHub's built-in token and may create its release PR. Repository Actions settings allow PR creation/approval; the repository's default token permissions remain read-only. Release-please requests content/issue/PR write permissions, Labeler requests PR write permissions, and OSV-Scanner requests `security-events: write`; Gitleaks is read-only. No workflow auto-approves or auto-merges. GitHub does not trigger a new workflow run for pull requests created with that token, so CI checks on a release PR may need a maintainer to dispatch CI on that PR branch. Do not store a personal credential in the repository.
+- `gitleaks` uses the pinned, checksum-verified open-source CLI so secret scanning runs without the commercial GitHub Action license. Output is redacted; the job scans repository history on push and pull-request events.
 
 The test-only native smoke adds interaction evidence to the native builds. It does not replace manual product, accessibility, recovery, or peer-network smoke checks. Report checks as passing only when the linked Actions run shows success.
 
 ## Issue hierarchy and board
 
-PLANS.md maps WP-00 through WP-12 to 13 parent Issues, 41 native sub-issues, and milestones S0 through S7. The [subissue map](subissue-map.md) links every OpenSpec task ID to its child Issue. The public [PeerCanvas Workflow Board](https://github.com/users/VforVitorio/projects/4/views/2) contains all 54 Issues. Status columns group work; milestone and parent issue fields are visible on board cards. The project view selector also exposes the issue table. Closed S0 child issues move to Done, while parent WPs stay open until all acceptance criteria pass.
+PLANS.md maps the current work packages and sprint milestones. The [subissue map](subissue-map.md) links OpenSpec tasks to their child Issues. The public [PeerCanvas Workflow Board](https://github.com/users/VforVitorio/projects/4/views/2) currently contains 69 items: 16 WP parents, 52 task issues, and supplemental issue #81 across 11 milestones (S0–S10). Status columns group work; milestone and parent issue fields are visible on board cards. Infrastructure maintenance issue #111 is tracked under WP-11 but has no product OpenSpec task. Parent WPs close only when all child tasks and acceptance criteria pass.
 
 ## Setup procedure
 
