@@ -14,17 +14,18 @@ Last updated: 2026-11-12.
 - Release Please token PR [#115](https://github.com/furancho-labs/Peer2Canvas/pull/115) merged into `dev` as `5f69146`. The organization-owned App `Peer2Canvas Release Automation` is installed only on `Peer2Canvas`; the repository variable and private-key secret are configured. `GITHUB_TOKEN` remains read-only and the organization policy is unchanged.
 - `scripts/setup-github.sh` completed successfully with `can_approve_pull_request_reviews=false`. Both protected branches retain the exact eight required contexts and strict checks.
 - Main infrastructure promotion PR [#117](https://github.com/furancho-labs/Peer2Canvas/pull/117) merged as `0dbb749`. The App-backed run [43215202478](https://github.com/furancho-labs/Peer2Canvas/actions/runs/43215202478) succeeded and created release PR [#118](https://github.com/furancho-labs/Peer2Canvas/pull/118). The generated-changelog `format` failure was fixed by PR [#119](https://github.com/furancho-labs/Peer2Canvas/pull/119), merged as `d97851b`; all eight required checks now pass on #118, which remains open for maintainer review.
-- Main handoff PR [#120](https://github.com/furancho-labs/Peer2Canvas/pull/120) merged as `38a0ffa`. Main-to-dev history sync PR [#121](https://github.com/furancho-labs/Peer2Canvas/pull/121) merged as `bab3140`, so `main` is again an ancestor of `dev`.
+- Main handoff PR [#120](https://github.com/furancho-labs/Peer2Canvas/pull/120) merged as `38a0ffa`; history sync PR [#121](https://github.com/furancho-labs/Peer2Canvas/pull/121) synchronized its history into `dev`. S3 promotion PR [#130](https://github.com/furancho-labs/Peer2Canvas/pull/130) has since advanced `main`; PR #131 synchronizes that promotion back into `dev`.
 - CI tracking issue [#111](https://github.com/furancho-labs/Peer2Canvas/issues/111) is closed and Done after Release Please created #118 and its required checks passed.
 - WP-05.1 PR [#114](https://github.com/furancho-labs/Peer2Canvas/pull/114) merged into `dev` as `246d6d3`; issue #27 is closed and Done. WP-05.2 PR [#123](https://github.com/furancho-labs/Peer2Canvas/pull/123) merged as `5839019`, and WP-05.3 PR [#124](https://github.com/furancho-labs/Peer2Canvas/pull/124) merged as `2d29f4f`. Issues #28 and #29 and parent WP-05/#5 are closed and Done; the WP-05 inventory is current through PR #124.
 - WP-06 PR [#125](https://github.com/furancho-labs/Peer2Canvas/pull/125) merged into `dev` as `a2f6077`. Children #30–#34 and parent WP-06/#7 are closed; WP-06 items are Done on Project #4. S3 milestone #4 contains 10 closed issues; verify its current state on the Project before resuming.
 - Documentation closeout PR [#126](https://github.com/furancho-labs/Peer2Canvas/pull/126) merged into `dev` as `8db7580`, updating the compatibility matrix, ADR-0006, and this handoff.
 - WP-06 CI passed all eight required contexts, CodeQL, OSV, Gitleaks, and the native jobs on Linux, macOS, and Windows. Local evidence: 231 TypeScript tests, 33 Rust tests, typecheck, lint, formatting, Clippy, strict OpenSpec validation, and optimized Rust compile passed. The Vite build succeeds with a JavaScript chunk over 500 kB.
 - A local macOS Tauri bundle attempt failed while generating the configured app icon (`No matching IconType`); native file-dialog UI smoke was not completed. Keep icon packaging in WP-11.6/#90.
+- S3 promotion PR [#130](https://github.com/furancho-labs/Peer2Canvas/pull/130) merged into `main` as `3940a07`. The required checks, CodeQL, OSV, and native jobs passed; milestone #4 is closed with all 10 S3 issues closed and Done on Project #4.
 
 ## Delivered product behavior
 
-The desktop app supports a canonical diagram document, model-backed editing, selection and transforms, straight connectors, property inspection, pages and layers, undo/redo, versioned `.peercanvas` save/open, migration, and non-destructive recovery. A native macOS save, close, and reopen flow was exercised. S3 adds the licensed shape catalog and declared draw.io import/export subset. Required native CI builds passed on Windows, macOS, and Linux; this is not a manual UI smoke test on each operating system.
+The desktop app supports a canonical diagram document, model-backed editing, selection and transforms, straight connectors, property inspection, pages and layers, undo/redo, versioned `.peercanvas` save/open, migration, non-destructive recovery, the licensed shape catalog, and declared draw.io import/export. A native macOS save, close, and reopen flow was exercised. Required native CI builds passed on Windows, macOS, and Linux; this is not a manual UI smoke test on each operating system.
 
 This was a source promotion. It did not publish an installer, declare minimum supported OS versions, or establish release readiness. The macOS Cmd+Q path was not manually rechecked while the Mac was locked; risk R-13 records the remaining native quit-path uncertainty.
 
@@ -34,7 +35,7 @@ The product still lacks grouping, peer collaboration, invitations, real assistan
 
 ## Roadmap after S2
 
-- S3 covers WP-05 (shape catalog) and WP-06 (draw.io interoperability). Both work packages and all child issues are complete; the board and milestone record the current promotion state.
+- S3 covers WP-05 (shape catalog) and WP-06 (draw.io interoperability). Both work packages, all child issues, and milestone #4 are complete on `main`.
 - S7: native icon packaging, WP-11.6/#90.
 - S8: desktop preferences and English/Spanish resources, WP-13/#93.
 - S9: grouping, WP-14/#91; discovery issue #89 defines the semantics before implementation tasks are opened.
@@ -61,4 +62,4 @@ The S7–S10 issues and OpenSpec proposals are planning only. No product impleme
 
 ## Next step
 
-Release PR #118 remains open for maintainer review; do not merge it without maintainer approval. At resume, refresh the live S3 promotion PR and milestone #4: if promotion to protected `main` is still pending, complete it only after required checks pass; if it has merged, close the milestone and sync `main` history into `dev` if required. Do not start a later sprint without maintainer direction.
+Release PR #118 remains open for maintainer review; do not merge it without maintainer approval. PR #131 is the main-to-dev history sync after S3 promotion; verify its merged status and that protected `main` is an ancestor of `dev` before resuming. Do not start a later sprint without maintainer direction.
