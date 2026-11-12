@@ -98,12 +98,12 @@ Effort ranges are initial engineering estimates. They exclude release administra
 
 ### WP-05: Shape catalog
 
-- **Scope:** catalog manifest, categories, local search, installed libraries, asset attribution and SVG safety.
+- **Scope:** catalog manifest, offline search/browse, approved shape insertion with stable references, asset attribution, and SVG preview safety.
 - **Requirements/spec:** FR-017..020; Diagram Shapes, Shape Catalog, Security & Privacy.
 - **Dependencies/components:** WP-02; catalog service, renderer, library metadata.
 - **Activities/contracts:** define asset schema with source URL, version, license, attribution, hash and review status; do not bundle a logo or stencil until rights are checked.
-- **Acceptance:** search returns only available assets; assets without verified redistribution rights are not bundled; unsafe SVG constructs are rejected or sanitized.
-- **Tests/DoD:** catalog fixture tests, SVG sanitizer tests, license manifest audit.
+- **Acceptance:** offline search returns usable approved entries in deterministic order; adding an entry stores its stable ID/version; unsafe SVG constructs are rejected; no asset with unknown redistribution rights is bundled.
+- **Tests/DoD:** catalog and schema-migration fixtures, keyboard/accessibility checks, malicious SVG tests, and a direct/transitive license and asset-rights audit.
 - **Effort/risk:** 6-10 PD; third-party logo and stencil rights are not inferred from the source repository license.
 - **Issue / PR:** WP-05 Build a licensed searchable shape catalog; PR to **dev**.
 
@@ -112,8 +112,8 @@ Effort ranges are initial engineering estimates. They exclude release administra
 - **Scope:** import/export adapter, format detection, mapping report, preserved unsupported content and golden fixtures.
 - **Requirements/spec:** FR-021..024; draw.io Compatibility, Import & Export.
 - **Dependencies/components:** WP-02 and WP-05; adapter, serializers, fixture corpus.
-- **Acceptance:** declared supported samples round-trip without loss of supported semantics; unsupported features produce a report and original payload is preserved where safe.
-- **Tests/DoD:** golden fixture matrix, malicious XML/SVG cases, round-trip comparisons, documented compatibility limits.
+- **Acceptance:** declared `.drawio`/`.xml` samples round-trip all supported semantics; imports report unsupported content before replacement; bounded safe fragments retain mapped source IDs and relationships; fragments whose mapped targets were deleted are reported and omitted from export; overwrite confirmation and failed-write recovery protect prior files.
+- **Tests/DoD:** licensed first-party golden fixtures, malformed/hostile XML and compressed-input tests, schema migration, round-trip comparisons, and documented compatibility/parser limits.
 - **Effort/risk:** 8-14 PD; draw.io's XML model and compressed variants make full parity unrealistic for the first release.
 - **Issue / PR:** WP-06 Import and export draw.io documents; PR to **dev**.
 

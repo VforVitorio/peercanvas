@@ -37,6 +37,7 @@ beforeEach(() => {
     geometry: { ...geometry },
     text: "",
     styleId: null,
+    catalogReference: null,
   });
 });
 afterEach(() => {

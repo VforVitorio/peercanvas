@@ -8,11 +8,11 @@ Source: S1 draft `s1-document-persistence-contract.md` from its separate worktre
 
 Export `Document`, `Page`, `Layer`, `Node`, `Connection`, `Style`, `ModelState`, `Diagnostic`, `Result`, `createDocument({documentId,pageId,layerId,title,now})`, `validateDocument`, `parseDocument`, `serializeDocument`, and `executeCommand` from the index. Creation returns `Result<ModelState>` at revision 0. `validateDocument(unknown)` returns a detached `Result<Document>`. Commands accept unknown runtime payloads and return the result specified below. The demo implements inverse-command undo/redo using this same executor, never direct semantic snapshot replacement. Do not add native or React/Weave dependencies.
 
-## Version 1 semantic snapshot
+## Schema v2 semantic snapshot
 
 ### Synthetic version 0 migration
 
-The exact test-only, unreleased version 0 schema is version 1 except `schemaVersion: 0` and no `metadata.updatedAt`. The declared 0→1 migration copies `createdAt` to `updatedAt`, preserves all other semantic fields/IDs, validates the whole result, and reports `sourceVersion: 0, migrated: true`. No other older/future version is supported. This paragraph is extracted from the S1 draft's recovery/migration section; version 0 is not a previously shipped product. Migration never writes the source.
+The test-only, unreleased version 0 schema differs from version 1 only by `schemaVersion: 0` and missing `metadata.updatedAt`. The 0→2 migration copies `createdAt` to `updatedAt`, adds null catalog references, carries over the reserved empty/null extension fields, validates the whole result, and reports `sourceVersion: 0, migrated: true`. The 1→2 migration preserves supported fields and IDs, adds a null `catalogReference` to each node, and reports `sourceVersion: 1, migrated: true`. Version 0 was never a released product format. Migration is in memory and never writes the source.
 
 The persisted snapshot is UTF-8 JSON in a user-selected `.peercanvas` file. ADR-0003 selects this format as the native local document store. There is one semantic document, independent of React, Weave, Yjs, or database internals.
 
@@ -20,20 +20,26 @@ All fields below are required. Objects reject unknown keys; optional references 
 
 ```text
 Document {
-  schemaVersion: 1,
+  schemaVersion: 2,
   documentId: Id,
   metadata: { title: string, description: string, createdAt: Timestamp, updatedAt: Timestamp },
   pages: Page[],
   styles: Style[],
   libraryReferences: [],
-  sourceCompatibility: null
+  sourceCompatibility: null | {
+    format: "drawio", version: 1, pages: {
+      pageId: Id, sourcePageId: string,
+      cellIdMap: { sourceId: string, elementId: Id }[], fragments: string[]
+    }[]
+  }
 }
 Page { pageId: Id, name: string, layers: Layer[] }
 Layer { layerId: Id, name: string, nodes: Node[], connections: Connection[] }
 Node {
   nodeId: Id, type: "rectangle" | "text",
   geometry: { x: number, y: number, width: number, height: number, rotation: number },
-  text: string, styleId: Id | null
+  text: string, styleId: Id | null,
+  catalogReference: { shapeId: string, version: string } | null
 }
 Connection {
   connectionId: Id, sourceNodeId: Id, targetNodeId: Id,
@@ -49,7 +55,7 @@ Style {
 
 `Timestamp` is an ISO UTC string in `YYYY-MM-DDTHH:mm:ss.sssZ` form with a valid calendar date. `updatedAt >= createdAt`. A successful content-changing command receives an injected timestamp no earlier than the current `updatedAt`. Reads and serialization never consult a clock or generate IDs. `Color` is lowercase `#rrggbb`; no CSS expressions or external resources are accepted. Default visual values for a null style are white fill, black stroke/text, stroke width 1, font size 16; text nodes have no rendered fill/stroke. These defaults belong to the adapter contract, not extra persisted renderer state.
 
-Library references and imported compatibility payloads are reserved as empty/null in this version. A non-empty or unknown extension is rejected rather than discarded. Later support requires a declared version/migration; it cannot silently widen this schema.
+`libraryReferences` remains empty in v2 until external libraries are in scope. `catalogReference` identifies a bundled manifest entry by its stable ID and asset version. `sourceCompatibility` stores source page IDs, mappings from imported cell IDs to canonical document IDs, and safe unsupported cell fragments. It is bounded to 100 source pages, 100,000 mappings, 1,000 fragments, 64 KiB per fragment, and 1 MiB of fragment text. A source-page record must reference a current page. The native exporter reparses each fragment and rejects active content before writing it. Fragments are never renderer input. If a mapped document element is deleted, its inert fragment remains in the file but is omitted from export with a loss report until the mapped relationship is valid again. Removing a page removes its source record; undo restores it.
 
 ### Invariants and bounds
 
@@ -69,7 +75,7 @@ Diagnostic { code: ErrorCode, path: string, message: string }
 Result<T> = { ok: true, value: T }
           | { ok: false, errors: Diagnostic[] }
 parseDocument(source: string): Result<{
-  document: Document, sourceVersion: 0 | 1, migrated: boolean
+  document: Document, sourceVersion: 0 | 1 | 2, migrated: boolean
 }>
 serializeDocument(document: unknown): Result<string>
 ModelState { document: Document, revision: nonnegativeSafeInteger }
@@ -90,17 +96,18 @@ New documents start at session revision 0 with externally supplied document/page
 
 Each row is an exact payload with a `type` discriminant plus the listed fields. An add accepts a full validated entity, including its children where applicable. An update replaces the complete entity; it cannot change its ID or ownership. Reorder uses an exact permutation without missing/duplicate IDs. Index values are integers in `[0, currentLength]` before insertion; there is no implicit append on an invalid index.
 
-| Type                                                         | Fields and behavior                                                                                                                  |
-| ------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------ |
-| `document.setMetadata`                                       | `title`, `description`; timestamps/IDs are not editable payload fields                                                               |
-| `page.add` / `page.remove` / `page.rename`                   | `{ page, index }` / `{ pageId }` / `{ pageId, name }`                                                                                |
-| `page.reorder`                                               | `{ pageIds }`, a permutation of all pages                                                                                            |
-| `layer.add` / `layer.remove` / `layer.rename`                | `{ pageId, layer, index }` / `{ pageId, layerId }` / `{ pageId, layerId, name }`                                                     |
-| `layer.reorder`                                              | `{ pageId, layerIds }`, a permutation of that page's layers                                                                          |
-| `node.add` / `node.update` / `node.remove`                   | `{ pageId, layerId, node, index }` / `{ pageId, layerId, node }` / `{ pageId, layerId, nodeId }`                                     |
-| `connection.add` / `connection.update` / `connection.remove` | `{ pageId, layerId, connection, index }` / `{ pageId, layerId, connection }` / `{ pageId, layerId, connectionId }`                   |
-| `style.put` / `style.remove`                                 | `{ style }`, replace existing same-ID style or append new style / `{ styleId }`, reject if referenced                                |
-| `batch`                                                      | `{ commands }`, 1–1,000 non-batch commands, applied in order as one candidate transaction; one failed child rejects the entire batch |
+| Type                                                         | Fields and behavior                                                                                                                   |
+| ------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------- |
+| `document.setMetadata`                                       | `title`, `description`; timestamps/IDs are not editable payload fields                                                                |
+| `document.setSourceCompatibility`                            | `sourceCompatibility`, validated against the current page set and preservation limits; used by undo to restore removed page fragments |
+| `page.add` / `page.remove` / `page.rename`                   | `{ page, index }` / `{ pageId }` / `{ pageId, name }`                                                                                 |
+| `page.reorder`                                               | `{ pageIds }`, a permutation of all pages                                                                                             |
+| `layer.add` / `layer.remove` / `layer.rename`                | `{ pageId, layer, index }` / `{ pageId, layerId }` / `{ pageId, layerId, name }`                                                      |
+| `layer.reorder`                                              | `{ pageId, layerIds }`, a permutation of that page's layers                                                                           |
+| `node.add` / `node.update` / `node.remove`                   | `{ pageId, layerId, node, index }` / `{ pageId, layerId, node }` / `{ pageId, layerId, nodeId }`                                      |
+| `connection.add` / `connection.update` / `connection.remove` | `{ pageId, layerId, connection, index }` / `{ pageId, layerId, connection }` / `{ pageId, layerId, connectionId }`                    |
+| `style.put` / `style.remove`                                 | `{ style }`, replace existing same-ID style or append new style / `{ styleId }`, reject if referenced                                 |
+| `batch`                                                      | `{ commands }`, 1–1,000 non-batch commands, applied in order as one candidate transaction; one failed child rejects the entire batch  |
 
 Node/connection array order is the stacking order within its category; layers are back to front, with connections drawn before nodes within a layer. Updates retain array positions. Style array order is preserved; `style.put` does not reorder an existing style. A batch updates timestamps/revision once if its final semantic state changes. Its diagnostics include the child command index. Referential validity is required after each child; no temporarily dangling references are allowed.
 

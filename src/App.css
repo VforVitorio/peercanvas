@@ -264,6 +264,92 @@ p {
   border: 1px solid currentColor;
   border-radius: 2px;
 }
+.pc-shape-library {
+  display: grid;
+  gap: 8px;
+  margin: 24px 0 4px;
+  padding-top: 18px;
+  border-top: 1px solid #d5dde2;
+}
+.pc-shape-library > label {
+  color: #435a69;
+  font-size: 12px;
+}
+.pc-shape-library input {
+  width: 100%;
+  min-height: 36px;
+  padding: 6px 8px;
+  border: 1px solid #aebfca;
+  border-radius: 5px;
+  background: #fff;
+  color: #17232d;
+  font: inherit;
+}
+.pc-shape-results {
+  display: grid;
+  gap: 8px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.pc-shape-add {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  width: 100%;
+  min-height: 52px;
+  padding: 6px;
+  border: 1px solid #d5dde2;
+  background: #fff;
+  color: #263c4b;
+  text-align: left;
+}
+.pc-shape-add:hover:not(:disabled) {
+  border-color: #6d879b;
+  background: #f2f6fa;
+}
+.pc-shape-add img,
+.pc-shape-fallback {
+  flex: 0 0 42px;
+  width: 42px;
+  height: 28px;
+  object-fit: contain;
+}
+.pc-shape-fallback {
+  border: 1px solid #335cbb;
+  border-radius: 3px;
+}
+.pc-shape-add strong,
+.pc-shape-add small {
+  display: block;
+}
+.pc-shape-add strong {
+  font-size: 12px;
+}
+.pc-shape-add small {
+  margin-top: 3px;
+  color: #526372;
+  font-size: 10px;
+}
+.pc-shape-result details {
+  padding: 6px 2px 0;
+  color: #526372;
+  font-size: 10px;
+  line-height: 1.5;
+}
+.pc-shape-result summary {
+  cursor: pointer;
+  color: #28476a;
+}
+.pc-shape-result details p {
+  margin-top: 4px;
+  overflow-wrap: anywhere;
+}
+.pc-shape-empty {
+  color: #526372;
+  font-size: 12px;
+  line-height: 1.5;
+}
 .pc-selected-label {
   margin-left: auto;
   font-size: 10px;

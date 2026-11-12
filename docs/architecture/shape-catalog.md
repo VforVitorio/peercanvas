@@ -1,14 +1,14 @@
 # Shape catalog design
 
-Status: schema v1 is defined and validated; no external shape or logo assets are bundled. Browse/search, SVG handling, and per-asset rights review remain in WP-05.2 and WP-05.3.
+Status: manifest schema v1 is validated. S3 adds a local catalog with one first-party rectangle preview under Apache-2.0, offline search, stable node references, and a bounded SVG sanitizer.
 
 ## Responsibilities
 
-The catalog resolves a stable shape identifier to a renderer-compatible shape definition and searchable metadata. It is separate from document storage: documents reference stable shape identifiers and record the version/schema needed to render them.
+The catalog resolves stable shape identifiers to renderer-supported node types and searchable metadata. It stays separate from document storage. Schema-v2 nodes retain `catalogReference: { shapeId, version } | null`; the current renderer mapping supports `basic-rectangle` as a rectangle node. Entries without a renderer mapping are not offered as usable shapes.
 
 ## Manifest schema v1
 
-The bundled manifest is `src/shapes/manifest.json`. It currently has no entries because no shape assets have completed rights review. Each entry records:
+The bundled manifest is `src/shapes/manifest.json`. Each entry records:
 
 - a stable lowercase ID, display name, category, search keywords, and optional local preview path;
 - source project, HTTPS source URL, source revision, asset version, and lowercase SHA-256 content hash;
@@ -17,27 +17,25 @@ The bundled manifest is `src/shapes/manifest.json`. It currently has no entries 
 - explicit redistribution, modification, and commercial-use decisions (`permitted`, `prohibited`, or `unknown`);
 - review status, reviewer, and review date.
 
-Only structurally valid entries with an approved review and explicit redistribution permission are usable. Unreviewed, rejected, or rights-unknown entries are excluded and reported. Duplicate IDs exclude every occurrence so resolution cannot depend on array order. The validator checks manifest metadata and hash format; it does not fetch source URLs, verify legal claims, or recompute a digest without the asset file. Those checks belong to the per-asset review in WP-05.3.
+Only structurally valid entries with an approved review and explicit redistribution permission are usable. Unreviewed, rejected, or rights-unknown entries are excluded. Duplicate IDs exclude every occurrence so resolution cannot depend on array order. The validator checks manifest metadata and hash format; it does not fetch source URLs or verify legal claims.
 
-The schema does not bind an asset to renderer/model versions. No bundled asset currently requires that compatibility rule; add it when a reviewed asset has a concrete renderer/model constraint.
-
-A permissive repository license does not automatically cover logos, brand marks, imported stencils, fonts, or user-contributed assets. An asset with unknown rights stays out of the bundled catalog.
+The bundled `assets/rectangle.svg` was authored for PeerCanvas. Its SHA-256 is `4d6734d996faaac492a34fc2d470bef63a40f9cc417988c8db85dccc944e88e7`; the manifest records its source path, asset version, Apache-2.0 license, attribution, rights, and review date. It contains no upstream artwork.
 
 ## Search and loading
 
-Search is local and works offline. The first catalog can be a static manifest plus lazy asset loading. Do not add a remote catalog service unless the product later needs updates that cannot be shipped with a release.
+Search is local and works offline. It trims the query, matches case-insensitive substrings in display name, category, and keywords, then sorts by lowercased display name and stable ID. The static bundled manifest is sufficient for S3; there is no remote catalog service.
 
 ## SVG boundary
 
-Treat SVG as untrusted structured input. Parse and sanitize it before rendering. Reject scripts, event handlers, external network references, embedded HTML, unsafe CSS and oversized data. Keep a canonical asset entry and renderer-safe representation; do not mutate the original file in place.
+The preview sanitizer rebuilds SVG using an allowlist of basic vector elements and attributes. It rejects scripts, event handlers, external references, CSS, embedded HTML, unsupported namespaces/elements/attributes, DTD/entity declarations, and input above 256 KiB, 2,000 elements, 32 nesting levels, or 4,096 characters per attribute value. The original bundled file stays unchanged; only the sanitized result is loaded through an image data URL.
 
 ## Verification
 
-WP-05 must add manifest schema validation, deterministic search fixtures, sanitizer tests, and a license audit. Release review checks that each distributed shape is traceable to an allowed source and that notices are shipped where required.
+Catalog tests cover local deterministic search, shape insertion, schema-v2 reference round trips, and empty results. SVG fixtures cover active content and each input bound. WP-05.3 separately reviews direct and transitive dependency license metadata and all bundled assets.
 
-## Initial rights review
+## Asset review
 
-- [Simple Icons](https://github.com/simple-icons/simple-icons) describes its icon assets as CC0, but brand/trademark policies still apply.
-- Cloud vendor architecture assets have individual terms; do not infer unrestricted redistribution from public download access.
-- draw.io source code licensing does not automatically grant redistribution rights to every icon or stencil included in the project.
-- No third-party icon/logo assets are present in the current scaffold. This is a planning record, not a completed license audit.
+- The catalog bundles no third-party icons, logos, fonts, stencils, or draw.io library assets.
+- Cloud vendor architecture assets have individual terms; public download access does not establish redistribution permission.
+- draw.io source licensing does not automatically grant rights to every icon or stencil in draw.io.
+- The only current shape preview is original first-party artwork under Apache-2.0; its file hash matches the manifest.

@@ -26,12 +26,32 @@ export interface Geometry {
   height: number;
   rotation: number;
 }
+export interface CatalogReference {
+  shapeId: string;
+  version: string;
+}
 export interface Node {
   nodeId: Id;
   type: "rectangle" | "text";
   geometry: Geometry;
   text: string;
   styleId: Id | null;
+  catalogReference: CatalogReference | null;
+}
+export interface SourceCellIdMapping {
+  sourceId: string;
+  elementId: Id;
+}
+export interface PreservedSourcePage {
+  pageId: Id;
+  sourcePageId: string;
+  cellIdMap: SourceCellIdMapping[];
+  fragments: string[];
+}
+export interface SourceCompatibility {
+  format: "drawio";
+  version: 1;
+  pages: PreservedSourcePage[];
 }
 export interface Connection {
   connectionId: Id;
@@ -61,13 +81,13 @@ export interface Page {
   layers: Layer[];
 }
 export interface Document {
-  schemaVersion: 1;
+  schemaVersion: 2;
   documentId: Id;
   metadata: { title: string; description: string; createdAt: Timestamp; updatedAt: Timestamp };
   pages: Page[];
   styles: Style[];
   libraryReferences: [];
-  sourceCompatibility: null;
+  sourceCompatibility: SourceCompatibility | null;
 }
 export interface ModelState {
   document: Document;
@@ -92,9 +112,19 @@ export interface CommandOutcome {
 
 const MAX_BYTES = 10 * 1024 * 1024;
 const MAX_DIAGNOSTICS = 100;
+const MAX_PRESERVED_FRAGMENTS = 1000;
+const MAX_PRESERVED_FRAGMENT_BYTES = 64 * 1024;
+const MAX_PRESERVED_TOTAL_BYTES = 1024 * 1024;
+const MAX_SOURCE_CELL_ID_MAPPINGS = 100000;
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/;
 const TIMESTAMP = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/;
 const COLOR = /^#[0-9a-f]{6}$/;
+const CATALOG_ID = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
+const hasForbiddenXmlControlCharacters = (value: string): boolean =>
+  [...value].some((character) => {
+    const code = character.charCodeAt(0);
+    return code < 32 && code !== 9 && code !== 10 && code !== 13;
+  });
 type Obj = Record<string, unknown>;
 const success = <T>(value: T): Result<T> => ({ ok: true, value });
 const failure = (code: DiagnosticCode, path: string, message: string): Result<never> => ({
@@ -143,6 +173,10 @@ const keys = (
   for (const k of expected)
     if (!own(o, k)) push(errors, code, `${path}/${k}`, "Required field is missing.");
 };
+const hasExactFields = (o: Obj, expected: string[]): boolean => {
+  const actual = Object.keys(o);
+  return actual.length === expected.length && expected.every((key) => own(o, key));
+};
 const push = (errors: Diagnostic[], code: DiagnosticCode, path: string, message: string): void => {
   if (errors.length < MAX_DIAGNOSTICS) errors.push({ code, path, message });
 };
@@ -182,6 +216,9 @@ const FIELD_ORDER = new Map([
   ["rotation", 4],
   ["text", 3],
   ["styleId", 4],
+  ["catalogReference", 5],
+  ["shapeId", 0],
+  ["version", 1],
   ["sourceNodeId", 1],
   ["targetNodeId", 2],
   ["routing", 3],
@@ -194,6 +231,11 @@ const FIELD_ORDER = new Map([
   ["fontSize", 5],
   ["libraryReferences", 5],
   ["sourceCompatibility", 6],
+  ["format", 0],
+  ["sourcePageId", 1],
+  ["cellIdMap", 2],
+  ["elementId", 0],
+  ["fragments", 3],
 ]);
 function sortDiagnostics(errors: Diagnostic[]): Diagnostic[] {
   const tokens = (path: string): string[] =>
@@ -239,7 +281,7 @@ function validate(value: unknown): Result<Document> {
     "",
     errors,
   );
-  if (value.schemaVersion !== 1 && own(value, "schemaVersion"))
+  if (value.schemaVersion !== 2 && own(value, "schemaVersion"))
     push(errors, "UNSUPPORTED_VERSION", "/schemaVersion", "Unsupported document version.");
   if (!validId(value.documentId))
     push(errors, "INVALID_SCHEMA", "/documentId", "Expected a lowercase UUID v4.");
@@ -271,14 +313,24 @@ function validate(value: unknown): Result<Document> {
       errors,
       "INVALID_SCHEMA",
       "/libraryReferences",
-      "Library references are reserved in version 1.",
+      "Library references are reserved in version 2.",
     );
-  if (value.sourceCompatibility !== null)
+  const source = value.sourceCompatibility;
+  if (
+    source !== null &&
+    (!isObject(source) ||
+      !hasExactFields(source, ["format", "version", "pages"]) ||
+      source.format !== "drawio" ||
+      source.version !== 1 ||
+      !isDenseDataArray(source.pages) ||
+      source.pages.length < 1 ||
+      source.pages.length > 100)
+  )
     push(
       errors,
       "INVALID_SCHEMA",
       "/sourceCompatibility",
-      "Compatibility data is reserved in version 1.",
+      "Invalid or over-limit compatibility data.",
     );
   const ids = new Set<string>();
   const addId = (id: unknown, path: string): void => {
@@ -290,6 +342,7 @@ function validate(value: unknown): Result<Document> {
     else ids.add(id);
   };
   addId(value.documentId, "/documentId");
+  const pageIds = new Set<string>();
   let layerCount = 0;
   let elementCount = 0;
   const nodeLocations = new Map<string, { page: number; layer: number }>();
@@ -302,6 +355,7 @@ function validate(value: unknown): Result<Document> {
       }
       keys(p, ["pageId", "name", "layers"], pp, errors);
       addId(p.pageId, `${pp}/pageId`);
+      if (validId(p.pageId)) pageIds.add(p.pageId);
       if (!string(p.name, 1, 256))
         push(errors, "INVALID_SCHEMA", `${pp}/name`, "Name must contain 1–256 code points.");
       if (!isDenseDataArray(p.layers) || p.layers.length < 1)
@@ -329,7 +383,12 @@ function validate(value: unknown): Result<Document> {
                 push(errors, "INVALID_SCHEMA", np, "Expected node object.");
                 return;
               }
-              keys(n, ["nodeId", "type", "geometry", "text", "styleId"], np, errors);
+              keys(
+                n,
+                ["nodeId", "type", "geometry", "text", "styleId", "catalogReference"],
+                np,
+                errors,
+              );
               addId(n.nodeId, `${np}/nodeId`);
               if (validId(n.nodeId)) nodeLocations.set(n.nodeId, { page: pi, layer: li });
               if (n.type !== "rectangle" && n.type !== "text")
@@ -338,6 +397,23 @@ function validate(value: unknown): Result<Document> {
                 push(errors, "INVALID_SCHEMA", `${np}/text`, "Text exceeds its limit.");
               if (n.styleId !== null && !validId(n.styleId))
                 push(errors, "INVALID_SCHEMA", `${np}/styleId`, "Expected a UUID or null.");
+              if (n.catalogReference !== null) {
+                const reference = n.catalogReference;
+                if (
+                  !isObject(reference) ||
+                  !hasExactFields(reference, ["shapeId", "version"]) ||
+                  !string(reference.shapeId, 1, 128) ||
+                  !CATALOG_ID.test(String(reference.shapeId)) ||
+                  !string(reference.version, 1, 64) ||
+                  n.type !== "rectangle"
+                )
+                  push(
+                    errors,
+                    "INVALID_SCHEMA",
+                    `${np}/catalogReference`,
+                    "Expected a supported shape identifier and version or null.",
+                  );
+              }
               const g = n.geometry;
               if (!isObject(g))
                 push(errors, "INVALID_GEOMETRY", `${np}/geometry`, "Expected geometry object.");
@@ -402,6 +478,122 @@ function validate(value: unknown): Result<Document> {
             });
         });
     });
+  if (isObject(source) && isDenseDataArray(source.pages)) {
+    let preservedBytes = 0;
+    let preservedCount = 0;
+    let mappedCellCount = 0;
+    const sourcePageIds = new Set<string>();
+    source.pages.forEach((rawPage, pageIndex) => {
+      const pagePath = `/sourceCompatibility/pages/${pageIndex}`;
+      if (!isObject(rawPage)) {
+        push(errors, "INVALID_SCHEMA", pagePath, "Expected a preserved source page.");
+        return;
+      }
+      keys(rawPage, ["pageId", "sourcePageId", "cellIdMap", "fragments"], pagePath, errors);
+      if (!validId(rawPage.pageId) || !pageIds.has(rawPage.pageId))
+        push(errors, "MISSING_REFERENCE", `${pagePath}/pageId`, "Source page does not exist.");
+      if (
+        typeof rawPage.sourcePageId !== "string" ||
+        !string(rawPage.sourcePageId, 1, 256) ||
+        hasForbiddenXmlControlCharacters(rawPage.sourcePageId) ||
+        sourcePageIds.has(rawPage.sourcePageId)
+      )
+        push(
+          errors,
+          "INVALID_SCHEMA",
+          `${pagePath}/sourcePageId`,
+          "Source page identifier is invalid or duplicated.",
+        );
+      else sourcePageIds.add(rawPage.sourcePageId as string);
+      if (!isDenseDataArray(rawPage.cellIdMap)) {
+        push(errors, "INVALID_SCHEMA", `${pagePath}/cellIdMap`, "Expected a source cell ID map.");
+      } else {
+        const sourceIds = new Set<string>();
+        const elementIds = new Set<string>();
+        rawPage.cellIdMap.forEach((rawMapping, mappingIndex) => {
+          const mapPath = `${pagePath}/cellIdMap/${mappingIndex}`;
+          if (!isObject(rawMapping)) {
+            push(errors, "INVALID_SCHEMA", mapPath, "Expected a source cell mapping.");
+            return;
+          }
+          keys(rawMapping, ["sourceId", "elementId"], mapPath, errors);
+          if (
+            typeof rawMapping.sourceId !== "string" ||
+            !string(rawMapping.sourceId, 1, 256) ||
+            hasForbiddenXmlControlCharacters(rawMapping.sourceId) ||
+            sourceIds.has(rawMapping.sourceId)
+          )
+            push(
+              errors,
+              "INVALID_SCHEMA",
+              `${mapPath}/sourceId`,
+              "Source cell identifier is invalid or duplicated.",
+            );
+          else sourceIds.add(rawMapping.sourceId as string);
+          if (!validId(rawMapping.elementId) || elementIds.has(rawMapping.elementId))
+            push(
+              errors,
+              "INVALID_SCHEMA",
+              `${mapPath}/elementId`,
+              "Mapped document identifier is invalid or duplicated.",
+            );
+          else elementIds.add(rawMapping.elementId as string);
+          mappedCellCount++;
+        });
+      }
+      if (!isDenseDataArray(rawPage.fragments)) {
+        push(
+          errors,
+          "INVALID_SCHEMA",
+          `${pagePath}/fragments`,
+          "Expected preserved source fragments.",
+        );
+      } else {
+        rawPage.fragments.forEach((fragment, fragmentIndex) => {
+          const path = `${pagePath}/fragments/${fragmentIndex}`;
+          if (typeof fragment !== "string") {
+            push(errors, "INVALID_SCHEMA", path, "Expected XML text.");
+            return;
+          }
+          preservedCount++;
+          const bytes = new TextEncoder().encode(fragment);
+          preservedBytes += bytes.length;
+          if (
+            bytes.length === 0 ||
+            bytes.length > MAX_PRESERVED_FRAGMENT_BYTES ||
+            hasForbiddenXmlControlCharacters(fragment)
+          )
+            push(
+              errors,
+              "LIMIT_EXCEEDED",
+              path,
+              "Preserved fragment is empty, unsafe, or too large.",
+            );
+        });
+      }
+    });
+    if (preservedCount > MAX_PRESERVED_FRAGMENTS)
+      push(
+        errors,
+        "LIMIT_EXCEEDED",
+        "/sourceCompatibility/pages",
+        "Preserved fragment count exceeds 1,000.",
+      );
+    if (mappedCellCount > MAX_SOURCE_CELL_ID_MAPPINGS)
+      push(
+        errors,
+        "LIMIT_EXCEEDED",
+        "/sourceCompatibility/pages",
+        "Source cell ID map exceeds 100,000 entries.",
+      );
+    if (preservedBytes > MAX_PRESERVED_TOTAL_BYTES)
+      push(
+        errors,
+        "LIMIT_EXCEEDED",
+        "/sourceCompatibility/pages",
+        "Preserved source exceeds the 1 MiB limit.",
+      );
+  }
   if (layerCount > 1000) push(errors, "LIMIT_EXCEEDED", "/pages", "Layer limit exceeded.");
   if (elementCount > 100000) push(errors, "LIMIT_EXCEEDED", "/pages", "Element limit exceeded.");
   const stylesById = new Set<string>();
@@ -595,26 +787,80 @@ function parseJsonStrict(source: string): unknown {
 }
 export function parseDocument(
   source: string,
-): Result<{ document: Document; sourceVersion: 0 | 1; migrated: boolean }> {
+): Result<{ document: Document; sourceVersion: 0 | 1 | 2; migrated: boolean }> {
   try {
     if (typeof source !== "string") return failure("INVALID_JSON", "", "Expected UTF-8 JSON text.");
     if (new TextEncoder().encode(source).length > MAX_BYTES)
       return failure("LIMIT_EXCEEDED", "", "Document exceeds the 10 MiB limit.");
     const raw = parseJsonStrict(source);
     if (isObject(raw) && raw.schemaVersion === 0) return migrateV0(raw);
-    if (isObject(raw) && own(raw, "schemaVersion") && raw.schemaVersion !== 1)
+    if (isObject(raw) && raw.schemaVersion === 1) return migrateV1(raw);
+    if (isObject(raw) && own(raw, "schemaVersion") && raw.schemaVersion !== 2)
       return failure("UNSUPPORTED_VERSION", "/schemaVersion", "Unsupported document version.");
     const checked = validateDocument(raw);
     return checked.ok
-      ? success({ document: checked.value, sourceVersion: 1, migrated: false })
+      ? success({ document: checked.value, sourceVersion: 2, migrated: false })
       : checked;
   } catch {
     return failure("INVALID_JSON", "", "Input is not valid JSON or contains duplicate keys.");
   }
 }
+function hasLegacyCatalogReference(pages: unknown): boolean {
+  return (
+    isDenseDataArray(pages) &&
+    pages.some(
+      (page) =>
+        isObject(page) &&
+        isDenseDataArray(page.layers) &&
+        page.layers.some(
+          (layer) =>
+            isObject(layer) &&
+            isDenseDataArray(layer.nodes) &&
+            layer.nodes.some((node) => isObject(node) && own(node, "catalogReference")),
+        ),
+    )
+  );
+}
+function addNullCatalogReferences(pages: unknown): unknown {
+  if (!isDenseDataArray(pages)) return pages;
+  return pages.map((page) => {
+    if (!isObject(page) || !isDenseDataArray(page.layers)) return page;
+    const copyPage = Object.assign(Object.create(null), page) as Obj;
+    copyPage.layers = page.layers.map((layer) => {
+      if (!isObject(layer) || !isDenseDataArray(layer.nodes)) return layer;
+      const copyLayer = Object.assign(Object.create(null), layer) as Obj;
+      copyLayer.nodes = layer.nodes.map((node) => {
+        if (!isObject(node)) return node;
+        const copyNode = Object.assign(Object.create(null), node) as Obj;
+        copyNode.catalogReference = null;
+        return copyNode;
+      });
+      return copyLayer;
+    });
+    return copyPage;
+  });
+}
+function migrateV1(
+  raw: Obj,
+): Result<{ document: Document; sourceVersion: 0 | 1 | 2; migrated: boolean }> {
+  if (hasLegacyCatalogReference(raw.pages))
+    return failure("INVALID_SCHEMA", "/pages", "Schema v1 cannot contain catalog references.");
+  if (raw.sourceCompatibility !== null)
+    return failure(
+      "INVALID_SCHEMA",
+      "/sourceCompatibility",
+      "Schema v1 cannot contain compatibility data.",
+    );
+  const migrated = Object.assign(Object.create(null), raw, {
+    schemaVersion: 2,
+    pages: addNullCatalogReferences(raw.pages),
+  }) as Obj;
+  const result = validateDocument(migrated);
+  return result.ok ? success({ document: result.value, sourceVersion: 1, migrated: true }) : result;
+}
 function migrateV0(
   raw: Obj,
-): Result<{ document: Document; sourceVersion: 0 | 1; migrated: boolean }> {
+): Result<{ document: Document; sourceVersion: 0 | 1 | 2; migrated: boolean }> {
   const errors: Diagnostic[] = [];
   keys(
     raw,
@@ -632,14 +878,30 @@ function migrateV0(
   );
   if (raw.schemaVersion !== 0)
     push(errors, "UNSUPPORTED_VERSION", "/schemaVersion", "Unsupported document version.");
+  if (hasLegacyCatalogReference(raw.pages))
+    push(errors, "INVALID_SCHEMA", "/pages", "Schema v0 cannot contain catalog references.");
+  if (raw.sourceCompatibility !== null)
+    push(
+      errors,
+      "INVALID_SCHEMA",
+      "/sourceCompatibility",
+      "Schema v0 cannot contain compatibility data.",
+    );
+  if (!isDenseDataArray(raw.libraryReferences) || raw.libraryReferences.length !== 0)
+    push(
+      errors,
+      "INVALID_SCHEMA",
+      "/libraryReferences",
+      "Schema v0 cannot contain library references.",
+    );
   if (!isObject(raw.metadata))
     push(errors, "INVALID_SCHEMA", "/metadata", "Expected metadata object.");
   else keys(raw.metadata, ["title", "description", "createdAt"], "/metadata", errors);
   if (errors.length) return { ok: false, errors: sortDiagnostics(errors) };
 
   const metadata = raw.metadata as Obj;
-  const migrated = {
-    schemaVersion: 1,
+  const migrated = Object.assign(Object.create(null), raw, {
+    schemaVersion: 2,
     documentId: raw.documentId,
     metadata: {
       title: metadata.title,
@@ -647,11 +909,8 @@ function migrateV0(
       createdAt: metadata.createdAt,
       updatedAt: metadata.createdAt,
     },
-    pages: raw.pages,
-    styles: raw.styles,
-    libraryReferences: raw.libraryReferences,
-    sourceCompatibility: raw.sourceCompatibility,
-  };
+    pages: addNullCatalogReferences(raw.pages),
+  }) as Obj;
   const result = validateDocument(migrated);
   return result.ok ? success({ document: result.value, sourceVersion: 0, migrated: true }) : result;
 }
@@ -660,7 +919,81 @@ export function serializeDocument(value: unknown): Result<string> {
   if (!valid.ok) return valid;
   try {
     const d = valid.value;
-    const text = `${JSON.stringify({ schemaVersion: d.schemaVersion, documentId: d.documentId, metadata: { title: d.metadata.title, description: d.metadata.description, createdAt: d.metadata.createdAt, updatedAt: d.metadata.updatedAt }, pages: d.pages.map((p) => ({ pageId: p.pageId, name: p.name, layers: p.layers.map((l) => ({ layerId: l.layerId, name: l.name, nodes: l.nodes.map((n) => ({ nodeId: n.nodeId, type: n.type, geometry: { x: n.geometry.x, y: n.geometry.y, width: n.geometry.width, height: n.geometry.height, rotation: n.geometry.rotation }, text: n.text, styleId: n.styleId })), connections: l.connections.map((c) => ({ connectionId: c.connectionId, sourceNodeId: c.sourceNodeId, targetNodeId: c.targetNodeId, routing: c.routing, label: c.label, styleId: c.styleId })) })) })), styles: d.styles.map((s) => ({ styleId: s.styleId, fill: s.fill, stroke: s.stroke, strokeWidth: s.strokeWidth, textColor: s.textColor, fontSize: s.fontSize })), libraryReferences: [], sourceCompatibility: null }, null, 2)}\n`;
+    const text = `${JSON.stringify(
+      {
+        schemaVersion: d.schemaVersion,
+        documentId: d.documentId,
+        metadata: {
+          title: d.metadata.title,
+          description: d.metadata.description,
+          createdAt: d.metadata.createdAt,
+          updatedAt: d.metadata.updatedAt,
+        },
+        pages: d.pages.map((page) => ({
+          pageId: page.pageId,
+          name: page.name,
+          layers: page.layers.map((layer) => ({
+            layerId: layer.layerId,
+            name: layer.name,
+            nodes: layer.nodes.map((node) => ({
+              nodeId: node.nodeId,
+              type: node.type,
+              geometry: {
+                x: node.geometry.x,
+                y: node.geometry.y,
+                width: node.geometry.width,
+                height: node.geometry.height,
+                rotation: node.geometry.rotation,
+              },
+              text: node.text,
+              styleId: node.styleId,
+              catalogReference:
+                node.catalogReference === null
+                  ? null
+                  : {
+                      shapeId: node.catalogReference.shapeId,
+                      version: node.catalogReference.version,
+                    },
+            })),
+            connections: layer.connections.map((connection) => ({
+              connectionId: connection.connectionId,
+              sourceNodeId: connection.sourceNodeId,
+              targetNodeId: connection.targetNodeId,
+              routing: connection.routing,
+              label: connection.label,
+              styleId: connection.styleId,
+            })),
+          })),
+        })),
+        styles: d.styles.map((style) => ({
+          styleId: style.styleId,
+          fill: style.fill,
+          stroke: style.stroke,
+          strokeWidth: style.strokeWidth,
+          textColor: style.textColor,
+          fontSize: style.fontSize,
+        })),
+        libraryReferences: [],
+        sourceCompatibility:
+          d.sourceCompatibility === null
+            ? null
+            : {
+                format: "drawio",
+                version: 1,
+                pages: d.sourceCompatibility.pages.map((sourcePage) => ({
+                  pageId: sourcePage.pageId,
+                  sourcePageId: sourcePage.sourcePageId,
+                  cellIdMap: sourcePage.cellIdMap.map((mapping) => ({
+                    sourceId: mapping.sourceId,
+                    elementId: mapping.elementId,
+                  })),
+                  fragments: [...sourcePage.fragments],
+                })),
+              },
+      },
+      null,
+      2,
+    )}\n`;
     if (new TextEncoder().encode(text).length > MAX_BYTES)
       return failure("LIMIT_EXCEEDED", "", "Serialized document exceeds the 10 MiB limit.");
     return success(text);
@@ -683,7 +1016,7 @@ export function createDocument(input: CreateDocumentInput): Result<ModelState> {
     )
       return failure("INVALID_SCHEMA", "", "Creation values are invalid.");
     const d = {
-      schemaVersion: 1,
+      schemaVersion: 2,
       documentId: input.documentId,
       metadata: { title: input.title, description: "", createdAt: input.now, updatedAt: input.now },
       pages: [
@@ -720,6 +1053,7 @@ function applyOne(d: Document, command: unknown, affected: Set<Id>, path: string
   const type = command.type;
   const schemas: Record<string, string[]> = {
     "document.setMetadata": ["type", "title", "description"],
+    "document.setSourceCompatibility": ["type", "sourceCompatibility"],
     "page.add": ["type", "page", "index"],
     "page.remove": ["type", "pageId"],
     "page.rename": ["type", "pageId", "name"],
@@ -757,6 +1091,13 @@ function applyOne(d: Document, command: unknown, affected: Set<Id>, path: string
       d.metadata.description = command.description as string;
       note(d.documentId);
       return success(undefined);
+    case "document.setSourceCompatibility": {
+      const checked = validateDocument({ ...d, sourceCompatibility: command.sourceCompatibility });
+      if (!checked.ok) return checked;
+      d.sourceCompatibility = checked.value.sourceCompatibility;
+      note(d.documentId);
+      return success(undefined);
+    }
     case "page.add": {
       if (!validIndex(command.index, d.pages.length))
         return failCommand(`${path}/index`, "Insertion index is invalid.", "INVALID_SCHEMA");
@@ -779,6 +1120,12 @@ function applyOne(d: Document, command: unknown, affected: Set<Id>, path: string
       const removed = d.pages.splice(i, 1)[0];
       collectSubtree(removed, affected);
       purgeDanglingConnections(d, affected);
+      if (d.sourceCompatibility !== null) {
+        const pages = d.sourceCompatibility.pages.filter(
+          (sourcePage) => sourcePage.pageId !== removed.pageId,
+        );
+        d.sourceCompatibility = pages.length > 0 ? { ...d.sourceCompatibility, pages } : null;
+      }
       return success(undefined);
     }
     case "page.rename": {

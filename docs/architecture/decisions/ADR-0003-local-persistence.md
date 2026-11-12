@@ -5,7 +5,7 @@
 
 ## Context
 
-The canonical TypeScript model already validates, migrates, and deterministically serializes schema v1. Its persisted snapshot is UTF-8 JSON, capped at 10 MiB. The product requires user-controlled create, open, save, rename, close, and reopen workflows without a network connection. Preferences, file paths, history, selection, and renderer state must stay outside the document snapshot.
+At the initial WP-03 baseline, the canonical TypeScript model validated and deterministically serialized schema v1. S3 adds schema-v2 catalog references and bounded draw.io compatibility data under [ADR-0007](ADR-0007-document-schema-v2-compatibility.md). The persisted snapshot remains UTF-8 JSON capped at 10 MiB. The product requires user-controlled create, open, save, rename, close, and reopen workflows without a network connection. Preferences, file paths, history, selection, and renderer state must stay outside the document snapshot.
 
 The storage decision must preserve one semantic source of truth, leave a known-good version after an interrupted save, and support the existing `.peercanvas` file contract. The app currently has one local editor window and no collaborative editing.
 
@@ -36,7 +36,7 @@ The Rust store enforces the 10 MiB byte limit before reading or writing. Save st
 
 The app stores only the last document path in a separate application preferences file. A document title change uses the canonical metadata command; Save As chooses a new filename and leaves the previous file intact. Preferences, file paths, revision counters, history, selection, and viewport are never serialized into `.peercanvas` content.
 
-The app has no autosave and does not open a document automatically on launch; the user can choose Reopen last. Unsaved changes require Save, Discard, or Cancel before replacing a document or closing the window. Cmd+Q and the custom native Quit menu item follow the same decision, then call the native app-exit command. A macOS Dock-context-menu Quit or OS-level termination may bypass this renderer-controlled path; this is a release risk until native interaction proves otherwise or the limitation is explicitly accepted. After a crash, Reopen last loads the last complete save and a corrupt primary can offer the `.bak` recovery candidate. A schema-v0 open migrates in memory and becomes dirty; the original is not rewritten until the user saves.
+The app has no autosave and does not open a document automatically on launch; the user can choose Reopen last. Unsaved changes require Save, Discard, or Cancel before replacing a document or closing the window. Cmd+Q and the custom native Quit menu item follow the same decision, then call the native app-exit command. A macOS Dock-context-menu Quit or OS-level termination may bypass this renderer-controlled path; this is a release risk until native interaction proves otherwise or the limitation is explicitly accepted. After a crash, Reopen last loads the last complete save and a corrupt primary can offer the `.bak` recovery candidate. Supported v0 and v1 documents migrate in memory to schema v2 and become dirty; the original is not rewritten until the user saves.
 
 ## Consequences
 

@@ -22,6 +22,8 @@ import { createSample } from "./editor/sample";
 import { createDocumentHistory } from "./document/history";
 import UnsavedChangesDialog from "./editor/UnsavedChangesDialog";
 import { useLocalDocuments } from "./editor/useLocalDocuments";
+import { searchShapes, shapeNodeType, shapePreviewDataUri } from "./shapes/catalog";
+import { bundledShapeManifest, type ApprovedShapeManifestEntry } from "./shapes/manifest";
 import "./App.css";
 
 const geometryFields = ["x", "y", "width", "height"] as const;
@@ -49,6 +51,7 @@ export default function App() {
   const [fitRequest, setFitRequest] = useState(0);
   const [feedback, setFeedback] = useState("Select an element to start editing.");
   const [error, setError] = useState("");
+  const [shapeQuery, setShapeQuery] = useState("");
   const outlineHeading = useRef<HTMLHeadingElement>(null);
   const geometryForm = useRef<HTMLFormElement>(null);
   const documentTitleForm = useRef<HTMLFormElement>(null);
@@ -65,6 +68,10 @@ export default function App() {
     (value) => value.connectionId === connectionSelection,
   );
   const pageNodes = page.layers.flatMap((value) => value.nodes);
+  const catalogResults = searchShapes(
+    bundledShapeManifest.entries.filter((entry) => shapeNodeType(entry) !== null),
+    shapeQuery,
+  );
   const selectedStyle = model.document.styles.find((value) => value.styleId === selected?.styleId);
   const connectorStyle = model.document.styles.find(
     (value) => value.styleId === selectedConnection?.styleId,
@@ -355,7 +362,15 @@ export default function App() {
     }
   }
 
-  function addRectangle() {
+  function addShape(shape: ApprovedShapeManifestEntry) {
+    const nodeType = shapeNodeType(shape);
+    if (
+      nodeType === null ||
+      !bundledShapeManifest.entries.some(
+        (entry) => entry.id === shape.id && entry.version === shape.version,
+      )
+    )
+      return;
     const nodes = layer.nodes;
     let cell = 0;
     let x = 80;
@@ -375,7 +390,7 @@ export default function App() {
     }
     const node: Node = {
       nodeId: crypto.randomUUID(),
-      type: "rectangle",
+      type: nodeType,
       text: "Rectangle",
       geometry: {
         x,
@@ -385,6 +400,7 @@ export default function App() {
         rotation: 0,
       },
       styleId: null,
+      catalogReference: { shapeId: shape.id, version: shape.version },
     };
     if (
       run(
@@ -808,9 +824,63 @@ export default function App() {
           {layer.nodes.length === 0 && (
             <p className="pc-empty">No elements. Add a rectangle to begin.</p>
           )}
-          <button type="button" className="pc-btn pc-add" onClick={addRectangle}>
-            Add rectangle
-          </button>
+          <section className="pc-shape-library" aria-labelledby="shape-library-heading">
+            <div className="pc-panel-title">
+              <h2 id="shape-library-heading">Shape library</h2>
+              <span>{catalogResults.length}</span>
+            </div>
+            <label htmlFor="shape-search">Search shapes</label>
+            <input
+              id="shape-search"
+              type="search"
+              value={shapeQuery}
+              onChange={(event) => setShapeQuery(event.target.value)}
+            />
+            {catalogResults.length > 0 ? (
+              <ul className="pc-shape-results" aria-label="Available shapes">
+                {catalogResults.map((shape) => {
+                  const preview = shapePreviewDataUri(shape);
+                  return (
+                    <li key={shape.id} className="pc-shape-result">
+                      <button
+                        type="button"
+                        className="pc-shape-add"
+                        aria-label={`Add ${shape.displayName.toLowerCase()}`}
+                        onClick={() => addShape(shape)}
+                        disabled={editingLocked}
+                      >
+                        {preview ? (
+                          <img src={preview} alt="" aria-hidden="true" />
+                        ) : (
+                          <span className="pc-shape-fallback" aria-hidden="true" />
+                        )}
+                        <span>
+                          <strong>Add {shape.displayName}</strong>
+                          <small>
+                            {shape.category} · v{shape.version}
+                          </small>
+                        </span>
+                      </button>
+                      <details>
+                        <summary>Source and license</summary>
+                        <p>{shape.attribution.text}</p>
+                        <p>
+                          {shape.license.identifier} · {shape.rights.redistribution} redistribution
+                        </p>
+                        <p>
+                          {shape.source.project} · {shape.source.revision}
+                        </p>
+                      </details>
+                    </li>
+                  );
+                })}
+              </ul>
+            ) : (
+              <p className="pc-shape-empty" role="status">
+                No approved shapes match this search.
+              </p>
+            )}
+          </section>
           <h2 className="pc-connections-title">Connections</h2>
           <ul className="pc-element-list" aria-label="Diagram connections">
             {layer.connections.map((connection) => (

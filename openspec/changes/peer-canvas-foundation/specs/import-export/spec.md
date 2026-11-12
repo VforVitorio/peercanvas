@@ -8,12 +8,12 @@ Defines explicit document import and export workflows that protect the active do
 
 ### Requirement: Import into a validated document
 
-The system SHALL parse an imported file into temporary state and validate it before changing or creating an active document.
+The system SHALL parse an imported file into temporary state, show its compatibility report, and validate it before changing or creating an active document.
 
 #### Scenario: Import succeeds
 
 - **WHEN** the source file is supported and passes validation
-- **THEN** the system presents the imported document without overwriting the source file
+- **THEN** the system presents the imported document and compatibility report without overwriting the source file
 
 #### Scenario: Import fails
 
@@ -22,7 +22,7 @@ The system SHALL parse an imported file into temporary state and validate it bef
 
 ### Requirement: Export to a user-selected destination
 
-The system SHALL export supported document content to an explicitly selected destination and format.
+The system SHALL export supported document content to an explicitly selected destination and format, and SHALL ask for confirmation before replacing an existing destination.
 
 #### Scenario: Export succeeds
 
@@ -33,6 +33,11 @@ The system SHALL export supported document content to an explicitly selected des
 
 - **WHEN** the user cancels or the destination cannot be written
 - **THEN** the active document and any previous destination content remain unchanged
+
+#### Scenario: Confirm an existing destination
+
+- **WHEN** an export destination already exists
+- **THEN** the system replaces it only after explicit confirmation and preserves its prior complete contents if export fails
 
 ### Requirement: Disclose known transformation losses
 

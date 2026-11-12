@@ -37,7 +37,40 @@ The system SHALL allow users to browse and search installed shape entries withou
 #### Scenario: Search while offline
 
 - **WHEN** a user searches an installed local catalog without network access
-- **THEN** matching entries are returned from local data
+- **THEN** case-insensitive substring matches across display name, category, and keywords are returned from local data in deterministic display-name and identifier order
+
+#### Scenario: Browse without a search term
+
+- **WHEN** the user leaves the search field empty
+- **THEN** all usable installed entries are shown in deterministic order
+
+### Requirement: Add an approved catalog shape
+
+The system SHALL add a selected usable shape through the validated document command boundary and retain its stable catalog identifier and asset version with the node.
+
+#### Scenario: Add a reviewed shape
+
+- **WHEN** the user selects an approved, available catalog entry
+- **THEN** the new node has a stable catalog reference and is rendered using its declared supported node type
+
+#### Scenario: Add an unavailable shape
+
+- **WHEN** the selected entry is invalid, unreviewed, rejected, or unavailable
+- **THEN** the system does not mutate the document
+
+### Requirement: Render only safe SVG previews
+
+The system SHALL validate and sanitize SVG previews before rendering them.
+
+#### Scenario: Reject active SVG content
+
+- **WHEN** an SVG contains a script, event handler, external resource, embedded HTML, CSS, unsupported namespace, element, or attribute
+- **THEN** the preview is rejected and no active content is rendered
+
+#### Scenario: Reject an over-limit SVG
+
+- **WHEN** the SVG exceeds 256 KiB, 2,000 elements, 32 levels of nesting, or 4,096 characters in an attribute value
+- **THEN** the preview is rejected before rendering
 
 ### Requirement: Distribute only reviewed assets
 

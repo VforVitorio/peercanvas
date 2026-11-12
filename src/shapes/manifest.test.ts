@@ -28,8 +28,9 @@ const reviewedEntry = (overrides: Record<string, unknown> = {}) => ({
 const manifest = (entries: unknown[]) => ({ schemaVersion: 1, entries });
 
 describe("shape manifest", () => {
-  it("starts with an empty, valid bundled manifest until asset rights are reviewed", () => {
-    expect(bundledShapeManifest).toEqual({ entries: [], issues: [] });
+  it("loads only the reviewed first-party rectangle asset", () => {
+    expect(bundledShapeManifest.entries.map((entry) => entry.id)).toEqual(["basic-rectangle"]);
+    expect(bundledShapeManifest.issues).toEqual([]);
   });
 
   it("includes only approved entries with explicit redistribution permission", () => {
