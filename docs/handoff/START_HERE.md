@@ -1,11 +1,12 @@
 # PeerCanvas session handoff
 
-Last updated: 2026-11-12.
+Last updated: 2026-11-13.
 
 ## Current checkpoint
 
 - The repository is [furancho-labs/Peer2Canvas](https://github.com/furancho-labs/Peer2Canvas). Its move to the organization was intentional. The GitHub Project remains under the personal account `VforVitorio`.
 - `main` is the protected release branch and `dev` is the integration branch. Refresh exact live refs, PRs, issues, milestones, and Project Board before beginning each task; do not infer current refs from this handoff.
+- At this checkpoint, `origin/main` is `3940a071390c19f1afe584ec5e8533e85c5c3b4e` and `origin/dev` is `b41362b1c5c95a9cc8b92c37e5e8c405324dd03a`; `main` is an ancestor of `dev`.
 - Promotion PR [#106](https://github.com/furancho-labs/Peer2Canvas/pull/106) merged S1 and S2 to `main` as `a2d9837`; docs promotion PR [#109](https://github.com/furancho-labs/Peer2Canvas/pull/109) records the closeout as `035b02f`.
 - S0, S1, and S2 are complete. Milestones #1, #2, and #3 are closed; S1 issues #2, #4, and #19–#24 and S2 issues #6, #25, #26, and #81 are closed and marked Done on the Project Board.
 - CI polish PR [#112](https://github.com/furancho-labs/Peer2Canvas/pull/112) merged into `dev` as `47e825f`. Its run [43191288824](https://github.com/furancho-labs/Peer2Canvas/actions/runs/43191288824) passed all eight required checks, CodeQL, OSV, and Gitleaks. The run took 12m37s overall; native jobs took Linux 9m35s, macOS 6m21s, and Windows 12m26s. The Rust cache now includes `src-tauri/Cargo.toml`, `Cargo.lock`, and `src-tauri/target`; this first run saved the cache and still ran the full S0 probe because it changed the CI workflow.
@@ -22,6 +23,10 @@ Last updated: 2026-11-12.
 - WP-06 CI passed all eight required contexts, CodeQL, OSV, Gitleaks, and the native jobs on Linux, macOS, and Windows. Local evidence: 231 TypeScript tests, 33 Rust tests, typecheck, lint, formatting, Clippy, strict OpenSpec validation, and optimized Rust compile passed. The Vite build succeeds with a JavaScript chunk over 500 kB.
 - A local macOS Tauri bundle attempt failed while generating the configured app icon (`No matching IconType`); native file-dialog UI smoke was not completed. Keep icon packaging in WP-11.6/#90.
 - S3 promotion PR [#130](https://github.com/furancho-labs/Peer2Canvas/pull/130) merged into `main` as `3940a07`. The required checks, CodeQL, OSV, and native jobs passed; milestone #4 is closed with all 10 S3 issues closed and Done on Project #4.
+- S4 milestone #5 is open; WP-07/#8 and children #35–#37 are tracked on Project #4. PR [#133](https://github.com/furancho-labs/Peer2Canvas/pull/133) delivers the WP-07.1 contract and WP-07.2 implementation to `dev`; refresh the live PR and board state before integrating. Release PR #118 remains open for maintainer review; do not merge it as part of S4.
+- WP-07.2 now contains host-sequenced validated commands, initial checkpoint/commit-tail synchronization, reconnect handling, transient awareness, and a replaceable Trystero 0.26 transport. `npm test` passed 246 tests; typecheck, lint, formatting, strict OpenSpec validation, and runtime dependency audit passed. The normal Vite build passes with the existing 927 kB chunk warning.
+- On macOS 27.2.1 arm64 / WebKit 22625.2.8.11.9, the canvas-only native smoke passed. The optional loopback and public-MQTT peer modes gathered `host` and `srflx` candidates, but ICE stayed `checking` and neither same-Mac peer became ready. The public mode negotiated MQTT WebSocket subprotocols with all three brokers; separate Node MQTT CONNECT checks also passed. These results do not establish LAN, cross-device, NAT, or TURN connectivity. No TURN credentials are available; #37 stays open for a second device/network and a valid TURN test.
+- The collaboration code is not wired into the product UI; sharing/invitation, admission, roles, and participant management remain WP-08/S5.
 
 ## Delivered product behavior
 
@@ -31,11 +36,14 @@ This was a source promotion. It did not publish an installer, declare minimum su
 
 ## Not implemented
 
-The product still lacks grouping, peer collaboration, invitations, real assistant/provider calls, and MCP. Delivered S3 behavior includes one reviewed first-party rectangle preview, offline search, safe SVG rendering, schema-v2 references, the asset/dependency license inventory, and the declared draw.io subset. Check live branch and board state before describing release availability. The app does not render connection labels on the canvas or support page/layer deletion and reordering. Icon packaging remains open under WP-11.6/#90. Do not describe planned S4–S10 work as implemented.
+The product on `main`/`dev` still lacks peer collaboration, invitations, grouping, real assistant/provider calls, and MCP. WP-07 session/transport code exists only on the local S4 branch and has not been integrated or exposed in the UI. Delivered S3 behavior includes one reviewed first-party rectangle preview, offline search, safe SVG rendering, schema-v2 references, the asset/dependency license inventory, and the declared draw.io subset. Check live branch and board state before describing release availability. The app does not render connection labels on the canvas or support page/layer deletion and reordering. Icon packaging remains open under WP-11.6/#90. Do not describe planned S5–S10 work as implemented.
 
-## Roadmap after S2
+## Roadmap after S3
 
 - S3 covers WP-05 (shape catalog) and WP-06 (draw.io interoperability). Both work packages, all child issues, and milestone #4 are complete on `main`.
+- S4 covers WP-07 (validated Yjs synchronization and replaceable transport). PR #133 delivers #35/#36 after checks pass; #37's real network matrix is still open. Do not start WP-08/S5 until S4 is closed.
+- S5 covers WP-08 (secure invitations, admission, roles, participant presence, and revocation) and depends on WP-07.
+- S6 covers WP-09 and WP-10 (optional Codex assistant and MCP tools); both remain planned work.
 - S7: native icon packaging, WP-11.6/#90.
 - S8: desktop preferences and English/Spanish resources, WP-13/#93.
 - S9: grouping, WP-14/#91; discovery issue #89 defines the semantics before implementation tasks are opened.
@@ -49,6 +57,7 @@ The S7–S10 issues and OpenSpec proposals are planning only. No product impleme
 - Use merge commits, delete merged feature branches, and do not create a long-lived `test` branch. Never add AI attribution or `Co-Authored-By` lines.
 - The maintainer owns merges. Pushes and merges require the user's explicit authorization for the current task.
 - Refresh live GitHub state before work; both collaborators and their agents should start from the latest `main`/`dev` and report what changed.
+- If frontend changes overlap or conflict, preserve the user's collaborator's Claude-authored version and integrate our changes around it.
 
 ## Source documents
 
@@ -62,4 +71,4 @@ The S7–S10 issues and OpenSpec proposals are planning only. No product impleme
 
 ## Next step
 
-Release PR #118 remains open for maintainer review; do not merge it without maintainer approval. PR #131 is the main-to-dev history sync after S3 promotion; verify its merged status and that protected `main` is an ancestor of `dev` before resuming. Do not start a later sprint without maintainer direction.
+Refresh the live refs, PR, issues, milestone, and Project Board. Finish WP-07.3/#37 with an independent device/network and valid TURN test credentials if available; reconcile actual results with ADR-0002. Do not promote S4 to `main` or start WP-08/S5 until #37's acceptance matrix passes. Release PR #118 remains open for maintainer review and is unrelated to S4.

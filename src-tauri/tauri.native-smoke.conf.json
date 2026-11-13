@@ -14,7 +14,7 @@
     ],
     "security": {
       "csp": {
-        "connect-src": "'none'"
+        "connect-src": "ws://127.0.0.1:* wss://broker.emqx.io:8084 wss://broker.hivemq.com:8884 wss://test.mosquitto.org:8081"
       },
       "capabilities": [
         {

@@ -39,8 +39,8 @@ S0 comprises tasks 1.1–1.5 and 8.2. Its compatibility probe is test-only and e
 
 ## 5. Peer collaboration, invitations, and presence (WP-07, WP-08)
 
-- [ ] 5.1 Define how validated model changes map to Yjs state and local durability; verify consistency with the document and persistence contracts. — GitHub Issue [#35](https://github.com/furancho-labs/Peer2Canvas/issues/35)
-- [ ] 5.2 Implement initial sync and a replaceable peer transport; verify deterministic two-peer convergence and initial-state completion tests. — GitHub Issue [#36](https://github.com/furancho-labs/Peer2Canvas/issues/36)
+- [x] 5.1 Record the host-sequenced concurrency/rebase policy, validated Yjs mapping, undo/save semantics, and FR-028/FR-034 ownership across WP-07/WP-08. — GitHub Issue [#35](https://github.com/furancho-labs/Peer2Canvas/issues/35)
+- [x] 5.2 Implement initial sync and a replaceable peer transport; verify deterministic two-peer convergence and initial-state completion tests. — GitHub Issue [#36](https://github.com/furancho-labs/Peer2Canvas/issues/36)
 - [ ] 5.3 Exercise LAN, NAT, signaling, STUN, TURN, reconnect, and host-loss scenarios; record actual results and service/credential requirements in ADR-0002. — GitHub Issue [#37](https://github.com/furancho-labs/Peer2Canvas/issues/37)
 - [ ] 5.4 Review and implement the invitation cryptographic protocol, URL/deep-link handling, expiry, admission, and secret redaction; verify entropy, leakage, and invalid/expired link tests. — GitHub Issue [#38](https://github.com/furancho-labs/Peer2Canvas/issues/38)
 - [ ] 5.5 Enforce viewer/editor roles for UI, remote, import, and MCP mutation paths; verify unauthorized changes are rejected in negative tests. — GitHub Issue [#39](https://github.com/furancho-labs/Peer2Canvas/issues/39)

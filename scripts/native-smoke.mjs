@@ -10,6 +10,7 @@ import path from "node:path";
 import process from "node:process";
 import { setTimeout as delay } from "node:timers/promises";
 import { fileURLToPath } from "node:url";
+import { createWsRelayServer } from "@trystero-p2p/ws-relay/server";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const runtimeEnvironmentKeys = [
@@ -54,8 +55,17 @@ async function assertProductionIsolation(directory) {
       );
       assert(!content.includes("__PEERCANVAS_NATIVE_SMOKE__"), `Smoke instrumentation in ${file}`);
       assert(
+        !content.includes("__PEERCANVAS_NATIVE_PEER__"),
+        `Peer smoke instrumentation in ${file}`,
+      );
+      assert(
         !content.includes("__PEERCANVAS_NATIVE_INPUT_ISOLATION__"),
         `Smoke isolation in ${file}`,
+      );
+      assert(!content.includes("native-smoke-peer"), `Peer smoke entry in ${file}`);
+      assert(
+        !content.includes("pc-yjs-update"),
+        `Peer transport leaked into production build in ${file}`,
       );
       assert(!content.includes("Native canvas compatibility probe"), `Smoke entry in ${file}`);
     }
@@ -72,12 +82,20 @@ if (process.argv[2] === "--check-production") {
     "Normal frontend includes the in-memory editor and excludes native-smoke instrumentation.",
   );
 } else {
-  assert.equal(process.argv.length, 2, "Unknown native-smoke argument");
-  await runNativeSmoke();
+  const modes = {
+    canvas: { runPeers: false, usePublicRelay: false },
+    "peers-local": { runPeers: true, usePublicRelay: false },
+    "peers-public": { runPeers: true, usePublicRelay: true },
+  };
+  const mode = process.argv[2] ?? "canvas";
+  assert(modes[mode], "Use canvas, peers-local, or peers-public native-smoke mode");
+  await runNativeSmoke(modes[mode]);
 }
 
-async function runNativeSmoke() {
-  const artifacts = path.join(root, "src-tauri", "target", "native-smoke", process.platform);
+async function runNativeSmoke({ runPeers, usePublicRelay }) {
+  const artifactSuffix = !runPeers ? "" : usePublicRelay ? "-public" : "-peers";
+  const artifactPlatform = `${process.platform}${artifactSuffix}`;
+  const artifacts = path.join(root, "src-tauri", "target", "native-smoke", artifactPlatform);
   await rm(artifacts, { recursive: true, force: true });
   await mkdir(artifacts, { recursive: true });
   const portProbe = createServer();
@@ -87,6 +105,36 @@ async function runNativeSmoke() {
   await new Promise((resolve, reject) =>
     portProbe.close((error) => (error ? reject(error) : resolve())),
   );
+
+  let relay = null;
+  let relayUrl = "public";
+  const relayMessageCounts = { subscribe: 0, publish: 0, unsubscribe: 0, malformed: 0, other: 0 };
+  const relayTopicActivity = new Map();
+  if (runPeers && !usePublicRelay) {
+    relay = createWsRelayServer({ host: "127.0.0.1", port: 0 });
+    await relay.ready;
+    const relayAddress = relay.address();
+    const relayPort = typeof relayAddress === "object" && relayAddress ? relayAddress.port : null;
+    assert(Number.isInteger(relayPort), "Local WebSocket signaling relay did not bind a port");
+    relayUrl = `ws://127.0.0.1:${relayPort}`;
+    relay.wss.on("connection", (socket) => {
+      socket.on("message", (data) => {
+        try {
+          const message = JSON.parse(data.toString());
+          const type = message?.type;
+          const topic = relayTopicActivity.get(message.topic) ?? { subscriptions: 0, publishes: 0 };
+          if (type === "subscribe") topic.subscriptions++;
+          if (type === "publish") topic.publishes++;
+          relayTopicActivity.set(message.topic, topic);
+          if (type === "subscribe" || type === "publish" || type === "unsubscribe")
+            relayMessageCounts[type]++;
+          else relayMessageCounts.other++;
+        } catch {
+          relayMessageCounts.malformed++;
+        }
+      });
+    });
+  }
 
   const address = `http://127.0.0.1:${port}`;
   const webViewReport = path.join(artifacts, "webview-version.txt");
@@ -130,13 +178,17 @@ async function runNativeSmoke() {
     status: "failed",
     startedAt: new Date().toISOString(),
     fixture: "two rectangles and one arrow; memory only",
-    offlineCondition: "Renderer CSP connect-src 'none'; bundled resources only; loopback WebDriver",
+    networkCondition: !runPeers
+      ? "The canvas-only native smoke does not start peer networking"
+      : usePublicRelay
+        ? "Collaboration smoke uses the configured public MQTT signaling allowlist and Trystero's public Google/Cloudflare STUN defaults"
+        : "External renderer endpoints denied; collaboration smoke uses an ephemeral loopback WebSocket relay and Trystero's public Google/Cloudflare STUN defaults",
     inputMethod:
       "Embedded WebDriver synthetic pointer/mouse events; trusted host input isolated in the test window",
     checks: [],
   };
 
-  async function request(route, method = "GET", body) {
+  async function request(route, method = "GET", body, timeoutMs = 15000) {
     let response;
     let payload;
     try {
@@ -144,7 +196,7 @@ async function runNativeSmoke() {
         method,
         headers: { "content-type": "application/json" },
         body: body === undefined ? undefined : JSON.stringify(body),
-        signal: globalThis.AbortSignal.timeout(15000),
+        signal: globalThis.AbortSignal.timeout(timeoutMs),
       });
       payload = await response.json();
     } catch (error) {
@@ -154,6 +206,33 @@ async function runNativeSmoke() {
       throw new Error(`${method} ${route}: ${JSON.stringify(payload.value ?? payload)}`);
     }
     return payload.value;
+  }
+
+  async function executeAsync(expression, args = []) {
+    const script = `const done = arguments[arguments.length - 1]; Promise.resolve(${expression}).then(done, error => done({ __nativeSmokeError: error instanceof Error ? error.message : String(error) }));`;
+    const value = await request(
+      `/session/${session}/execute/async`,
+      "POST",
+      { script, args },
+      90_000,
+    );
+    if (value?.__nativeSmokeError)
+      throw new Error(`Native peer smoke: ${value.__nativeSmokeError}`);
+    return value;
+  }
+
+  async function assertWebSocketAccess() {
+    const state = await executeAsync(
+      `new Promise(resolve => {
+        const socket = new WebSocket(arguments[0]);
+        const timeout = setTimeout(() => { socket.close(); resolve("timeout"); }, 5000);
+        socket.addEventListener("open", () => { clearTimeout(timeout); socket.close(); resolve("open"); }, { once: true });
+        socket.addEventListener("error", () => { clearTimeout(timeout); resolve("error"); }, { once: true });
+      })`,
+      [relayUrl],
+    );
+    assert.equal(state, "open", `Native WebView could not open the loopback relay (${state})`);
+    report.checks.push("native WebView reached the ephemeral loopback WebSocket relay");
   }
 
   async function waitFor(check, description, timeout = 30000) {
@@ -254,6 +333,7 @@ async function runNativeSmoke() {
       "native window session",
     );
     session = created.sessionId;
+    await request(`/session/${session}/timeouts`, "POST", { script: 90_000 });
     const initial = await fixtureWhen(
       (state) =>
         hasPixel(state.pixels.node, [37, 99, 235]) &&
@@ -274,7 +354,7 @@ async function runNativeSmoke() {
     );
     await screenshot("initial.png");
     report.checks.push(
-      "native launch with renderer connections denied",
+      "native launch with external renderer connections denied",
       "two nodes and connector rendered in actual canvas pixels",
     );
 
@@ -326,6 +406,78 @@ async function runNativeSmoke() {
       "connector remains rendered",
       "no uncaught WebView errors",
     );
+
+    if (runPeers && relay) await assertWebSocketAccess();
+
+    if (runPeers) {
+      const peerInitial = await executeAsync(
+        "window.__PEERCANVAS_NATIVE_SMOKE__?.startPeerTest(arguments[0])",
+        [relayUrl],
+      );
+      assert.equal(
+        peerInitial.host.status,
+        "ready",
+        "Host did not record the initial-sync acknowledgement",
+      );
+      assert.equal(
+        peerInitial.peer.status,
+        "ready",
+        "Participant became ready before validated sync",
+      );
+      assert.equal(peerInitial.sameDocument, true, "Initial peer snapshot did not converge");
+
+      const peerEdit = await executeAsync("window.__PEERCANVAS_NATIVE_SMOKE__?.submitPeerEdit()");
+      assert.equal(peerEdit.reply.status, "accepted", "Host rejected a valid peer edit");
+      assert.equal(peerEdit.sameDocument, true, "Host and participant diverged after a peer edit");
+
+      const peerReconnect = await executeAsync(
+        "window.__PEERCANVAS_NATIVE_SMOKE__?.reconnectPeer()",
+      );
+      assert.equal(
+        peerReconnect.peer.status,
+        "ready",
+        "Reconnected participant did not synchronize",
+      );
+      assert.equal(peerReconnect.sameDocument, true, "Reconnected participant missed host state");
+
+      const peerHostLoss = await executeAsync("window.__PEERCANVAS_NATIVE_SMOKE__?.stopHost()");
+      assert.equal(peerHostLoss.peer.status, "disconnected", "Host loss was not surfaced");
+      assert.equal(
+        peerHostLoss.retainedDocument,
+        true,
+        "Host loss changed the participant's last valid snapshot",
+      );
+      report.peerNetwork = {
+        signaling: usePublicRelay
+          ? "Trystero MQTT over the configured public broker allowlist"
+          : "Trystero WebSocket relay on loopback",
+        iceConfiguration: "Trystero public Google/Cloudflare STUN defaults; no TURN credentials",
+        initialSync: {
+          hostStatus: peerInitial.host.status,
+          peerStatus: peerInitial.peer.status,
+          converged: peerInitial.sameDocument,
+        },
+        acceptedCommand: {
+          status: peerEdit.reply.status,
+          revision: peerEdit.host.revision,
+          converged: peerEdit.sameDocument,
+          links: peerEdit.hostLinks,
+        },
+        reconnect: { status: peerReconnect.peer.status, converged: peerReconnect.sameDocument },
+        hostLoss: {
+          status: peerHostLoss.peer.status,
+          retainedSnapshot: peerHostLoss.retainedDocument,
+        },
+      };
+      report.checks.push(
+        `two Tauri WebView contexts synchronized through Trystero/Yjs over ${usePublicRelay ? "public MQTT brokers" : "a loopback relay"}`,
+        "host-sequenced remote command converged in both canonical models",
+        "reconnect restored the current host checkpoint before ready",
+        "host loss preserved the participant's validated in-memory snapshot",
+      );
+      await executeAsync("window.__PEERCANVAS_NATIVE_SMOKE__?.closePeerTest()");
+    }
+
     const nativeWebView = (await readFile(webViewReport, "utf8")).trim();
     assert(nativeWebView && !nativeWebView.startsWith("error:"), "Native WebView version missing");
     const packages = {};
@@ -338,6 +490,9 @@ async function runNativeSmoke() {
       "@inditextech/weave-types",
       "konva",
       "yjs",
+      "@trystero-p2p/mqtt",
+      "@trystero-p2p/ws-relay",
+      "ws",
       "@tauri-apps/cli",
     ]) {
       packages[name] = JSON.parse(
@@ -368,9 +523,21 @@ async function runNativeSmoke() {
     report.status = "passed";
   } catch (error) {
     report.error = error.stack ?? String(error);
+    if (relay)
+      report.peerRelayDiagnostics = {
+        connectedSockets: relay.wss.clients.size,
+        subscriptions: relay.getSubscriberCount(),
+        messageCounts: relayMessageCounts,
+        topicActivity: [...relayTopicActivity.values()].sort(
+          (left, right) =>
+            left.subscriptions - right.subscriptions || left.publishes - right.publishes,
+        ),
+      };
     if (session) await screenshot("failure.png").catch(() => {});
     throw error;
   } finally {
+    if (session)
+      await executeAsync("window.__PEERCANVAS_NATIVE_SMOKE__?.closePeerTest()").catch(() => {});
     if (session) await request(`/session/${session}`, "DELETE").catch(() => {});
     if (!exited) {
       const closing = once(app, "exit").catch(() => {});
@@ -383,6 +550,11 @@ async function runNativeSmoke() {
     }
     process.removeListener("SIGINT", terminate);
     process.removeListener("SIGTERM", terminate);
+    await relay?.close().catch((error) => {
+      report.status = "failed";
+      report.cleanupError = `Local signaling relay did not stop cleanly: ${String(error)}`;
+      process.exitCode = 1;
+    });
     try {
       assert(exited, "Native process did not exit during cleanup");
       await assert.rejects(

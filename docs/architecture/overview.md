@@ -1,18 +1,18 @@
 # PeerCanvas architecture overview
 
-Status: architecture baseline with bounded S0 compatibility evidence, 2026-11-10. The matrix records current hosted runner images; minimum OS floors and product workflows remain unverified.
+Status: the S0 compatibility probe and S1–S3 local-editor capabilities are delivered; WP-07 transport implementation is in progress, without share/join UI. Minimum OS floors and real cross-device WebRTC workflows remain unverified.
 
 ## Constraints and verified baseline
 
 - Desktop shell: Tauri 2.12.x candidate with Rust.
 - UI: React 18.3.1, TypeScript, and Vite 8. React 18 is retained because the selected Weave renderer's published peer dependency range excludes React 19.
 - Canvas engine: Weave.js 5.7.1 with its React renderer and Konva integration; selectively reuse canvas UI components from the official `weavejs-frontend` example.
-- Document collaboration candidate: Yjs state; an adapter tentatively named WeaveStoreP2P; Trystero over WebRTC.
+- Document collaboration: host-sequenced Yjs state behind a replaceable transport adapter; initial signaling uses Trystero 0.26 MQTT-over-WebSocket and WebRTC. Public Google/Cloudflare STUN defaults are in use; no TURN provider is selected.
 - Platforms: Windows, macOS, Linux. The S0 probe measured the native WebViews on the runner images in the [platform matrix](../support/platform-matrix.md); minimum OS support floors and full product behavior remain open.
 - AI candidate: optional Codex app-server process using Sign in with ChatGPT for eligible open-source/local-app plan usage, subject to preview terms and registration.
 - Chat UI: adapt the shadcn chatbot template's React components and interaction patterns while retaining the Tauri/Vite shell and PeerCanvas provider boundary; do not adopt its Next.js routes or Vercel AI SDK backend.
 
-The bounded test-only WP-01 probe passed native launch, rendering, selection, transforms, connector rendering, and one in-memory Weave-store-backed edit on the runner images in the [platform matrix](../support/platform-matrix.md). It is excluded from normal production builds, which retain the engineering scaffold. This result does not establish minimum OS floors, product editing workflows, or durable persistence; WP-03 owns the native adapter and recovery evidence selected in [ADR-0003](decisions/ADR-0003-local-persistence.md).
+The bounded test-only WP-01 probe passed native launch, rendering, selection, transforms, connector rendering, and one in-memory Weave-store-backed edit on the runner images in the [platform matrix](../support/platform-matrix.md). It remains separate from production workflows and does not establish minimum OS floors, product persistence, or WebRTC behavior. The delivered editor and persistence flows have separate evidence in the current [session handoff](../handoff/START_HERE.md) and [ADR-0003](decisions/ADR-0003-local-persistence.md).
 
 ## Logical component view
 
@@ -56,18 +56,18 @@ The model command boundary is the security and consistency boundary for UI, peer
 
 ## Component responsibilities
 
-| Component                  | Responsibility                                                                                     | Must not own                                      |
-| -------------------------- | -------------------------------------------------------------------------------------------------- | ------------------------------------------------- |
-| Tauri shell                | Window lifecycle, native dialogs, secure storage, deep links, controlled child processes           | Diagram semantics                                 |
-| React UI                   | Toolbars, panels, session controls, chat, previews, errors, accessibility                          | A separate mutable diagram document               |
-| Weave adapter              | Canvas rendering, selection, transforms, connectors, plugins, history integration where compatible | Authorization or durable storage policy           |
-| Canonical document model   | Versioned pages/layers/nodes/edges/styles; command validation; migrations and stable IDs           | Provider tokens or transport credentials          |
-| Persistence adapter        | Atomic local save/open, checkpoints, migration and recovery                                        | Collaboration policy                              |
-| Yjs adapter                | Encode/apply validated document changes; initial sync and awareness                                | Trusting peer input without command validation    |
-| Transport adapter          | Peer discovery, signaling and WebRTC lifecycle                                                     | Claiming that all peers can connect directly      |
-| Invitation/session service | Secret generation, expiry, admission, roles, revocation and session lifecycle                      | Centralized identity in the initial design        |
-| Codex app-server adapter   | Optional conversations, streaming, cancellation and provider lifecycle                             | Direct access to unsafe arbitrary model mutations |
-| MCP server                 | Versioned, bounded document tools that use the model command boundary                              | Bypassing approval or role enforcement            |
+| Component                  | Responsibility                                                                                             | Must not own                                             |
+| -------------------------- | ---------------------------------------------------------------------------------------------------------- | -------------------------------------------------------- |
+| Tauri shell                | Window lifecycle, native dialogs, secure storage, deep links, controlled child processes                   | Diagram semantics                                        |
+| React UI                   | Toolbars, panels, session controls, chat, previews, errors, accessibility                                  | A separate mutable diagram document                      |
+| Weave adapter              | Canvas rendering, selection, transforms, connectors, plugins, history integration where compatible         | Authorization or durable storage policy                  |
+| Canonical document model   | Versioned pages/layers/nodes/edges/styles; command validation; migrations and stable IDs                   | Provider tokens or transport credentials                 |
+| Persistence adapter        | Explicit save/open of user-managed `.peercanvas` files, migration, backups, and recovery                   | Collaboration policy or implicit autosave                |
+| Yjs adapter                | Transient session synchronization, initial sync and awareness; accepted changes use the canonical boundary | Trusting raw peer input or owning durable document state |
+| Transport adapter          | Peer discovery, signaling and WebRTC lifecycle                                                             | Claiming that all peers can connect directly             |
+| Invitation/session service | Secret generation, expiry, admission, roles, revocation and session lifecycle                              | Centralized identity in the initial design               |
+| Codex app-server adapter   | Optional conversations, streaming, cancellation and provider lifecycle                                     | Direct access to unsafe arbitrary model mutations        |
+| MCP server                 | Versioned, bounded document tools that use the model command boundary                                      | Bypassing approval or role enforcement                   |
 
 ## Canonical document model
 
@@ -109,13 +109,15 @@ sequenceDiagram
   Model->>Model: Check IDs, schema, invariants and permissions
   Model-->>Weave: Accepted model update
   Weave-->>UI: Render and selection state
-  Model->>Store: Persist update/checkpoint
+  User->>UI: Save
+  UI->>Model: Snapshot canonical document
+  Model->>Store: Explicit save to .peercanvas
   Store-->>UI: Saved or recoverable error
 ```
 
 ### Peer update
 
-The intended flow is a validated local command, durable local update, Yjs update encoding, encrypted WebRTC transport, remote validation/application, and acknowledgement or visible failure. The exact boundary between Weave's Yjs store and the persistence adapter is unresolved until WP-01 and WP-03.
+Peer edits arrive as commands. The host serializes proposals through `executeCommand`; it rebases only stale proposals whose affected IDs do not overlap newer accepted commands and rejects the rest with the current snapshot. Only the host writes accepted commits to transient Yjs state, and peers replay those commits through the same validator. Commits carry their origin so each participant can keep undo/redo history for their own commands. Connection/retry status and ephemeral awareness remain separate from saved document state. The host's `.peercanvas` file changes only through explicit Save; transport loss must not silently save, discard, delete, or replace the last successful save. Invitation, admission, and role policy remain WP-08.
 
 ### AI-proposed change
 
