@@ -9,11 +9,17 @@ import {
   validateDocument,
   type ModelState,
 } from "../document";
+import { usePreferences } from "../preferences/context";
 import {
-  localDocumentFiles,
-  type DrawioExportReview,
-  type LocalDocumentCandidate,
-} from "./local-document-files";
+  diagnostics,
+  fromError,
+  fromWarning,
+  list,
+  normalizeLoss,
+  text,
+  type EditorMessage,
+} from "./components/messages";
+import { localDocumentFiles, type LocalDocumentCandidate } from "./local-document-files";
 
 export type DocumentReplacement =
   "new" | "open" | "import" | "reopen" | "close" | "quit" | "quit-app";
@@ -23,10 +29,17 @@ type RecoveryCandidate = {
   state: ModelState;
 };
 
+/** Losses are kept as one structured entry per native report, translated at render time. */
 type DrawioImportReview = {
   displayName: string;
   state: ModelState;
-  losses: string[];
+  losses: EditorMessage[];
+  preservedFragmentCount: number;
+};
+
+type DrawioExportReview = {
+  token: string;
+  losses: EditorMessage[];
   preservedFragmentCount: number;
 };
 
@@ -34,27 +47,34 @@ type Options = {
   getModel: () => ModelState;
   replaceModel: (state: ModelState) => void;
   clearHistory: () => void;
-  reportError: (message: string) => void;
-  reportFeedback: (message: string) => void;
+  /** Reports a persistent error; `null` clears it. */
+  reportError: (message: EditorMessage | null) => void;
+  reportFeedback: (message: EditorMessage) => void;
+  /** Title for documents created by New/Close, in the current interface language. */
+  defaultTitle?: () => string;
+  /** Initial page and layer names for documents created by New/Close. */
+  defaultPageName?: () => string;
+  defaultLayerName?: () => string;
 };
 
 type SaveOutcome =
   | { kind: "saved"; unchanged: boolean }
   | { kind: "cancelled" }
-  | { kind: "failed"; message: string };
+  | { kind: "failed"; message: EditorMessage };
 
-const diagnosticText = (errors: { message: string }[]) =>
-  errors.map((diagnostic) => diagnostic.message).join(" ");
-
-function errorText(error: unknown): string {
-  return error instanceof Error ? error.message : String(error);
-}
+const losses = (value: unknown) => (Array.isArray(value) ? value : []).map(normalizeLoss);
 
 export function useLocalDocuments(options: Options) {
   const optionsRef = useRef(options);
   useLayoutEffect(() => {
     optionsRef.current = options;
   }, [options]);
+  // Native overwrite confirmation uses the live interface language, including session-only choices.
+  const { locale } = usePreferences();
+  const localeRef = useRef(locale);
+  useLayoutEffect(() => {
+    localeRef.current = locale;
+  }, [locale]);
   const available = localDocumentFiles.available;
   const dirtyRef = useRef(true);
   const busyRef = useRef(false);
@@ -69,7 +89,7 @@ export function useLocalDocuments(options: Options) {
   const [fileName, setFileName] = useState<string | null>(null);
   const [recentName, setRecentName] = useState<string | null>(null);
   const [pendingAction, setPendingActionState] = useState<DocumentReplacement | null>(null);
-  const [promptError, setPromptError] = useState<string | null>(null);
+  const [promptError, setPromptError] = useState<EditorMessage | null>(null);
   const [recovery, setRecovery] = useState<RecoveryCandidate | null>(null);
   const [drawioImport, setDrawioImport] = useState<DrawioImportReview | null>(null);
   const [drawioExport, setDrawioExport] = useState<DrawioExportReview | null>(null);
@@ -119,7 +139,7 @@ export function useLocalDocuments(options: Options) {
         if (mounted) setRecentName(name);
       })
       .catch((error: unknown) => {
-        if (mounted) optionsRef.current.reportError(errorText(error));
+        if (mounted) optionsRef.current.reportError(fromError(error));
       });
     return () => {
       mounted = false;
@@ -134,7 +154,7 @@ export function useLocalDocuments(options: Options) {
     setDirty(hasChanges);
     setRecovered(false);
     setRecoveryCandidate(null);
-    optionsRef.current.reportError("");
+    optionsRef.current.reportError(null);
   }
 
   function blankDocument(): ModelState | null {
@@ -143,11 +163,13 @@ export function useLocalDocuments(options: Options) {
       documentId: crypto.randomUUID(),
       pageId: crypto.randomUUID(),
       layerId: crypto.randomUUID(),
-      title: "Untitled diagram",
+      title: optionsRef.current.defaultTitle?.() || "Untitled diagram",
+      pageName: optionsRef.current.defaultPageName?.() || "Page 1",
+      layerName: optionsRef.current.defaultLayerName?.() || "Layer 1",
       now,
     });
     if (!result.ok) {
-      optionsRef.current.reportError(diagnosticText(result.errors));
+      optionsRef.current.reportError(diagnostics(result.errors));
       return null;
     }
     return result.value;
@@ -156,24 +178,25 @@ export function useLocalDocuments(options: Options) {
   const save = useCallback(
     async (saveAs: boolean): Promise<SaveOutcome> => {
       if (!available) {
-        const message = "Saving is available in the PeerCanvas desktop app.";
+        const message = text("documents.errors.desktopOnlySave");
         optionsRef.current.reportError(message);
         return { kind: "failed", message };
       }
-      if (busyRef.current) return { kind: "failed", message: "Another file operation is running." };
+      if (busyRef.current)
+        return { kind: "failed", message: text("documents.errors.operationRunning") };
 
       const session = sessionRef.current;
       const snapshot = optionsRef.current.getModel();
       const serialized = serializeDocument(snapshot.document);
       if (!serialized.ok) {
-        const message = diagnosticText(serialized.errors);
+        const message = diagnostics(serialized.errors);
         optionsRef.current.reportError(message);
         return { kind: "failed", message };
       }
 
       setBusy(true);
       try {
-        const result = await localDocumentFiles.save(serialized.value, saveAs);
+        const result = await localDocumentFiles.save(serialized.value, saveAs, localeRef.current);
         if (!result) return { kind: "cancelled" };
         if (session !== sessionRef.current) return { kind: "saved", unchanged: false };
 
@@ -182,11 +205,14 @@ export function useLocalDocuments(options: Options) {
         setRecovered(false);
         const unchanged = optionsRef.current.getModel().revision === snapshot.revision;
         setDirty(!unchanged);
-        if (result.warning) optionsRef.current.reportError(result.warning);
-        else optionsRef.current.reportFeedback(`Saved ${result.displayName}.`);
+        if (result.warning) optionsRef.current.reportError(fromWarning(result.warning));
+        else
+          optionsRef.current.reportFeedback(
+            text("documents.feedback.saved", { name: result.displayName }),
+          );
         return { kind: "saved", unchanged };
       } catch (error) {
-        const message = errorText(error);
+        const message = fromError(error);
         optionsRef.current.reportError(message);
         return { kind: "failed", message };
       } finally {
@@ -204,7 +230,7 @@ export function useLocalDocuments(options: Options) {
         recentUpdated = await localDocumentFiles.acceptOpen(candidate.token, "primary");
       } catch (error) {
         await localDocumentFiles.discardOpen(candidate.token).catch(() => undefined);
-        optionsRef.current.reportError(errorText(error));
+        optionsRef.current.reportError(fromError(error));
         return;
       }
       installDocument(
@@ -215,13 +241,11 @@ export function useLocalDocuments(options: Options) {
       setRecentName(recentUpdated ? candidate.displayName : null);
       optionsRef.current.reportFeedback(
         primary.value.migrated
-          ? `Opened and migrated ${candidate.displayName}. Save to update its format.`
-          : `Opened ${candidate.displayName}.`,
+          ? text("documents.feedback.openedMigrated", { name: candidate.displayName })
+          : text("documents.feedback.opened", { name: candidate.displayName }),
       );
       if (!recentUpdated) {
-        optionsRef.current.reportError(
-          "Opened the document, but Reopen last could not be updated. Save it again to update the preference.",
-        );
+        optionsRef.current.reportError(text("documents.errors.recentNotUpdated"));
       }
       return;
     }
@@ -232,16 +256,18 @@ export function useLocalDocuments(options: Options) {
         candidate,
         state: { document: backup.value.document, revision: 0 },
       });
-      const reason = primary ? diagnosticText(primary.errors) : "The original file is missing.";
-      optionsRef.current.reportError(`${reason} A previous complete backup is available.`);
+      // Keep the specific validation reason, followed by the recovery explanation.
+      optionsRef.current.reportError(
+        primary
+          ? list(diagnostics(primary.errors), text("documents.errors.backupAvailable"))
+          : text("documents.errors.backupAvailableMissing"),
+      );
       return;
     }
 
     await localDocumentFiles.discardOpen(candidate.token).catch(() => undefined);
     optionsRef.current.reportError(
-      primary
-        ? diagnosticText(primary.errors)
-        : "The selected file and its backup are unavailable.",
+      primary ? diagnostics(primary.errors) : text("documents.errors.fileAndBackupUnavailable"),
     );
   }
 
@@ -252,7 +278,7 @@ export function useLocalDocuments(options: Options) {
         await invoke("quit_application");
       } catch (error) {
         setBusy(false);
-        optionsRef.current.reportError(errorText(error));
+        optionsRef.current.reportError(fromError(error));
       }
       return;
     }
@@ -264,7 +290,7 @@ export function useLocalDocuments(options: Options) {
       } catch (error) {
         allowWindowClose.current = false;
         setBusy(false);
-        optionsRef.current.reportError(errorText(error));
+        optionsRef.current.reportError(fromError(error));
       }
       return;
     }
@@ -278,7 +304,7 @@ export function useLocalDocuments(options: Options) {
         if (available) await localDocumentFiles.close();
         installDocument(blank, null, false);
         optionsRef.current.reportFeedback(
-          action === "new" ? "New document created." : "Document closed.",
+          text(action === "new" ? "documents.feedback.created" : "documents.feedback.closed"),
         );
         return;
       }
@@ -286,18 +312,18 @@ export function useLocalDocuments(options: Options) {
       if (action === "import") {
         const candidate = await localDocumentFiles.importDrawio(new Date().toISOString());
         if (!candidate) {
-          optionsRef.current.reportFeedback("draw.io import canceled.");
+          optionsRef.current.reportFeedback(text("documents.feedback.importCanceled"));
           return;
         }
         const document = validateDocument(candidate.document);
         if (!document.ok) {
-          optionsRef.current.reportError(diagnosticText(document.errors));
+          optionsRef.current.reportError(diagnostics(document.errors));
           return;
         }
         stageDrawioImport({
           displayName: candidate.displayName,
           state: { document: document.value, revision: 0 },
-          losses: candidate.losses,
+          losses: losses(candidate.losses),
           preservedFragmentCount: candidate.preservedFragmentCount,
         });
         return;
@@ -307,13 +333,15 @@ export function useLocalDocuments(options: Options) {
         action === "open" ? await localDocumentFiles.open() : await localDocumentFiles.loadRecent();
       if (!candidate) {
         optionsRef.current.reportFeedback(
-          action === "open" ? "Open canceled." : "No recent document was selected.",
+          text(
+            action === "open" ? "documents.feedback.openCanceled" : "documents.feedback.noRecent",
+          ),
         );
         return;
       }
       await acceptCandidate(candidate);
     } catch (error) {
-      optionsRef.current.reportError(errorText(error));
+      optionsRef.current.reportError(fromError(error));
     } finally {
       setBusy(false);
     }
@@ -345,8 +373,8 @@ export function useLocalDocuments(options: Options) {
       result.kind === "failed"
         ? result.message
         : result.kind === "cancelled"
-          ? "Save was canceled. Your document is still open."
-          : "The document changed while it was saving. Save again before continuing.",
+          ? text("documents.errors.saveCanceled")
+          : text("documents.errors.changedWhileSaving"),
     );
   }
 
@@ -370,21 +398,19 @@ export function useLocalDocuments(options: Options) {
     stageDrawioImport(null);
     installDocument(candidate.state, null, true);
     optionsRef.current.reportFeedback(
-      `Imported ${candidate.displayName} as an unsaved document; the source file is unchanged.`,
+      text("documents.feedback.imported", { name: candidate.displayName }),
     );
   }
 
   function cancelDrawioImport() {
     if (!drawioImportRef.current || busyRef.current) return;
     stageDrawioImport(null);
-    optionsRef.current.reportFeedback(
-      "draw.io import canceled; the current document remains open.",
-    );
+    optionsRef.current.reportFeedback(text("documents.feedback.importCanceledKeep"));
   }
 
   const prepareDrawioExport = useCallback(async () => {
     if (!available) {
-      optionsRef.current.reportError("draw.io export is available in the PeerCanvas desktop app.");
+      optionsRef.current.reportError(text("documents.errors.desktopOnlyExport"));
       return;
     }
     if (isEditingLocked()) return;
@@ -392,7 +418,7 @@ export function useLocalDocuments(options: Options) {
     const snapshot = optionsRef.current.getModel();
     const serialized = serializeDocument(snapshot.document);
     if (!serialized.ok) {
-      optionsRef.current.reportError(diagnosticText(serialized.errors));
+      optionsRef.current.reportError(diagnostics(serialized.errors));
       return;
     }
     setBusy(true);
@@ -403,14 +429,16 @@ export function useLocalDocuments(options: Options) {
         optionsRef.current.getModel().revision !== snapshot.revision
       ) {
         await localDocumentFiles.discardDrawioExport(review.token).catch(() => undefined);
-        optionsRef.current.reportError(
-          "The document changed while preparing the export. Try again.",
-        );
+        optionsRef.current.reportError(text("documents.errors.changedWhileExporting"));
         return;
       }
-      stageDrawioExport(review);
+      stageDrawioExport({
+        token: review.token,
+        losses: losses(review.losses),
+        preservedFragmentCount: review.preservedFragmentCount,
+      });
     } catch (error) {
-      optionsRef.current.reportError(errorText(error));
+      optionsRef.current.reportError(fromError(error));
     } finally {
       setBusy(false);
     }
@@ -421,16 +449,23 @@ export function useLocalDocuments(options: Options) {
     if (!review || busyRef.current) return;
     setBusy(true);
     try {
-      const result = await localDocumentFiles.exportDrawio(review.token, review.losses.length > 0);
+      const result = await localDocumentFiles.exportDrawio(
+        review.token,
+        review.losses.length > 0,
+        localeRef.current,
+      );
       stageDrawioExport(null);
       if (!result) {
-        optionsRef.current.reportFeedback("draw.io export canceled.");
+        optionsRef.current.reportFeedback(text("documents.feedback.exportCanceled"));
         return;
       }
-      if (result.warning) optionsRef.current.reportError(result.warning);
-      else optionsRef.current.reportFeedback(`Exported ${result.displayName}.`);
+      if (result.warning) optionsRef.current.reportError(fromWarning(result.warning));
+      else
+        optionsRef.current.reportFeedback(
+          text("documents.feedback.exported", { name: result.displayName }),
+        );
     } catch (error) {
-      optionsRef.current.reportError(errorText(error));
+      optionsRef.current.reportError(fromError(error));
       await localDocumentFiles.discardDrawioExport(review.token).catch(() => undefined);
       stageDrawioExport(null);
     } finally {
@@ -444,9 +479,9 @@ export function useLocalDocuments(options: Options) {
     setBusy(true);
     try {
       await localDocumentFiles.discardDrawioExport(review.token);
-      optionsRef.current.reportFeedback("draw.io export canceled.");
+      optionsRef.current.reportFeedback(text("documents.feedback.exportCanceled"));
     } catch (error) {
-      optionsRef.current.reportError(errorText(error));
+      optionsRef.current.reportError(fromError(error));
     } finally {
       stageDrawioExport(null);
       setBusy(false);
@@ -466,12 +501,12 @@ export function useLocalDocuments(options: Options) {
       setDirty(true);
       setRecovered(true);
       setRecoveryCandidate(null);
-      optionsRef.current.reportError("");
+      optionsRef.current.reportError(null);
       optionsRef.current.reportFeedback(
-        `Recovered ${recovery.candidate.displayName}. Save As creates a separate file; the damaged source is unchanged.`,
+        text("documents.feedback.recovered", { name: recovery.candidate.displayName }),
       );
     } catch (error) {
-      optionsRef.current.reportError(errorText(error));
+      optionsRef.current.reportError(fromError(error));
     } finally {
       setBusy(false);
     }
@@ -483,10 +518,10 @@ export function useLocalDocuments(options: Options) {
     try {
       await localDocumentFiles.discardOpen(recovery.candidate.token);
       setRecoveryCandidate(null);
-      optionsRef.current.reportError("");
-      optionsRef.current.reportFeedback("Recovery canceled; the current document remains open.");
+      optionsRef.current.reportError(null);
+      optionsRef.current.reportFeedback(text("documents.feedback.recoveryCanceled"));
     } catch (error) {
-      optionsRef.current.reportError(errorText(error));
+      optionsRef.current.reportError(fromError(error));
     } finally {
       setBusy(false);
     }
@@ -507,7 +542,7 @@ export function useLocalDocuments(options: Options) {
           else stop();
         })
         .catch((error: unknown) => {
-          if (mounted) optionsRef.current.reportError(errorText(error));
+          if (mounted) optionsRef.current.reportError(fromError(error));
         });
     }
     register(
@@ -515,9 +550,7 @@ export function useLocalDocuments(options: Options) {
         if (allowWindowClose.current) return;
         if (busyRef.current) {
           event.preventDefault();
-          optionsRef.current.reportError(
-            "A file operation is still running. Close again when it finishes.",
-          );
+          optionsRef.current.reportError(text("documents.errors.closeWhileBusy"));
           return;
         }
         if (!dirtyRef.current) return;
@@ -565,3 +598,5 @@ export function useLocalDocuments(options: Options) {
     cancelDrawioExport,
   };
 }
+
+export type LocalDocuments = ReturnType<typeof useLocalDocuments>;

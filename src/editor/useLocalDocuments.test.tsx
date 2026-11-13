@@ -45,6 +45,7 @@ vi.mock("@tauri-apps/api/window", () => ({
 }));
 
 import { serializeDocument } from "../document";
+import { PreferencesContext, fallbackPreferences } from "../preferences/context";
 import { useLocalDocuments } from "./useLocalDocuments";
 
 describe("useLocalDocuments", () => {
@@ -99,6 +100,20 @@ describe("useLocalDocuments", () => {
     reportError.mockReset();
     reportFeedback.mockReset();
     replaceModel.mockClear();
+  });
+
+  it("adapts save and draw.io export locales to their native command arguments", async () => {
+    const { localDocumentFiles: nativeFiles } =
+      await vi.importActual<typeof import("./local-document-files")>("./local-document-files");
+    appState.invoke.mockClear();
+
+    await nativeFiles.save('{"schemaVersion":2}', false, "es");
+    await nativeFiles.exportDrawio("export-1", true, "en");
+
+    expect(appState.invoke.mock.calls).toEqual([
+      ["save_document", { contents: '{"schemaVersion":2}', saveAs: false, locale: "es" }],
+      ["export_drawio", { token: "export-1", confirmLosses: true, locale: "en" }],
+    ]);
   });
 
   it("keeps a dirty document open when replacement is canceled", () => {
@@ -174,21 +189,46 @@ describe("useLocalDocuments", () => {
 
     expect(result.current.fileName).toBe("opened.peercanvas");
     expect(result.current.recentName).toBeNull();
-    expect(reportError).toHaveBeenCalledWith(
-      "Opened the document, but Reopen last could not be updated. Save it again to update the preference.",
-    );
+    expect(reportError).toHaveBeenCalledWith({
+      kind: "text",
+      key: "documents.errors.recentNotUpdated",
+      params: undefined,
+    });
 
+    const warning = { code: "file.directoryNotDurable", params: {} };
     files.save.mockResolvedValue({
       displayName: "opened.peercanvas",
-      warning: "Saved, but the recent document preference could not be updated.",
+      warning,
       recentUpdated: false,
     });
     await act(async () => result.current.saveDocument());
 
     expect(result.current.recentName).toBeNull();
-    expect(reportError).toHaveBeenLastCalledWith(
-      "Saved, but the recent document preference could not be updated.",
-    );
+    expect(reportError).toHaveBeenLastCalledWith({ kind: "native", message: warning });
+  });
+
+  it("never forwards unstructured native or exception text", async () => {
+    files.save.mockResolvedValue({
+      displayName: "diagram.peercanvas",
+      warning: "/Users/private/raw native text",
+      recentUpdated: true,
+    });
+    const { result } = renderSession();
+    await act(async () => result.current.saveDocument());
+    expect(reportError).toHaveBeenLastCalledWith({
+      kind: "text",
+      key: "documents.errors.warning",
+      params: undefined,
+    });
+
+    files.save.mockRejectedValue(new Error("EACCES: /Users/private/diagram.peercanvas"));
+    await act(async () => result.current.saveDocument());
+    expect(reportError).toHaveBeenLastCalledWith({
+      kind: "text",
+      key: "documents.errors.unexpected",
+      params: undefined,
+    });
+    expect(JSON.stringify(reportError.mock.calls)).not.toContain("/Users/private");
   });
 
   it("saves, closes, and reopens the same model through the last-file path", async () => {
@@ -284,8 +324,33 @@ describe("useLocalDocuments", () => {
     expect(result.current.fileName).toBe("diagram.peercanvas");
   });
 
+  it("passes the live Spanish interface language to native save", async () => {
+    const { result } = renderHook(
+      () =>
+        useLocalDocuments({
+          getModel: () => current,
+          replaceModel,
+          clearHistory,
+          reportError,
+          reportFeedback,
+        }),
+      {
+        wrapper: ({ children }) => (
+          <PreferencesContext.Provider value={{ ...fallbackPreferences, locale: "es" }}>
+            {children}
+          </PreferencesContext.Provider>
+        ),
+      },
+    );
+
+    await act(async () => result.current.saveDocument());
+
+    expect(files.save).toHaveBeenCalledWith(expect.any(String), false, "es");
+  });
+
   it("keeps the replacement prompt open when saving fails", async () => {
-    files.save.mockRejectedValue(new Error("Permission denied."));
+    const denied = { code: "file.permissionDenied", params: {} };
+    files.save.mockRejectedValue(denied);
     const { result } = renderSession();
 
     act(() => result.current.closeDocument());
@@ -293,8 +358,46 @@ describe("useLocalDocuments", () => {
 
     expect(result.current.pendingAction).toBe("close");
     expect(result.current.dirty).toBe(true);
-    expect(result.current.promptError).toBe("Permission denied.");
+    expect(result.current.promptError).toEqual({ kind: "native", message: denied });
     expect(files.close).not.toHaveBeenCalled();
+  });
+
+  it("keeps the replacement prompt open with a reason when Save is canceled", async () => {
+    files.save.mockResolvedValue(null);
+    const { result } = renderSession();
+
+    act(() => result.current.openDocument());
+    await act(async () => result.current.saveAndContinue());
+
+    expect(result.current.pendingAction).toBe("open");
+    expect(result.current.promptError).toEqual({
+      kind: "text",
+      key: "documents.errors.saveCanceled",
+      params: undefined,
+    });
+    expect(files.open).not.toHaveBeenCalled();
+  });
+
+  it("explains an unreadable file with the validation reason before offering its backup", async () => {
+    const backup = createSample("2026-11-11T10:02:00.000Z");
+    const serialized = serializeDocument(backup.document);
+    if (!serialized.ok) throw new Error("Backup document did not serialize.");
+    files.open.mockResolvedValue({
+      token: "candidate-3",
+      displayName: "damaged.peercanvas",
+      primaryText: "{bad json",
+      backupText: serialized.value,
+    });
+    const { result } = renderSession();
+    act(() => result.current.openDocument());
+    await act(async () => result.current.discardAndContinue());
+    await waitFor(() => expect(result.current.recovery).not.toBeNull());
+
+    const reported = reportError.mock.calls.at(-1)![0];
+    expect(reported.kind).toBe("list");
+    expect(reported.items[0]).toMatchObject({ kind: "diagnostics" });
+    expect(reported.items[0].diagnostics[0].code).toBe("INVALID_JSON");
+    expect(reported.items[1]).toMatchObject({ key: "documents.errors.backupAvailable" });
   });
 
   it("intercepts native window close and waits for the unsaved-change choice", async () => {
@@ -320,7 +423,11 @@ describe("useLocalDocuments", () => {
     expect(result.current.isEditingLocked()).toBe(true);
     await act(async () => failClose(new Error("Close failed.")));
     expect(result.current.isEditingLocked()).toBe(false);
-    expect(reportError).toHaveBeenCalledWith("Close failed.");
+    expect(reportError).toHaveBeenCalledWith({
+      kind: "text",
+      key: "documents.errors.unexpected",
+      params: undefined,
+    });
   });
 
   it("protects app-menu quit with the unsaved-change decision and removes its listener", async () => {
@@ -355,10 +462,12 @@ describe("useLocalDocuments", () => {
   it("stages a draw.io import for review before replacing the active document", async () => {
     const original = current.document;
     const imported = createSample("2026-11-11T10:05:00.000Z");
+    const element = { code: "drawio.unsupportedElement", params: { name: "custom" } };
     files.importDrawio.mockResolvedValue({
       displayName: "import.drawio",
       document: imported.document,
-      losses: ["A custom cell was kept as source data."],
+      // A legacy string entry is kept as a generic loss so the review stays complete.
+      losses: [element, "Legacy native text"],
       preservedFragmentCount: 1,
     });
     const { result } = renderSession();
@@ -370,7 +479,10 @@ describe("useLocalDocuments", () => {
     await waitFor(() => expect(result.current.drawioImport?.displayName).toBe("import.drawio"));
     expect(current.document).toBe(original);
     expect(result.current.isEditingLocked()).toBe(true);
-    expect(result.current.drawioImport?.losses).toEqual(["A custom cell was kept as source data."]);
+    expect(result.current.drawioImport?.losses).toEqual([
+      { kind: "native", message: element },
+      { kind: "text", key: "documents.drawio.unknownLoss", params: undefined },
+    ]);
     act(() => result.current.acceptDrawioImport());
 
     expect(current.document).toEqual(imported.document);
@@ -413,7 +525,7 @@ describe("useLocalDocuments", () => {
   it("holds an export snapshot for review and requires explicit loss confirmation", async () => {
     files.prepareDrawioExport.mockResolvedValue({
       token: "export-1",
-      losses: ["One deleted-cell reference cannot be exported."],
+      losses: [{ code: "drawio.preservedCellOmitted", params: {} }],
       preservedFragmentCount: 1,
     });
     files.exportDrawio.mockResolvedValue({ displayName: "diagram.drawio", warning: null });
@@ -427,10 +539,46 @@ describe("useLocalDocuments", () => {
     );
     await act(async () => result.current.confirmDrawioExport());
 
-    expect(files.exportDrawio).toHaveBeenCalledWith("export-1", true);
+    // The native overwrite confirmation receives the resolved interface language.
+    expect(files.exportDrawio).toHaveBeenCalledWith("export-1", true, "en");
     expect(result.current.drawioExport).toBeNull();
     expect(result.current.isEditingLocked()).toBe(false);
-    expect(reportFeedback).toHaveBeenCalledWith("Exported diagram.drawio.");
+    expect(reportFeedback).toHaveBeenCalledWith({
+      kind: "text",
+      key: "documents.feedback.exported",
+      params: { name: "diagram.drawio" },
+    });
+  });
+
+  it("passes the live Spanish interface language to the native export", async () => {
+    files.prepareDrawioExport.mockResolvedValue({
+      token: "export-es",
+      losses: [],
+      preservedFragmentCount: 0,
+    });
+    files.exportDrawio.mockResolvedValue(null);
+    const { result } = renderHook(
+      () =>
+        useLocalDocuments({
+          getModel: () => current,
+          replaceModel,
+          clearHistory,
+          reportError,
+          reportFeedback,
+        }),
+      {
+        wrapper: ({ children }) => (
+          <PreferencesContext.Provider value={{ ...fallbackPreferences, locale: "es" }}>
+            {children}
+          </PreferencesContext.Provider>
+        ),
+      },
+    );
+
+    await act(async () => result.current.prepareDrawioExport());
+    await act(async () => result.current.confirmDrawioExport());
+
+    expect(files.exportDrawio).toHaveBeenCalledWith("export-es", false, "es");
   });
 
   it("discards an export review without writing a file", async () => {
