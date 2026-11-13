@@ -64,3 +64,12 @@ The system SHALL explain that revocation prevents future session access but cann
 
 - **WHEN** a participant has already received document content and the host revokes that participant
 - **THEN** the system blocks future access and does not claim to erase the participant's prior copy
+
+### Requirement: Preserve the host document when a session ends
+
+The system SHALL leave the host's last durable local document unchanged when an invitation expires, a participant is revoked, or the host closes or loses the session. Session lifecycle operations SHALL NOT implicitly save or delete the host's local document.
+
+#### Scenario: Host closes or revokes a session
+
+- **WHEN** the host closes the session or revokes the invitation or participant
+- **THEN** affected participants lose future session access and the host's last successfully saved `.peercanvas` document remains intact

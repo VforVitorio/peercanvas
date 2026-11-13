@@ -2,9 +2,9 @@
 
 PeerCanvas is an independent project. References to upstream projects do not imply endorsement or official affiliation.
 
-## Dependency license inventory (2026-11-12)
+## Dependency license inventory (2026-11-13)
 
-[`LICENSES/dependency-inventory-2026-11.csv`](LICENSES/dependency-inventory-2026-11.csv) records the locked dependency license expressions, upstream source URLs, and metadata sources. It contains 344 npm entries (8 direct runtime, 19 direct build/test, 317 transitive) and 448 Cargo entries (9 direct runtime, 1 direct build, 1 optional direct, 436 transitive, and the project crate). The inventory includes all locked platform variants; 40 npm entries are not installed on this macOS host (mostly platform-specific packages) but have license metadata in `package-lock.json`. The root package and Cargo crate both identify the project's Apache-2.0 license. All 792 inventory records have license metadata across 34 distinct expressions; no `UNKNOWN` entries remain.
+[`LICENSES/dependency-inventory-2026-11.csv`](LICENSES/dependency-inventory-2026-11.csv) records the locked dependency license expressions, upstream source URLs, and metadata sources. It contains 382 npm entries (9 direct runtime, 20 direct build/test, 353 transitive) and 448 Cargo entries (9 direct runtime, 1 direct build, 1 optional direct, 436 transitive, and the project crate). The inventory includes all locked platform variants; 39 npm entries are not installed on this macOS host (mostly platform-specific packages) but have license metadata in `package-lock.json`. The root package and Cargo crate both identify the project's Apache-2.0 license. All 830 inventory records have license metadata across 34 distinct expressions; no `UNKNOWN` entries remain.
 
 Special license and attribution records:
 
@@ -29,9 +29,9 @@ The logo, symbol, and app icon PNGs were supplied by the maintainer and are reco
 
 The local document workflow uses **tauri-plugin-dialog 2.7.3**, dual-licensed MIT or Apache-2.0, for native file selection from Rust commands. It does not expose the filesystem plugin's general JavaScript API. See the [plugin source](https://github.com/tauri-apps/plugins-workspace/tree/v2/plugins/dialog) and [license metadata](https://crates.io/crates/tauri-plugin-dialog/2.7.3).
 
-## S0 native compatibility probe
+## Native compatibility and peer transport probe
 
-The separately invoked native probe uses Weave.js 5.7.1 (Apache-2.0), Konva 10.0.2 (MIT), and Yjs 13.6.27 (MIT). Its fixture and instrumentation are excluded from the normal application entrypoint and production builds. No upstream artwork, font, stencil, or service integration is copied.
+The separately invoked canvas probe uses Weave.js 5.7.1 (Apache-2.0), Konva 10.0.2 (MIT), and Yjs 13.6.27 (MIT). S4 adds `@trystero-p2p/mqtt` 0.26.0 (MIT) for replaceable peer signaling and dev-only `@trystero-p2p/ws-relay` 0.26.0 (MIT) for two native WebView peers. The runtime adapter is pinned to 0.26 to avoid BigInt syntax in the configured Safari 13 JavaScript target; this build target does not declare a supported OS floor. These packages and their locked dependencies are listed in the inventory. The default canvas smoke does not start peer networking. Optional peer smoke modes use either a temporary loopback relay or the configured public MQTT brokers, with Trystero's public Google/Cloudflare STUN defaults. Their UI and test dependencies are excluded from normal application builds. No upstream artwork, font, or stencil is copied.
 
 `src/native-smoke/NativeSmokeCanvas.tsx` adapts the provider/container composition and a minimal node/plugin selection from these Apache-2.0 sources. It retains the Inditex copyright and SPDX notice and identifies the modification for PeerCanvas:
 

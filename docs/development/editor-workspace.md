@@ -1,6 +1,6 @@
 # Production editor workspace and preferences
 
-Status: implemented on `feature/wp13-editor-preferences`, 2026-11-13. Automated and browser checks below pass. The maintainer authorized focused commits and a source-branch push. Fluent human Spanish review and native platform integration remain open acceptance gates; no merge or release is authorized.
+Status: implemented on the open `feature/wp13-editor-preferences` PR, 2026-11-13. Automated and browser checks below pass. The maintainer authorized focused commits and a source-branch push. Fluent human Spanish review and native platform integration remain open acceptance gates; this work is not merged or released.
 
 ## Contract and scope
 
@@ -75,12 +75,12 @@ Code Review Graph was rebuilt with this repository's explicit absolute root and 
 
 The isolated native QA configuration used identifier `org.peercanvas.editor-refresh-qa` and the existing Vite server. `npm run tauri -- dev --no-watch --config /private/tmp/peercanvas-editor-refresh/native-qa.conf.json` compiled and launched the native executable. The computer-use controller could not select that unbundled app by name or executable path, so native file-dialog, preference-restart, menu, and WebView interactions were **not verified**. The QA child processes were stopped. No new installer/package claim is made, and the earlier icon-packaging issue remains under #90.
 
-No CI run, Windows/Linux native check, screen-reader audit, or fluent human Spanish sign-off was performed. Keep #100, #101, and parent #93 open until those external acceptance requirements are satisfied. No OpenSpec change was archived.
+The initial PR #132 CI run passed typecheck, lint, formatting, tests, frontend build, CodeQL, OSV, and Gitleaks, but its native-linux, native-macos, and native-windows checks failed. This branch is being synchronized with the S4 `dev` changes while preserving its frontend; rerun the native checks before merging. A screen-reader audit and fluent human Spanish sign-off were not performed. Keep #100, #101, and parent #93 open until those external acceptance requirements are satisfied. No OpenSpec change was archived.
 
 ## Traceability
 
 - Requirements: FR-003..004, FR-010..012, FR-016, FR-018, FR-021..023, FR-050..051, UC-11, NFR-010.
 - Contracts: `openspec/changes/editor-workspace-refresh` and `openspec/changes/desktop-preferences`.
 - Work package: WP-13/#93; children #96 (contracts), #95 (appearance), #100 (localization), #101 (platform integration).
-- Data decisions: ADR-0003, ADR-0006, ADR-0007. Risks: R-14, R-17, R-18 and native evidence risk R-11.
+- Data decisions: ADR-0003, ADR-0006, ADR-0007. Risks: R-14, R-19, R-20 and native evidence risk R-11.
 - The maintainer subsequently authorized focused commits and a push of `feature/wp13-editor-preferences`. PR creation, issue mutations, merges, and releases are outside that authorization.

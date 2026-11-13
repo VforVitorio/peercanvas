@@ -1,6 +1,6 @@
 # PeerCanvas delivery plan
 
-Status: planning baseline established 2026-11-07; S0–S2 are complete on `main` as of 2026-11-11, and the S7–S10 roadmap additions are recorded here. This plan does not authorize product implementation by itself.
+Status: planning baseline established 2026-11-07; S0–S3 are complete on `main` as of 2026-11-13. S4 is the current open milestone; the S7–S10 roadmap additions are recorded here. This plan does not authorize product implementation by itself.
 
 This file is the canonical roadmap and work-package ledger. Product behavior and acceptance requirements live in the [product definition](docs/requirements/product-definition.md); versioned capability contracts live in OpenSpec; GitHub Issues track execution. Update this file when scope, dependencies, estimates, sprint assignments, or risks change.
 
@@ -25,24 +25,24 @@ WP-04.1 and WP-04.2 provide in-memory editing. S1 persistence and S2 local editi
 
 Effort ranges are initial engineering estimates. They exclude release administration and external review time.
 
-| ID    | Package and objective                                                                              | Requirements / OpenSpec                                                           | Dependencies         | Estimate |
-| ----- | -------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------- | -------------------- | -------: |
-| WP-00 | Engineering foundation: repository, policies, CI, OpenSpec, traceability, local developer workflow | NFR-010..013; Desktop Application, Quality & Testing, Security & Privacy          | None                 |   3-5 PD |
-| WP-01 | Tauri + Weave compatibility spike and minimal canvas integration                                   | FR-001..004; Desktop Application, Canvas Editing, Cross-Platform Compatibility    | WP-00                |   4-7 PD |
-| WP-02 | Canonical document model, command boundary, IDs, pages, layers, nodes, edges                       | FR-005..011; Document Model                                                       | WP-01                |  6-10 PD |
-| WP-03 | Versioned `.peercanvas` save/open, snapshots, recovery and migration                               | FR-012..016; Local Persistence, History & Recovery                                | WP-02                |  6-10 PD |
-| WP-04 | Core canvas editing, selection, transforms, connectors, properties and undo/redo                   | FR-004..011; Canvas Editing                                                       | WP-02, WP-03         | 10-16 PD |
-| WP-05 | Shape catalog manifest, search, categories, provenance and safe SVG rendering                      | FR-017..020; Diagram Shapes, Shape Catalog, Security & Privacy                    | WP-02                |  6-10 PD |
-| WP-06 | draw.io import/export adapter and compatibility fixtures                                           | FR-021..024; draw.io Compatibility, Import & Export                               | WP-02, WP-05         |  8-14 PD |
-| WP-07 | Yjs synchronization contract and WeaveStoreP2P adapter                                             | FR-025..028; P2P Collaboration, Presence & Awareness                              | WP-01, WP-02, WP-03  |  8-14 PD |
-| WP-08 | Peer session lifecycle, invitations, participant approval, roles and revocation                    | FR-029..034; Secure Session Invitations, Security & Privacy                       | WP-07                |  8-14 PD |
-| WP-09 | Optional Codex conversation UI and provider boundary                                               | FR-035..040; Codex Embedded Chat                                                  | WP-02, WP-04         |  8-13 PD |
-| WP-10 | MCP document tools, proposal/approval workflow and audit events                                    | FR-041..046; MCP Integration                                                      | WP-02, WP-04, WP-09  |  8-14 PD |
-| WP-11 | Cross-platform, security, accessibility, performance, recovery and icon-packaging hardening        | NFR-001..015; Cross-Platform Compatibility, Quality & Testing, Security & Privacy | WP-03..WP-10         | 10-18 PD |
-| WP-12 | User-facing Codex skills and community integration guide                                           | FR-047..049; User-Facing Codex Skills                                             | WP-10, WP-11         |   4-7 PD |
-| WP-13 | Local appearance and language preferences                                                          | FR-050..051; User Preferences, Localization                                       | WP-03                |   5-8 PD |
-| WP-14 | Validated diagram grouping and ungrouping; exact scope follows discovery                           | Proposed FR-053/UC-13; OpenSpec after discovery                                   | WP-02, WP-04         |      TBD |
-| WP-15 | Accessible onboarding for reviewed PMV workflows                                                   | FR-052/UC-12; Guided Onboarding                                                   | WP-13, PMV workflows |      TBD |
+| ID    | Package and objective                                                                              | Requirements / OpenSpec                                                                                                               | Dependencies         | Estimate |
+| ----- | -------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- | -------------------- | -------: |
+| WP-00 | Engineering foundation: repository, policies, CI, OpenSpec, traceability, local developer workflow | NFR-010..013; Desktop Application, Quality & Testing, Security & Privacy                                                              | None                 |   3-5 PD |
+| WP-01 | Tauri + Weave compatibility spike and minimal canvas integration                                   | FR-001..004; Desktop Application, Canvas Editing, Cross-Platform Compatibility                                                        | WP-00                |   4-7 PD |
+| WP-02 | Canonical document model, command boundary, IDs, pages, layers, nodes, edges                       | FR-005..011; Document Model                                                                                                           | WP-01                |  6-10 PD |
+| WP-03 | Versioned `.peercanvas` save/open, snapshots, recovery and migration                               | FR-012..016; Local Persistence, History & Recovery                                                                                    | WP-02                |  6-10 PD |
+| WP-04 | Core canvas editing, selection, transforms, connectors, properties and undo/redo                   | FR-004..011; Canvas Editing                                                                                                           | WP-02, WP-03         | 10-16 PD |
+| WP-05 | Shape catalog manifest, search, categories, provenance and safe SVG rendering                      | FR-017..020; Diagram Shapes, Shape Catalog, Security & Privacy                                                                        | WP-02                |  6-10 PD |
+| WP-06 | draw.io import/export adapter and compatibility fixtures                                           | FR-021..024; draw.io Compatibility, Import & Export                                                                                   | WP-02, WP-05         |  8-14 PD |
+| WP-07 | Yjs synchronization contract and WeaveStoreP2P adapter                                             | FR-025..027, FR-028 (transport state), FR-034 (network loss); P2P Collaboration, Presence & Awareness                                 | WP-01, WP-02, WP-03  |  8-14 PD |
+| WP-08 | Peer session lifecycle, invitations, participant approval, roles and revocation                    | FR-028 (participant awareness), FR-029..034 (session lifecycle); Secure Session Invitations, Presence & Awareness, Security & Privacy | WP-07                |  8-14 PD |
+| WP-09 | Optional Codex conversation UI and provider boundary                                               | FR-035..040; Codex Embedded Chat                                                                                                      | WP-02, WP-04         |  8-13 PD |
+| WP-10 | MCP document tools, proposal/approval workflow and audit events                                    | FR-041..046; MCP Integration                                                                                                          | WP-02, WP-04, WP-09  |  8-14 PD |
+| WP-11 | Cross-platform, security, accessibility, performance, recovery and icon-packaging hardening        | NFR-001..015; Cross-Platform Compatibility, Quality & Testing, Security & Privacy                                                     | WP-03..WP-10         | 10-18 PD |
+| WP-12 | User-facing Codex skills and community integration guide                                           | FR-047..049; User-Facing Codex Skills                                                                                                 | WP-10, WP-11         |   4-7 PD |
+| WP-13 | Local appearance and language preferences                                                          | FR-050..051; User Preferences, Localization                                                                                           | WP-03                |   5-8 PD |
+| WP-14 | Validated diagram grouping and ungrouping; exact scope follows discovery                           | Proposed FR-053/UC-13; OpenSpec after discovery                                                                                       | WP-02, WP-04         |      TBD |
+| WP-15 | Accessible onboarding for reviewed PMV workflows                                                   | FR-052/UC-12; Guided Onboarding                                                                                                       | WP-13, PMV workflows |      TBD |
 
 ### WP-00: Engineering foundation
 
@@ -120,20 +120,22 @@ Effort ranges are initial engineering estimates. They exclude release administra
 ### WP-07: P2P synchronization
 
 - **Scope:** Yjs state exchange, Trystero transport adapter, initial sync, disconnect/reconnect, and awareness routing.
-- **Requirements/spec:** FR-025..028; P2P Collaboration, Presence & Awareness.
+- **Requirements/spec:** FR-025..028 (transport and connection-state aspects), FR-034 (protection during network loss); P2P Collaboration, Presence & Awareness.
 - **Dependencies/components:** WP-01..WP-03; collaboration adapter and session lifecycle.
-- **Activities/contracts:** test local LAN, NAT traversal, STUN/TURN needs, relay behavior, peer limits, and host disconnect; define how host-local persistence receives remote updates.
-- **Acceptance:** two peers converge to the same document under concurrent edits; offline edits remain locally available; unsupported network paths fail clearly.
-- **Tests/DoD:** deterministic Yjs update tests plus WebRTC integration tests on LAN and relay/TURN cases; no claim that direct connectivity always works.
-- **Effort/risk:** 8-14 PD; TURN service availability and cost are open.
-- **Issue / PR:** WP-07 Add Yjs and Trystero peer transport; PR to **dev**.
+- **Activities/contracts:** host-sequence peer command proposals through `executeCommand`; rebase only proposals whose affected IDs do not overlap intervening commits; reject overlapping or too-old proposals with the current state. Expose connection/retry status and ephemeral awareness through the session API for WP-08's UI to consume; do not add invitation controls to S4. The host is the only Yjs document writer; the session Y.Doc is transient, and `.peercanvas` remains the only durable document. The initial adapter uses Trystero 0.26 MQTT-over-WebSocket signaling; explicit public broker endpoints are replaceable, and this does not select a permanent operator or guarantee availability.
+- **Acceptance:** disjoint simultaneous proposals converge in host order; conflicting proposals are rejected without invalidating the canonical document; a peer becomes ready only after a complete validated snapshot and commit tail; the session API exposes sanitized connection failure/retry state; transport loss leaves the host's last durable `.peercanvas` intact and unsaved changes follow Save/Discard/Cancel.
+- **Tests/DoD:** deterministic Yjs update tests plus native WebRTC evidence across available WebViews and LAN/signaling/STUN/TURN cases; record unavailable topologies and do not claim that direct connectivity always works.
+- **Gate:** WP-07.1/#35 records the host-sequenced concurrency, validation, sync-readiness, per-user undo, and durability contract before WP-07.2/#36 implementation; that contract is now recorded in ADR-0002 and OpenSpec.
+- **Effort/risk:** 8-14 PD; default Trystero STUN endpoints are public Google and Cloudflare services. A TURN provider, credentials, cost, and the final relay policy remain open pending WP-07.3 evidence.
+- **Current delivery evidence:** WP-07.2 has host-sequenced command handling, validated Yjs checkpoints/commit tails, reconnect synchronization, sanitized network errors, and deterministic tests merged to `dev` by PR #133. The canvas-only native smoke passes on macOS/Linux/Windows CI. Optional two-WebView peer smokes establish the local/public signaling path and gather host/server-reflexive candidates, but ICE remains `checking` when both peers run inside this same Mac/WebView network. This is not evidence of cross-device connectivity; WP-07.3 remains open for a second device/network and TURN testing with valid credentials.
+- **Issue / PR:** WP-07/#8; implementation PR [#133](https://github.com/furancho-labs/Peer2Canvas/pull/133) merged to **dev**; WP-07.3/#37 remains open.
 
 ### WP-08: Secure sharing and presence
 
 - **Scope:** temporary share lifecycle, invite links, host approval, read/edit capabilities, participant list, revoke/close, and presence.
-- **Requirements/spec:** FR-029..034; Secure Session Invitations, Presence & Awareness, Security & Privacy.
+- **Requirements/spec:** FR-028 (participant-presence aspect), FR-029..034 (session-lifecycle aspects); Secure Session Invitations, Presence & Awareness, Security & Privacy.
 - **Dependencies/components:** WP-07; Web Crypto, Tauri deep links, session authorization boundary.
-- **Acceptance:** secrets are high entropy, never placed in query strings or logged, and are redacted from diagnostic output; host can deny/revoke access; read-only peers cannot mutate through model commands.
+- **Acceptance:** secrets are high entropy, never placed in query strings or logged, and are redacted from diagnostic output; host can deny/revoke access; read-only peers cannot mutate through model commands; expiry, revocation, or session close does not delete or overwrite the host's last durable `.peercanvas` file.
 - **Tests/DoD:** protocol tests for expired/revoked invitations, unauthorized mutations, copied links, host loss, and deep-link parsing; threat model reviewed.
 - **Effort/risk:** 8-14 PD; information already received cannot be remotely erased; define scope of revocation honestly.
 - **Issue / PR:** WP-08 Secure peer sharing and participant controls; PR to **dev**.
@@ -228,8 +230,8 @@ S1 and S2 are complete on `main`. Promotion PR [#106](https://github.com/furanch
 | S1     | Canonical data and durable local files | WP-02, WP-03 | versioned model; save/open/recovery acceptance evidence                                                                                   |
 | S2     | Useful local editor                    | WP-04        | create, edit, connect, undo and reopen a small diagram                                                                                    |
 | S3     | Reusable assets and interoperability   | WP-05, WP-06 | licensed fixture catalog and declared draw.io subset with round-trip evidence                                                             |
-| S4     | Collaboration foundation               | WP-07        | Yjs convergence and recorded LAN/NAT outcomes                                                                                             |
-| S5     | Safe peer sessions                     | WP-08        | invite approval, permission enforcement, expiry and revocation evidence                                                                   |
+| S4     | Collaboration foundation               | WP-07        | Validated Yjs convergence, recorded LAN/NAT outcomes, and host-file preservation through transport loss                                   |
+| S5     | Safe peer sessions                     | WP-08        | Invite approval, permission enforcement, expiry/revocation evidence, and host-file preservation through session lifecycle events          |
 | S6     | Optional AI and model tools            | WP-09, WP-10 | provider fallback, preview/approval, MCP protocol and security tests                                                                      |
 | S7     | Hardening and ecosystem                | WP-11, WP-12 | release checklist, supported OS evidence, verified skill package, reproducible native app icons                                           |
 | S8     | Desktop experience preferences         | WP-13        | persistent light/dark theme, English/Spanish resources, cross-platform preference evidence                                                |
@@ -238,7 +240,7 @@ S1 and S2 are complete on `main`. Promotion PR [#106](https://github.com/furanch
 
 **Approved sequencing exception, 2026-11-13:** implement the bounded WP-13 appearance/language scope and `editor-workspace-refresh` locally after S3 and before S4. The sprint table retains the original milestone identities; this exception does not authorize other S8–S10 behavior or mark any acceptance gate complete.
 
-S1 and S2 are complete on `main`; PR #106 promoted the S1 persistence and S2 editor work and closed their issues and milestones. The eight required CI checks passed, and a macOS Tauri flow saved, closed, and reopened an edited diagram. Grouping is outside S2 and belongs to S9/WP-14, with discovery child #89; it did not block S2 closure. No product implementation for S3 or later is authorized by this planning update.
+S1, S2, and S3 are complete on `main`; PR #133 delivered WP-07.1/#35 and WP-07.2/#36 to `dev`, and WP-07.3/#37 remains in progress. Grouping is outside S2 and belongs to S9/WP-14, with discovery child #89; it did not block S2 closure. The WP-13 sequencing exception authorizes only the bounded appearance/language and workspace-refresh scope described above; other S8–S10 work remains planning only.
 
 ### Critical path and parallel work
 
@@ -283,7 +285,8 @@ For implementation, create **feature/WP-xx-short-name** from **dev**, open a PR 
 | ------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------- |
 | Weave package and WebView compatibility     | S0 fixture probe passes on current CI runner images; minimum OS floor and product adapter remain open                                  | [S0 platform matrix](docs/support/platform-matrix.md); product gate in WP-04/WP-11      |
 | Durable local store                         | `.peercanvas` JSON selected and merged to `dev`; required CI and backend storage tests pass, with native UI evidence recorded on macOS | WP-03/PR #104 and [ADR-0003](docs/architecture/decisions/ADR-0003-local-persistence.md) |
-| P2P relay/STUN/TURN policy                  | Trystero + WebRTC candidate; direct connection not guaranteed                                                                          | WP-07 network matrix, service/cost analysis                                             |
+| P2P relay/STUN/TURN policy                  | Trystero 0.26 MQTT signaling with explicit public endpoints; public Google/Cloudflare STUN defaults; no TURN provider selected         | WP-07 network matrix, metadata/privacy review, service/cost analysis                    |
+| Yjs concurrency and invariant policy        | Host-sequenced commands; disjoint stale proposals rebase, overlapping proposals are rejected                                           | WP-07.1/#35; deterministic tests for concurrent, stale, duplicate, and invalid commands |
 | Invitation and authorization protocol       | Capability link plus host approval proposed; revocation limits must be explicit                                                        | WP-08 threat review and protocol tests                                                  |
 | draw.io parity                              | Selective compatible subset; preserve/report unsupported source                                                                        | WP-06 fixture matrix                                                                    |
 | ChatGPT-plan OAuth registration             | Official local OSS path exists in preview; eligibility/terms must be rechecked                                                         | WP-09 legal/technical gate and auth test                                                |

@@ -18,20 +18,20 @@
 
 PeerCanvas is an open-source desktop diagram editor for turning ideas into architecture, UML, BPMN, network, cloud, database, process, and workflow diagrams. The goal is a useful local editor that works without a network connection or an AI account, with optional peer collaboration, draw.io interchange, and Codex/MCP assistance.
 
-The project is in early development. S0–S2 are implemented on `main`; S3 implementation is complete and its promotion state is tracked on the delivery board. S3 adds a licensed offline shape catalog, safe SVG previews, schema-v2 catalog references, and local draw.io import/export for a declared subset. Full draw.io parity is not claimed.
+The project is in early development. S0–S3 are complete on `main`; WP-07 implementation is now underway for S4. S3 added a licensed offline shape catalog, safe SVG previews, schema-v2 catalog references, and local draw.io import/export for a declared subset. Full draw.io parity is not claimed, and S4's real-network matrix remains in progress.
 
 ## Project status
 
-**S0–S2 are implemented on `main`; S3 implementation is complete. Check the delivery board for promotion status.** S3 includes one reviewed first-party rectangle preview, a versioned shape reference on inserted nodes, and a tested draw.io subset with loss reports and safe source-fragment preservation. The renderer compatibility gate passed its bounded native fixture on Windows, macOS, and Linux; that evidence does not establish full native product support.
+**S0–S3 are complete on `main`; S4 is the current open milestone.** S3 includes one reviewed first-party rectangle preview, a versioned shape reference on inserted nodes, and a tested draw.io subset with loss reports and safe source-fragment preservation. The renderer compatibility gate passed its bounded native fixture on Windows, macOS, and Linux; that evidence does not establish full native product support.
 
-| Area                                            | Current state                                                                                                                                                                    |
-| ----------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Core editing                                    | In-memory add, select, move, resize, and delete. [WP-04.1 / #25](https://github.com/furancho-labs/Peer2Canvas/issues/25) is merged into `dev`.                                   |
-| Connectors, properties, pages/layers, undo/redo | Included in the current S2 code under [WP-04.2 / #26](https://github.com/furancho-labs/Peer2Canvas/issues/26).                                                                   |
-| Local files and recovery                        | S2 adds `.peercanvas` Save, Save As, Open, Reopen last, migration, unsaved-change protection, and backup recovery; native UI evidence is recorded on macOS.                      |
-| Shape catalog and draw.io interchange           | WP-05 and WP-06 implementation is complete; the catalog, safe SVG previews, schema-v2 references, and declared draw.io subset are implemented. Promotion status is on the board. |
-| Peer collaboration                              | Planned around Yjs and Trystero/WebRTC; network behavior is unverified.                                                                                                          |
-| Codex and MCP                                   | Optional integrations researched; not implemented.                                                                                                                               |
+| Area                                            | Current state                                                                                                                                                                                                  |
+| ----------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Core editing                                    | In-memory add, select, move, resize, and delete. [WP-04.1 / #25](https://github.com/furancho-labs/Peer2Canvas/issues/25) is merged into `dev`.                                                                 |
+| Connectors, properties, pages/layers, undo/redo | Included in the current S2 code under [WP-04.2 / #26](https://github.com/furancho-labs/Peer2Canvas/issues/26).                                                                                                 |
+| Local files and recovery                        | S2 adds `.peercanvas` Save, Save As, Open, Reopen last, migration, unsaved-change protection, and backup recovery; native UI evidence is recorded on macOS.                                                    |
+| Shape catalog and draw.io interchange           | WP-05 and WP-06 are complete on `main`; the catalog, safe SVG previews, schema-v2 references, and declared draw.io subset are implemented.                                                                     |
+| Peer collaboration                              | Host-sequenced Yjs transport code is in progress; there are no share/join controls yet. Public MQTT signaling and Google/Cloudflare STUN are configured; NAT/TURN and cross-device behavior remain unverified. |
+| Codex and MCP                                   | Optional integrations researched; not implemented.                                                                                                                                                             |
 
 WP-05 and WP-06 are complete on `dev`. Local checks pass 231 TypeScript tests and 33 Rust tests, typecheck, lint, formatting, Clippy, the optimized Rust check, and OpenSpec validation. PR [#125](https://github.com/furancho-labs/Peer2Canvas/pull/125) passed all eight required checks, CodeQL, OSV, Gitleaks, and native jobs. A local macOS bundle attempt could not generate the configured app icon, so native file-dialog interaction remains unverified. See the [platform matrix](docs/support/platform-matrix.md) and [handoff](docs/handoff/START_HERE.md) for the scope of each result.
 
@@ -74,14 +74,14 @@ Open `http://127.0.0.1:1430/`. This review surface uses fictional data and simul
 
 ## Architecture
 
-| Layer         | Direction                                                                                                                                                    |
-| ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Desktop shell | Tauri 2 and Rust, hosting React 18, TypeScript, and Vite.                                                                                                    |
-| Canvas        | The official Weave.js renderer, with selected composition adapted from `weavejs-frontend`. The example app's TanStack Start runtime is not adopted.          |
-| Document      | One canonical, versioned model. UI edits pass through validated commands; Weave holds a disposable rendering projection.                                     |
-| Persistence   | A versioned `.peercanvas` JSON file is the durable document; a Rust adapter owns native dialogs, safe writes, and recovery. Preferences stay separate.       |
-| Collaboration | Yjs synchronization with a replaceable Trystero/WebRTC transport is proposed. Signaling relays or TURN may be needed; direct connectivity is not guaranteed. |
-| Assistant     | A planned provider boundary and Codex app-server integration. The chat UI will adapt the shadcn chatbot template while keeping the Tauri/Vite structure.     |
+| Layer         | Direction                                                                                                                                                                                                                                                                       |
+| ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Desktop shell | Tauri 2 and Rust, hosting React 18, TypeScript, and Vite.                                                                                                                                                                                                                       |
+| Canvas        | The official Weave.js renderer, with selected composition adapted from `weavejs-frontend`. The example app's TanStack Start runtime is not adopted.                                                                                                                             |
+| Document      | One canonical, versioned model. UI edits pass through validated commands; Weave holds a disposable rendering projection.                                                                                                                                                        |
+| Persistence   | A versioned `.peercanvas` JSON file is the durable document; a Rust adapter owns native dialogs, safe writes, and recovery. Preferences stay separate.                                                                                                                          |
+| Collaboration | Host-sequenced Yjs synchronization uses a replaceable Trystero 0.26/WebRTC transport. The initial build allowlists three public MQTT signaling brokers and uses public Google/Cloudflare STUN defaults; no TURN provider is selected and direct connectivity is not guaranteed. |
+| Assistant     | A planned provider boundary and Codex app-server integration. The chat UI will adapt the shadcn chatbot template while keeping the Tauri/Vite structure.                                                                                                                        |
 
 The shadcn template's Next.js routes and Vercel AI SDK backend are outside the planned stack. Current authentication research and implementation gates are documented in [Codex integration](docs/architecture/codex-integration.md).
 

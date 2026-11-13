@@ -54,7 +54,7 @@ The AI provider and MCP client are not trusted authorities. They may propose com
 - The stack is Tauri 2 + React + TypeScript + Vite; Weave.js is the intended engine. Compatibility is not proven by the current shell.
 - The target desktop OS families are Windows, macOS (Apple Silicon and Intel where viable), and Linux. Exact OS minimum versions are undecided.
 - Weave.js 5.7.1 and React 18.3.1 are the pinned research baseline. Recheck current releases and peer dependencies before changing either.
-- Yjs + Trystero + WebRTC is a proposed collaboration path. Signaling, STUN, TURN, NAT traversal, and relay availability remain external dependencies.
+- The initial collaboration adapter uses Yjs, Trystero 0.26 MQTT-over-WebSocket signaling, and WebRTC. The current broker allowlist is public and replaceable; Trystero's default Google/Cloudflare STUN services are external. No TURN provider is selected, and direct connectivity remains unverified across representative NAT/firewall paths.
 - Local diagrams use versioned `.peercanvas` JSON through the Rust persistence adapter selected in [ADR-0003](../architecture/decisions/ADR-0003-local-persistence.md). Application preferences remain separate from diagram content.
 - The initial release does not rely on centralized user identity.
 - The current OpenAI documentation describes a Sign in with ChatGPT plan-usage path for eligible open-source/local apps. It is a preview; verify registration, eligibility, rate/usage limits, terms, and storage requirements before implementation.
@@ -106,7 +106,7 @@ The OpenSpec capability names below are the planned canonical capability contrac
 | FR-023 | The application shall report unsupported or lossy transformations before the user confirms them.                       | draw.io Compatibility          |
 | FR-024 | The adapter shall preserve safe, bounded unsupported draw.io source fragments.                                         | draw.io Compatibility          |
 | FR-025 | Concurrent document edits shall synchronize through Yjs updates.                                                       | P2P Collaboration              |
-| FR-026 | The proposed peer transport shall use a replaceable adapter and support Trystero/WebRTC as the initial candidate.      | P2P Collaboration              |
+| FR-026 | The peer transport shall use a replaceable adapter; the initial implementation uses Trystero/WebRTC.                   | P2P Collaboration              |
 | FR-027 | Joining a peer session shall receive an initial document state before declaring the peer ready.                        | P2P Collaboration              |
 | FR-028 | The session shall surface connection state, reconnection, and presence/awareness separately from saved document state. | Presence & Awareness           |
 | FR-029 | The host shall generate an invitation with a random session identifier and a high-entropy secret.                      | Secure Session Invitations     |
@@ -333,8 +333,10 @@ The accompanying `editor-workspace` contract reorganizes the implemented UC-01..
 | FR-012..016       | UC-01                            | WP-03                      | Local Persistence, History & Recovery                               |
 | FR-017..020       | UC-03                            | WP-05                      | Shape Catalog, Diagram Shapes, Security & Privacy                   |
 | FR-021..024       | UC-04, UC-05                     | WP-06                      | draw.io Compatibility, Import & Export                              |
-| FR-025..028       | UC-06, UC-07                     | WP-07, WP-08               | P2P Collaboration, Presence & Awareness                             |
-| FR-029..034       | UC-06..UC-08                     | WP-08                      | Secure Session Invitations, Security & Privacy                      |
+| FR-025..027       | UC-06, UC-07                     | WP-07                      | P2P Collaboration                                                   |
+| FR-028            | UC-06, UC-07                     | WP-07, WP-08               | P2P Collaboration, Presence & Awareness                             |
+| FR-029..033       | UC-06..UC-08                     | WP-08                      | Secure Session Invitations, Security & Privacy                      |
+| FR-034            | UC-06, UC-08                     | WP-07, WP-08               | P2P Collaboration, Secure Session Invitations                       |
 | FR-035..040       | UC-09                            | WP-09                      | Codex Embedded Chat                                                 |
 | FR-041..046       | UC-10                            | WP-10                      | MCP Integration                                                     |
 | FR-047..049       | Not applicable before tools ship | WP-12                      | User-Facing Codex Skills                                            |
