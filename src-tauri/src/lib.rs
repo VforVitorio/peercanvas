@@ -3,6 +3,7 @@ compile_error!("native-smoke feature cannot be used in a release build");
 
 mod drawio;
 mod interchange;
+mod messages;
 mod persistence;
 
 #[cfg(not(target_os = "linux"))]
@@ -11,6 +12,50 @@ use tauri::Emitter;
 #[tauri::command]
 fn quit_application(app: tauri::AppHandle) {
     app.exit(0);
+}
+
+#[tauri::command]
+fn set_interface_locale(
+    app: tauri::AppHandle,
+    locale: persistence::LocalePreference,
+) -> persistence::NativeResult<()> {
+    #[cfg(not(target_os = "linux"))]
+    {
+        let menu = app
+            .menu()
+            .ok_or_else(|| messages::NativeMessage::new("native.menuUnavailable"))?;
+        let quit_item = menu
+            .items()
+            .ok()
+            .and_then(|items| {
+                items.into_iter().find_map(|item| {
+                    let submenu = item.as_submenu()?;
+                    submenu.items().ok()?.into_iter().find_map(|item| {
+                        let menu_item = item.as_menuitem()?;
+                        (menu_item.id().as_ref() == "peercanvas-quit").then(|| menu_item.clone())
+                    })
+                })
+            })
+            .ok_or_else(|| messages::NativeMessage::new("native.menuUnavailable"))?;
+        #[cfg(target_os = "macos")]
+        let label = if locale == persistence::LocalePreference::Es {
+            "Salir de PeerCanvas"
+        } else {
+            "Quit PeerCanvas"
+        };
+        #[cfg(target_os = "windows")]
+        let label = if locale == persistence::LocalePreference::Es {
+            "Salir de PeerCanvas"
+        } else {
+            "Exit PeerCanvas"
+        };
+        quit_item
+            .set_text(label)
+            .map_err(|_| messages::NativeMessage::new("native.menuUpdateFailed"))?;
+    }
+    #[cfg(target_os = "linux")]
+    let _ = (app, locale);
+    Ok(())
 }
 
 #[cfg(not(target_os = "linux"))]
@@ -71,11 +116,14 @@ pub fn run() {
         .invoke_handler(tauri::generate_handler![
             persistence::load_recent_document,
             persistence::get_recent_document_name,
+            persistence::get_preferences,
+            persistence::update_preferences,
             persistence::open_document,
             persistence::accept_open,
             persistence::discard_open,
             persistence::save_document,
             persistence::close_document,
+            set_interface_locale,
             interchange::import_drawio,
             interchange::prepare_drawio_export,
             interchange::export_drawio,
