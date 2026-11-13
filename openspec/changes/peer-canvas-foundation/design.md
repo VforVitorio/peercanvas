@@ -44,7 +44,13 @@ S3 uses schema v2 for nullable per-node catalog references and bounded inert dra
 
 ### Adapter boundaries for renderer, storage, and transport
 
-Use Weave.js as the renderer candidate behind an adapter. Keep local persistence and peer transport behind separate adapters. Yjs with a Trystero/WebRTC adapter is the proposed collaboration path, but network connectivity and participant validation require experiments.
+Use Weave.js as the renderer behind an adapter. Keep local persistence and peer transport behind separate adapters. WP-07 selects Yjs with Trystero 0.26/WebRTC as the initial collaboration path, using explicit public MQTT-over-WebSocket signaling endpoints and Trystero's default public STUN services. Network connectivity remains subject to the WP-07.3 matrix; no TURN service is selected.
+
+### Host-sequenced peer commands
+
+The host is the only writer to the session Y.Doc. Participants send command proposals to the host; it applies each proposal to its current canonical state through `executeCommand` and publishes accepted commands in order as Yjs updates. If a proposal is based on an older revision, the host accepts it only when its affected IDs are disjoint from intervening accepted commands. Overlapping or expired proposals are rejected with the current validated snapshot. Commits carry their originating peer so each participant can keep a local undo/redo stack for its own accepted commands; undo and redo are new host-validated proposals. A snapshot resync clears that in-memory history because checkpoints do not preserve inverse commands. The Y.Doc carries a checkpoint and a bounded commit tail, remains transient, and never replaces the user-managed `.peercanvas` file. Signaling and session identity are inputs to this adapter; invitations, admission, and roles remain WP-08.
+
+Ephemeral participant cursor/selection state uses Trystero per-user awareness, separate from the document Y.Doc and `.peercanvas` file. Trystero uses a session-only browser identity; the collaboration adapter does not persist a participant identity.
 
 **Alternative considered:** bind the document contracts directly to a particular transport or storage API. Rejected until compatibility, recovery, and failure tests establish the contract.
 
@@ -57,6 +63,8 @@ The probe does not introduce a second product document model, durable storage, p
 ### Store portable JSON documents through a native adapter
 
 Use one user-selected `.peercanvas` JSON file as the durable document source, using the canonical model's serializer and parser. Keep native dialogs and bounded filesystem operations in Rust commands; keep app preferences in a separate app-data file. Save through a temporary sibling and one prior-version backup. Never publish an incomplete candidate or overwrite the source when recovery validation fails. The detailed policy and measured option comparison are in [ADR-0003](../../../docs/architecture/decisions/ADR-0003-local-persistence.md).
+
+Peer collaboration keeps its Y.Doc transient. Transport loss and session expiry, revocation, or closure must leave the host's last successful `.peercanvas` save intact; remote or unsaved changes become durable only through the existing explicit save flow.
 
 **Alternative considered:** use SQLite as the document source. Rejected for the initial editor because the product's open/save workflow is built around portable user-managed files, and the JSON file already matches the canonical versioned snapshot without a database projection or a separate export/import format. SQLite remains suitable for future indexes if they stay rebuildable and do not become a second semantic authority.
 
@@ -91,6 +99,7 @@ User-facing Codex skills remain a later capability. They can be distributed only
 - **Weave does not work in one target WebView** → WP-01 gates canvas implementation on a three-platform compatibility spike; update ADR-0001 before choosing a fallback.
 - **Local saves can corrupt user data** → WP-03 tests atomic writes, interrupted saves, migrations, and recovery before selecting a store.
 - **Some peer networks cannot connect directly** → WP-07 records LAN, NAT, STUN, and TURN results and exposes connection failure; no universal-connectivity claim is allowed.
+- **Yjs updates converge to a document that violates domain invariants** → WP-07.1/#35 selects the concurrency and conflict policy and proves how the canonical validator protects accepted state before transport implementation.
 - **Yjs updates cannot safely enforce viewer roles by UI alone** → WP-08 validates authorization at the command boundary and runs negative tests against direct remote mutation paths.
 - **A participant copies content before revocation** → the invitation specification limits revocation to future session access and requires that limit to be disclosed.
 - **ChatGPT-plan usage eligibility or limits change** → WP-09 rechecks official documentation and terms; local editing remains available without that provider.

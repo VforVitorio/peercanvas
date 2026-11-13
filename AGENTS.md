@@ -4,7 +4,7 @@
 
 PeerCanvas is a local-first desktop diagram editor. Read [README.md](README.md), [the product definition](docs/requirements/product-definition.md), [the architecture overview](docs/architecture/overview.md), and [PLANS.md](PLANS.md) before changing product behavior.
 
-The current app is a scaffold. Do not claim editing, persistence, sharing, import/export, AI, or MCP features work until implemented and verified. Planning documents distinguish proposed decisions from verified behavior.
+The app has delivered the canonical document model and local editor, versioned `.peercanvas` persistence/recovery, the licensed shape catalog, and a declared draw.io subset. Peer collaboration, secure invitations, real assistant/provider calls, and MCP remain planned. Check the current handoff and live branch state before making capability claims; planning documents distinguish proposals from verified behavior.
 
 ## OpenSpec and implementation
 
@@ -46,6 +46,7 @@ The current app is a scaffold. Do not claim editing, persistence, sharing, impor
 
 - Branch flow: feature/* from dev, PR into dev, then sprint promotion PR from dev to main.
 - main is the stable default branch. Do not add a long-lived test branch.
+- PeerCanvas is co-developed. Before integrating, refresh main/dev and open PRs. When frontend work from the user's collaborator using Claude overlaps or conflicts, preserve that version and adapt our changes around it; never overwrite or revert it to simplify a merge.
 - Use Conventional Commit subjects in English. Do not add AI attribution or Co-Authored-By lines.
 - The maintainer owns merges and releases. Agents may commit or push only when the user explicitly authorizes those actions for the current task; never infer publication permission from local edits. Agents must not merge unless explicitly authorized.
 - Never add AI attribution or Co-Authored-By lines to commits, PRs, or GitHub content.
