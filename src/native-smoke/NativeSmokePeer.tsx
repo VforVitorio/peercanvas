@@ -11,7 +11,11 @@ import {
 import { createTrysteroPeerTransport } from "../collaboration/trystero-peer-transport";
 import { PeerDocumentSession } from "../collaboration/peer-document-session";
 import { serializeDocument } from "../document";
-import { installNativeIceDiagnostics, readNativeIceDiagnostics } from "./ice-diagnostics";
+import {
+  installNativeIceDiagnostics,
+  readNativeIceDiagnostics,
+  type NativeIceDiagnostic,
+} from "./ice-diagnostics";
 import type {
   CommandReply,
   PeerNetworkDiagnostic,
@@ -47,6 +51,7 @@ export type NativePeerDebug = {
   error: string | null;
   identityMatchesHost: boolean;
   transportPeerCount: number;
+  ice: NativeIceDiagnostic[];
   network: Array<Omit<PeerNetworkDiagnostic, "peerId">>;
   errors: PeerTransportError[];
   signalingSockets: Array<{ readyState: number; protocol: string }>;
