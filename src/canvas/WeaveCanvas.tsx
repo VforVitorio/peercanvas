@@ -23,6 +23,7 @@ import { WeaveStoreStandalone } from "@inditextech/weave-store-standalone/client
 import type { WeaveStateElement } from "@inditextech/weave-types";
 import type Konva from "konva";
 import type { Document, Geometry } from "../document";
+import { useI18n } from "../i18n";
 import {
   buildProjection,
   fitZoom,
@@ -32,6 +33,8 @@ import {
 
 export type CanvasStatus =
   { state: "starting" } | { state: "ready" } | { state: "error"; message: string };
+/** Stable, user-visible renderer failure codes (construction vs. asynchronous start). */
+type CanvasFailureCode = "CANVAS_INIT" | "CANVAS_START";
 
 interface Props {
   document: Document | null;
@@ -71,9 +74,11 @@ function toWeave(element: ProjectedElement, editable: boolean): WeaveStateElemen
     const base = WeaveArrowNode.defaultState(element.id);
     return {
       ...base,
+      type: "arrow",
       props: {
         ...base.props,
         id: element.id,
+        nodeType: "arrow",
         x: 0,
         y: 0,
         ...element.props,
@@ -134,7 +139,9 @@ export default function WeaveCanvas({
   const container = useRef<HTMLDivElement>(null);
   const instanceRef = useRef<Weave | null>(null);
   const selectionPluginRef = useRef<WeaveNodesSelectionPlugin | null>(null);
+  const { t } = useI18n();
   const [status, setStatus] = useState<CanvasStatus>({ state: "starting" });
+  const [failureCode, setFailureCode] = useState<CanvasFailureCode>("CANVAS_INIT");
   const [attempt, setAttempt] = useState(0);
   const projection = useMemo(() => {
     const next = buildProjection(doc, pageId, layerId);
@@ -282,6 +289,7 @@ export default function WeaveCanvas({
         },
       );
     } catch (error) {
+      setFailureCode("CANVAS_INIT");
       report({ state: "error", message: error instanceof Error ? error.message : String(error) });
       return;
     }
@@ -454,11 +462,12 @@ export default function WeaveCanvas({
       .start()
       .then(markReady)
       .catch((error: unknown) => {
-        if (!disposed)
-          report({
-            state: "error",
-            message: error instanceof Error ? error.message : String(error),
-          });
+        if (disposed) return;
+        setFailureCode("CANVAS_START");
+        report({
+          state: "error",
+          message: error instanceof Error ? error.message : String(error),
+        });
       });
 
     return () => {
@@ -560,22 +569,25 @@ export default function WeaveCanvas({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pageKey]);
 
+  // Presentation only: the renderer's exception text stays in onStatusChange diagnostics and is
+  // never shown. The visible code is stable and locale-independent.
   return (
     <div className="pc-canvas-host">
       <div ref={container} className="pc-weave" data-testid="weave-container" />
       {status.state === "starting" && (
         <div className="pc-canvas-state" role="status">
-          <span className="pc-spinner" aria-hidden="true" /> Starting Weave canvas…
+          <span className="pc-spinner" aria-hidden="true" /> {t("editor.canvas.starting")}
         </div>
       )}
       {status.state === "error" && (
         <div className="pc-canvas-state pc-canvas-error" role="alert">
           <p>
-            <strong>Canvas renderer failed:</strong> {status.message}
+            <strong>{t("editor.canvas.failed")}</strong>
           </p>
-          <p>The document is unaffected. The Outline panel and inspector remain usable.</p>
+          <p>{t("editor.canvas.failedDetail")}</p>
+          <p className="pc-hint">{t("editor.canvas.failedCode", { code: failureCode })}</p>
           <button type="button" className="pc-btn" onClick={() => setAttempt((n) => n + 1)}>
-            Retry canvas
+            {t("editor.canvas.retry")}
           </button>
         </div>
       )}

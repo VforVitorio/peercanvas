@@ -50,6 +50,30 @@ describe("canonical document contract", () => {
     expect(page.layers[0].layerId).toBe(id(3));
   });
 
+  it("validates optional initial page and layer names without changing default initialization", () => {
+    const input = {
+      documentId: id(1),
+      pageId: id(2),
+      layerId: id(3),
+      title: "Diagrama",
+      now: createdAt,
+    };
+    const localized = createDocument({ ...input, pageName: "Página 1", layerName: "Capa 1" });
+    expect(localized.ok).toBe(true);
+    if (!localized.ok) throw new Error("Localized initialization was rejected.");
+    expect(localized.value.revision).toBe(0);
+    expect(localized.value.document.pages[0].name).toBe("Página 1");
+    expect(localized.value.document.pages[0].layers[0].name).toBe("Capa 1");
+    expect(emptyDocument().document.pages[0].name).toBe("Page 1");
+    expect(createDocument({ ...input, pageName: "" }).ok).toBe(false);
+    expect(createDocument({ ...input, layerName: "x".repeat(257) }).ok).toBe(false);
+    const serialized = serializeDocument(localized.value.document);
+    expect(serialized.ok).toBe(true);
+    if (!serialized.ok) throw new Error("Localized document did not serialize.");
+    const reopened = parseDocument(serialized.value);
+    expect(reopened.ok && reopened.value.document).toEqual(localized.value.document);
+  });
+
   it("rejects duplicate IDs without changing the original document", () => {
     const state = emptyDocument();
     const node = rectangle(id(4));

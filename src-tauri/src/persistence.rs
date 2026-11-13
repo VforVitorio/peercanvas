@@ -1,3 +1,4 @@
+use crate::messages::{self, NativeMessage};
 use serde::{Deserialize, Serialize};
 use std::{
     fs::{self, File, OpenOptions},
@@ -15,6 +16,15 @@ use tauri_plugin_dialog::{DialogExt, MessageDialogButtons, MessageDialogKind};
 const MAX_BYTES: u64 = 10 * 1024 * 1024;
 static TEMP_ID: AtomicU64 = AtomicU64::new(0);
 type Result<T> = std::result::Result<T, String>;
+pub type NativeResult<T> = std::result::Result<T, NativeMessage>;
+
+pub fn native_error(error: String) -> NativeMessage {
+    messages::from_text(&error)
+}
+
+pub fn native_result<T>(result: Result<T>) -> NativeResult<T> {
+    result.map_err(native_error)
+}
 
 #[derive(Default)]
 pub struct PersistenceState(Mutex<Store>);
@@ -53,7 +63,7 @@ pub struct OpenCandidate {
 #[serde(rename_all = "camelCase")]
 pub struct SaveOutcome {
     display_name: String,
-    warning: Option<String>,
+    warning: Option<NativeMessage>,
     recent_updated: bool,
 }
 
@@ -61,7 +71,7 @@ pub struct SaveOutcome {
 #[serde(rename_all = "camelCase")]
 pub struct DrawioSaveOutcome {
     display_name: String,
-    warning: Option<String>,
+    warning: Option<NativeMessage>,
 }
 
 #[derive(Deserialize)]
@@ -71,10 +81,55 @@ pub enum OpenSource {
     Backup,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Clone, Debug, Default, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 struct Preferences {
+    #[serde(default)]
     last_document: Option<PathBuf>,
+    #[serde(default)]
+    theme: Option<ThemePreference>,
+    #[serde(default)]
+    locale: Option<LocalePreference>,
+}
+
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "lowercase")]
+pub enum ThemePreference {
+    #[default]
+    System,
+    Light,
+    Dark,
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "lowercase")]
+pub enum LocalePreference {
+    En,
+    Es,
+}
+
+#[derive(Clone, Copy, Debug, Default, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct PreferencesPatch {
+    pub theme: Option<ThemePreference>,
+    pub locale: Option<LocalePreference>,
+}
+
+#[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct PreferencesResponse {
+    pub theme: ThemePreference,
+    pub locale: Option<LocalePreference>,
+    pub warning: Option<NativeMessage>,
+}
+
+#[derive(Default)]
+struct PreferenceRead {
+    preferences: Preferences,
+    exists: bool,
+    source: Option<PathBuf>,
+    warning: Option<NativeMessage>,
+    legacy: bool,
 }
 
 fn io_error(error: io::Error) -> String {
@@ -147,13 +202,19 @@ fn drawio_path(mut path: PathBuf) -> Result<PathBuf> {
 pub async fn export_drawio_file(
     app: tauri::AppHandle,
     contents: String,
+    locale: LocalePreference,
 ) -> Result<Option<DrawioSaveOutcome>> {
     with_store(app, move |app, _| {
+        let spanish = locale == LocalePreference::Es;
         let selected = app
             .dialog()
             .file()
             .add_filter("draw.io", &["drawio", "xml"])
-            .set_file_name("Diagram.drawio")
+            .set_file_name(if spanish {
+                "Diagrama.drawio"
+            } else {
+                "Diagram.drawio"
+            })
             .blocking_save_file()
             .map(|path| {
                 path.into_path()
@@ -176,12 +237,20 @@ pub async fn export_drawio_file(
         if expected.is_some()
             && !app
                 .dialog()
-                .message("A file with this name already exists. Replace it?")
-                .title("Replace existing file?")
+                .message(if spanish {
+                    "Ya existe un archivo con este nombre. ¿Quieres reemplazarlo?"
+                } else {
+                    "A file with this name already exists. Replace it?"
+                })
+                .title(if spanish {
+                    "¿Reemplazar el archivo existente?"
+                } else {
+                    "Replace existing file?"
+                })
                 .kind(MessageDialogKind::Warning)
                 .buttons(MessageDialogButtons::OkCancelCustom(
-                    "Replace".into(),
-                    "Cancel".into(),
+                    (if spanish { "Reemplazar" } else { "Replace" }).into(),
+                    (if spanish { "Cancelar" } else { "Cancel" }).into(),
                 ))
                 .blocking_show()
         {
@@ -197,7 +266,7 @@ pub async fn export_drawio_file(
         )?;
         Ok(Some(DrawioSaveOutcome {
             display_name: display_name(&path),
-            warning,
+            warning: warning.as_deref().map(messages::from_text),
         }))
     })
     .await
@@ -286,6 +355,26 @@ fn publish_with_validator(
     validate_content: impl FnOnce(&str) -> Result<()>,
     keep_backup: bool,
 ) -> Result<Option<String>> {
+    publish_with_validator_and_sync(
+        path,
+        text,
+        expected,
+        before_publish,
+        validate_content,
+        keep_backup,
+        sync_parent,
+    )
+}
+
+fn publish_with_validator_and_sync(
+    path: &Path,
+    text: &str,
+    expected: Option<&Snapshot>,
+    before_publish: impl FnOnce() -> io::Result<()>,
+    validate_content: impl FnOnce(&str) -> Result<()>,
+    keep_backup: bool,
+    sync_directory: impl Fn(&Path) -> io::Result<()>,
+) -> Result<Option<String>> {
     if text.len() as u64 > MAX_BYTES {
         return Err("The document exceeds the 10 MiB limit.".into());
     }
@@ -336,7 +425,7 @@ fn publish_with_validator(
             unchanged(path, expected)?;
             fs::rename(path, &backup).map_err(io_error)?;
             rotated = true;
-            sync_parent(path).map_err(io_error)?;
+            sync_directory(path).map_err(io_error)?;
             unchanged(&backup, expected)?;
         }
         before_publish().map_err(io_error)?;
@@ -353,7 +442,7 @@ fn publish_with_validator(
         let backup_retained =
             rotated && (unchanged(path, None).is_err() || fs::rename(&backup, path).is_err());
         if rotated && !backup_retained {
-            let _ = sync_parent(path);
+            let _ = sync_directory(path);
         }
         if owns_temporary {
             let _ = fs::remove_file(&temporary);
@@ -365,7 +454,7 @@ fn publish_with_validator(
             error
         });
     }
-    let durable = sync_parent(path).is_ok();
+    let durable = sync_directory(path).is_ok();
     let _ = fs::remove_file(&temporary);
     let mut warning = (!durable)
         .then(|| "Saved, but the filesystem could not confirm directory durability.".to_string());
@@ -376,7 +465,7 @@ fn publish_with_validator(
                     "Exported, but the previous file backup remains.".into()
                 });
             }
-        } else if sync_parent(path).is_err() {
+        } else if sync_directory(path).is_err() {
             warning.get_or_insert_with(|| {
                 "Exported, but the filesystem could not confirm directory durability.".into()
             });
@@ -392,42 +481,227 @@ fn preferences_path(app: &tauri::AppHandle) -> Result<PathBuf> {
         .map_err(|_| "Application preferences are unavailable.".into())
 }
 
-fn remember(path: &Path, last_document: Option<PathBuf>) -> Result<()> {
-    fs::create_dir_all(
-        path.parent()
-            .ok_or("Application preferences are unavailable.")?,
-    )
-    .map_err(io_error)?;
-    let text = serde_json::to_string(&Preferences { last_document })
-        .map_err(|_| "Application preferences are unavailable.".to_string())?;
-    let prior = match read_snapshot(path) {
-        Ok(snapshot) => Some(snapshot),
-        Err(_) if !path.exists() => None,
-        Err(error) => return Err(error),
-    };
-    publish(path, &text, prior.as_ref(), || Ok(())).map(|_| ())
+fn remember(path: &Path, last_document: Option<PathBuf>) -> Result<Option<NativeMessage>> {
+    let mut preferences = read_preferences_state(path).preferences;
+    preferences.last_document = last_document;
+    write_preferences(path, &preferences)
 }
 
 fn read_preferences(path: &Path) -> Result<Option<Preferences>> {
+    let loaded = read_preferences_state(path);
+    Ok(loaded.exists.then_some(loaded.preferences))
+}
+
+/// Read primary then the atomic-write backup. Damaged preference data never
+/// blocks document Open; defaults are returned with a renderer-safe warning.
+fn read_preferences_state(path: &Path) -> PreferenceRead {
     let mut found = false;
-    let mut last_error = None;
-    for candidate in [path.to_path_buf(), sibling(path, ".bak")] {
+    let mut had_failure = false;
+    for candidate in [
+        path.to_path_buf(),
+        sibling(path, ".bak"),
+        sibling(path, ".recovery.bak"),
+        sibling(path, ".migration.bak"),
+    ] {
         if !candidate.exists() {
             continue;
         }
         found = true;
-        match read_snapshot(&candidate).and_then(|snapshot| {
-            serde_json::from_str(&snapshot.text)
-                .map_err(|_| "The recent document preference is invalid. Use Open instead.".into())
-        }) {
-            Ok(preferences) => return Ok(Some(preferences)),
-            Err(error) => last_error = Some(error),
+        let Ok(snapshot) = read_snapshot(&candidate) else {
+            had_failure = true;
+            continue;
+        };
+        let Ok(value) = serde_json::from_str::<serde_json::Value>(&snapshot.text) else {
+            had_failure = true;
+            continue;
+        };
+        let legacy = value.get("theme").is_none() || value.get("locale").is_none();
+        let mut value = value;
+        let mut sanitized = false;
+        if let Some(object) = value.as_object_mut() {
+            if object
+                .keys()
+                .any(|key| !["lastDocument", "theme", "locale"].contains(&key.as_str()))
+            {
+                had_failure = true;
+                continue;
+            }
+            for key in ["theme", "locale"] {
+                if object.get(key).is_some_and(|value| {
+                    !value.is_null() && !value.is_string()
+                        || (key == "theme"
+                            && value
+                                .as_str()
+                                .is_some_and(|value| !["system", "light", "dark"].contains(&value)))
+                        || (key == "locale"
+                            && value
+                                .as_str()
+                                .is_some_and(|value| !["en", "es"].contains(&value)))
+                }) {
+                    object.insert(key.to_owned(), serde_json::Value::Null);
+                    sanitized = true;
+                }
+            }
+            if object
+                .get("lastDocument")
+                .is_some_and(|value| !value.is_null() && !value.is_string())
+            {
+                object.insert("lastDocument".into(), serde_json::Value::Null);
+                sanitized = true;
+            }
         }
+        let Ok(preferences) = serde_json::from_value::<Preferences>(value) else {
+            had_failure = true;
+            continue;
+        };
+        let recovered = candidate.as_path() != path || had_failure || sanitized;
+        let warning = recovered.then(|| NativeMessage::new("preferences.recovered"));
+        return PreferenceRead {
+            preferences,
+            exists: true,
+            source: Some(candidate),
+            warning,
+            legacy,
+        };
     }
-    if found {
-        Err(last_error.unwrap_or_else(|| "Application preferences are unavailable.".into()))
-    } else {
-        Ok(None)
+    PreferenceRead {
+        preferences: Preferences::default(),
+        exists: found,
+        source: None,
+        warning: found.then(|| NativeMessage::new("preferences.reset")),
+        legacy: false,
+    }
+}
+
+/// Keep the pre-preferences-schema file available for rollback. This backup
+/// is created once and is never rotated by subsequent preference writes.
+fn preserve_legacy_preferences(path: &Path, loaded: &PreferenceRead) -> Result<()> {
+    if !loaded.legacy {
+        return Ok(());
+    }
+    let Some(source) = loaded.source.as_ref() else {
+        return Ok(());
+    };
+    preserve_preferences_file(path, source, ".migration.bak")
+}
+
+/// Preserve the recovered valid copy before publish rotates the ordinary
+/// `.bak` file. A temporary sibling is synced before an atomic hard link makes
+/// the backup visible, so an interrupted copy can never look like a backup.
+fn preserve_recovered_preferences(path: &Path, loaded: &PreferenceRead) -> Result<()> {
+    if loaded.source.as_deref() == Some(path) || !loaded.exists {
+        return Ok(());
+    }
+    let Some(source) = loaded.source.as_ref() else {
+        return Ok(());
+    };
+    preserve_preferences_file(path, source, ".recovery.bak")
+}
+
+fn preserve_preferences_file(path: &Path, source: &Path, suffix: &str) -> Result<()> {
+    let parent = path
+        .parent()
+        .ok_or("Application preferences are unavailable.")?;
+    fs::create_dir_all(parent).map_err(io_error)?;
+    let source_snapshot = read_snapshot(source)?;
+    let backup = sibling(path, suffix);
+    if backup.exists() {
+        if read_snapshot(&backup).is_ok_and(|snapshot| snapshot == source_snapshot) {
+            return Ok(());
+        }
+        // The recovered source stays intact until this replacement is fully
+        // published. If interrupted after removal, it remains available at
+        // `source`; in particular, a valid ordinary `.bak` is not rotated
+        // until this staged replacement has been synced and linked.
+        fs::remove_file(&backup).map_err(io_error)?;
+    }
+    let temporary = sibling(
+        &backup,
+        &format!(
+            ".{}.{}.tmp",
+            std::process::id(),
+            TEMP_ID.fetch_add(1, Ordering::Relaxed)
+        ),
+    );
+    let mut output = OpenOptions::new()
+        .write(true)
+        .create_new(true)
+        .open(&temporary)
+        .map_err(io_error)?;
+    let result = (|| -> Result<()> {
+        output
+            .set_permissions(fs::metadata(source).map_err(io_error)?.permissions())
+            .map_err(io_error)?;
+        output
+            .write_all(source_snapshot.text.as_bytes())
+            .map_err(io_error)?;
+        output.sync_all().map_err(io_error)?;
+        match fs::hard_link(&temporary, &backup) {
+            Ok(()) => Ok(()),
+            Err(error) if error.kind() == io::ErrorKind::AlreadyExists => Ok(()),
+            Err(error) => Err(io_error(error)),
+        }
+    })();
+    let _ = fs::remove_file(&temporary);
+    result?;
+    sync_parent(path).map_err(io_error)
+}
+
+fn write_preferences(path: &Path, preferences: &Preferences) -> Result<Option<NativeMessage>> {
+    write_preferences_with_sync(path, preferences, sync_parent)
+}
+
+fn write_preferences_with_sync(
+    path: &Path,
+    preferences: &Preferences,
+    sync_directory: impl Fn(&Path) -> io::Result<()>,
+) -> Result<Option<NativeMessage>> {
+    let loaded = read_preferences_state(path);
+    preserve_legacy_preferences(path, &loaded)?;
+    preserve_recovered_preferences(path, &loaded)?;
+    let parent = path
+        .parent()
+        .ok_or("Application preferences are unavailable.")?;
+    fs::create_dir_all(parent).map_err(io_error)?;
+    let text = serde_json::to_string(preferences)
+        .map_err(|_| "Application preferences are unavailable.".to_string())?;
+    // Capture even a malformed but readable primary so publication can
+    // compare-and-replace it without racing a concurrent writer.
+    let prior = read_snapshot(path).ok();
+    publish_with_validator_and_sync(
+        path,
+        &text,
+        prior.as_ref(),
+        || Ok(()),
+        |value| {
+            serde_json::from_str::<serde_json::Value>(value)
+                .map(|_| ())
+                .map_err(|_| "The document is not valid JSON.".to_string())
+        },
+        true,
+        sync_directory,
+    )
+    .map(|warning| warning.as_deref().map(messages::from_text))
+}
+
+fn apply_preferences_patch(path: &Path, patch: PreferencesPatch) -> PreferencesResponse {
+    let read = read_preferences_state(path);
+    let mut preferences = read.preferences;
+    if let Some(theme) = patch.theme {
+        preferences.theme = Some(theme);
+    }
+    if let Some(locale) = patch.locale {
+        preferences.locale = Some(locale);
+    }
+    let warning = match write_preferences(path, &preferences) {
+        Ok(Some(warning)) => Some(warning),
+        Ok(None) => read.warning,
+        Err(_) => Some(NativeMessage::new("preferences.writeFailed")),
+    };
+    PreferencesResponse {
+        theme: preferences.theme.unwrap_or_default(),
+        locale: preferences.locale,
+        warning,
     }
 }
 
@@ -510,7 +784,9 @@ impl Store {
                 "That filename already exists. Choose a different filename for Save As.".into(),
             );
         }
-        let mut warning = publish(&path, contents, expected, || Ok(()))?;
+        let mut warning = publish(&path, contents, expected, || Ok(()))?
+            .as_deref()
+            .map(messages::from_text);
         let snapshot = read_snapshot(&path)?;
         if snapshot.text != contents {
             return Err(
@@ -519,10 +795,18 @@ impl Store {
         }
         self.current = Some((path.clone(), snapshot));
         self.recovered_source = None;
-        let recent_updated = remember(preferences, Some(path.clone())).is_ok();
-        if !recent_updated {
-            warning =
-                Some("Saved, but the recent document preference could not be updated.".into());
+        let recent_result = remember(preferences, Some(path.clone()));
+        let recent_updated = recent_result.is_ok();
+        match recent_result {
+            Ok(Some(preference_warning)) if warning.is_none() => {
+                warning = Some(preference_warning);
+            }
+            Err(_) => {
+                warning = Some(messages::from_text(
+                    "Saved, but the recent document preference could not be updated.",
+                ));
+            }
+            _ => {}
         }
         Ok(SaveOutcome {
             display_name: display_name(&path),
@@ -549,67 +833,81 @@ async fn with_store<T: Send + 'static>(
 }
 
 #[tauri::command]
-pub async fn get_recent_document_name(app: tauri::AppHandle) -> Result<Option<String>> {
-    with_store(app, |app, _| {
-        let path = preferences_path(app)?;
-        Ok(read_preferences(&path)?
-            .and_then(|preferences| preferences.last_document)
-            .map(|path| display_name(&path)))
-    })
-    .await
+pub async fn get_recent_document_name(app: tauri::AppHandle) -> NativeResult<Option<String>> {
+    native_result(
+        with_store(app, |app, _| {
+            let path = preferences_path(app)?;
+            Ok(read_preferences(&path)?
+                .and_then(|preferences| preferences.last_document)
+                .map(|path| display_name(&path)))
+        })
+        .await,
+    )
 }
 
 #[tauri::command]
-pub async fn load_recent_document(app: tauri::AppHandle) -> Result<Option<OpenCandidate>> {
-    with_store(app, |app, store| {
-        let path = preferences_path(app)?;
-        read_preferences(&path)?
-            .and_then(|preferences| preferences.last_document)
-            .map(|path| document_path(path).and_then(|path| store.stage_open(path)))
-            .transpose()
-    })
-    .await
+pub async fn load_recent_document(app: tauri::AppHandle) -> NativeResult<Option<OpenCandidate>> {
+    native_result(
+        with_store(app, |app, store| {
+            let path = preferences_path(app)?;
+            read_preferences(&path)?
+                .and_then(|preferences| preferences.last_document)
+                .map(|path| document_path(path).and_then(|path| store.stage_open(path)))
+                .transpose()
+        })
+        .await,
+    )
 }
 
 #[tauri::command]
-pub async fn open_document(app: tauri::AppHandle) -> Result<Option<OpenCandidate>> {
-    with_store(app, |app, store| {
-        app.dialog()
-            .file()
-            .add_filter("PeerCanvas", &["peercanvas"])
-            .blocking_pick_file()
-            .map(|path| {
-                path.into_path()
-                    .map_err(|_| "Choose a local document file.".to_string())
-                    .and_then(document_path)
-                    .and_then(|path| store.stage_open(path))
-            })
-            .transpose()
-    })
-    .await
+pub async fn open_document(app: tauri::AppHandle) -> NativeResult<Option<OpenCandidate>> {
+    native_result(
+        with_store(app, |app, store| {
+            app.dialog()
+                .file()
+                .add_filter("PeerCanvas", &["peercanvas"])
+                .blocking_pick_file()
+                .map(|path| {
+                    path.into_path()
+                        .map_err(|_| "Choose a local document file.".to_string())
+                        .and_then(document_path)
+                        .and_then(|path| store.stage_open(path))
+                })
+                .transpose()
+        })
+        .await,
+    )
 }
 
 #[tauri::command]
-pub async fn accept_open(app: tauri::AppHandle, token: String, source: OpenSource) -> Result<bool> {
-    with_store(app, move |app, store| {
-        store.accept(&token, source, &preferences_path(app)?)
-    })
-    .await
+pub async fn accept_open(
+    app: tauri::AppHandle,
+    token: String,
+    source: OpenSource,
+) -> NativeResult<bool> {
+    native_result(
+        with_store(app, move |app, store| {
+            store.accept(&token, source, &preferences_path(app)?)
+        })
+        .await,
+    )
 }
 
 #[tauri::command]
-pub async fn discard_open(app: tauri::AppHandle, token: String) -> Result<()> {
-    with_store(app, move |_, store| {
-        if store
-            .pending
-            .as_ref()
-            .is_some_and(|pending| pending.token == token)
-        {
-            store.pending = None;
-        }
-        Ok(())
-    })
-    .await
+pub async fn discard_open(app: tauri::AppHandle, token: String) -> NativeResult<()> {
+    native_result(
+        with_store(app, move |_, store| {
+            if store
+                .pending
+                .as_ref()
+                .is_some_and(|pending| pending.token == token)
+            {
+                store.pending = None;
+            }
+            Ok(())
+        })
+        .await,
+    )
 }
 
 #[tauri::command]
@@ -617,47 +915,84 @@ pub async fn save_document(
     app: tauri::AppHandle,
     contents: String,
     save_as: bool,
-) -> Result<Option<SaveOutcome>> {
-    with_store(app, move |app, store| {
-        let target = if !save_as && store.current.is_some() {
-            store.current.as_ref().map(|(path, _)| path.clone())
-        } else {
-            app.dialog()
-                .file()
-                .set_file_name("Untitled.peercanvas")
-                .blocking_save_file()
-                .map(|path| {
-                    path.into_path()
-                        .map_err(|_| "Choose a local document file.".to_string())
-                })
-                .transpose()?
-                .map(|path| {
-                    if path.extension().is_none() {
-                        path.with_extension("peercanvas")
+    locale: LocalePreference,
+) -> NativeResult<Option<SaveOutcome>> {
+    native_result(
+        with_store(app, move |app, store| {
+            let target = if !save_as && store.current.is_some() {
+                store.current.as_ref().map(|(path, _)| path.clone())
+            } else {
+                app.dialog()
+                    .file()
+                    .set_file_name(if locale == LocalePreference::Es {
+                        "Sin título.peercanvas"
                     } else {
-                        path
-                    }
+                        "Untitled.peercanvas"
+                    })
+                    .blocking_save_file()
+                    .map(|path| {
+                        path.into_path()
+                            .map_err(|_| "Choose a local document file.".to_string())
+                    })
+                    .transpose()?
+                    .map(|path| {
+                        if path.extension().is_none() {
+                            path.with_extension("peercanvas")
+                        } else {
+                            path
+                        }
+                    })
+            };
+            target
+                .map(|path| {
+                    document_path(path)
+                        .and_then(|path| store.save(path, &contents, &preferences_path(app)?))
                 })
-        };
-        target
-            .map(|path| {
-                document_path(path)
-                    .and_then(|path| store.save(path, &contents, &preferences_path(app)?))
-            })
-            .transpose()
-    })
-    .await
+                .transpose()
+        })
+        .await,
+    )
 }
 
 #[tauri::command]
-pub async fn close_document(app: tauri::AppHandle) -> Result<()> {
-    with_store(app, |_, store| {
-        store.current = None;
-        store.recovered_source = None;
-        store.pending = None;
-        Ok(())
-    })
-    .await
+pub async fn close_document(app: tauri::AppHandle) -> NativeResult<()> {
+    native_result(
+        with_store(app, |_, store| {
+            store.current = None;
+            store.recovered_source = None;
+            store.pending = None;
+            Ok(())
+        })
+        .await,
+    )
+}
+
+#[tauri::command]
+pub async fn get_preferences(app: tauri::AppHandle) -> NativeResult<PreferencesResponse> {
+    native_result(
+        with_store(app, |app, _| {
+            let read = read_preferences_state(&preferences_path(app)?);
+            Ok(PreferencesResponse {
+                theme: read.preferences.theme.unwrap_or_default(),
+                locale: read.preferences.locale,
+                warning: read.warning,
+            })
+        })
+        .await,
+    )
+}
+
+#[tauri::command]
+pub async fn update_preferences(
+    app: tauri::AppHandle,
+    patch: PreferencesPatch,
+) -> NativeResult<PreferencesResponse> {
+    native_result(
+        with_store(app, move |app, _| {
+            Ok(apply_preferences_patch(&preferences_path(app)?, patch))
+        })
+        .await,
+    )
 }
 
 #[cfg(test)]
@@ -728,6 +1063,305 @@ mod tests {
         fs::remove_file(preferences_path).unwrap();
         let preferences = read_preferences(&fixture.preferences()).unwrap().unwrap();
         assert_eq!(preferences.last_document, Some(first));
+    }
+
+    #[test]
+    fn preference_upgrade_preserves_last_document_and_keeps_rollback_copy() {
+        let fixture = Fixture::new();
+        let path = fixture.preferences();
+        let recent = fixture.0.join("existing.peercanvas");
+        fs::create_dir_all(path.parent().unwrap()).unwrap();
+        let original = serde_json::json!({ "lastDocument": recent }).to_string();
+        fs::write(&path, &original).unwrap();
+
+        let result = apply_preferences_patch(
+            &path,
+            PreferencesPatch {
+                theme: Some(ThemePreference::Dark),
+                locale: None,
+            },
+        );
+        assert_eq!(result.theme, ThemePreference::Dark);
+        assert_eq!(result.locale, None);
+        let saved: Preferences = serde_json::from_str(&fs::read_to_string(&path).unwrap()).unwrap();
+        assert_eq!(saved.last_document, Some(recent.clone()));
+        assert_eq!(saved.theme, Some(ThemePreference::Dark));
+        assert_eq!(
+            fs::read_to_string(sibling(&path, ".migration.bak")).unwrap(),
+            original
+        );
+
+        apply_preferences_patch(
+            &path,
+            PreferencesPatch {
+                theme: None,
+                locale: Some(LocalePreference::Es),
+            },
+        );
+        remember(&path, Some(recent.clone())).unwrap();
+        let saved: Preferences = serde_json::from_str(&fs::read_to_string(&path).unwrap()).unwrap();
+        assert_eq!(saved.last_document, Some(recent));
+        assert_eq!(saved.theme, Some(ThemePreference::Dark));
+        assert_eq!(saved.locale, Some(LocalePreference::Es));
+        assert_eq!(
+            fs::read_to_string(sibling(&path, ".migration.bak")).unwrap(),
+            original
+        );
+    }
+
+    #[test]
+    fn preferences_recover_backup_and_sanitize_bad_enum_values() {
+        let fixture = Fixture::new();
+        let path = fixture.preferences();
+        fs::create_dir_all(path.parent().unwrap()).unwrap();
+        fs::write(&path, "{broken").unwrap();
+        let recent = fixture.0.join("recent.peercanvas");
+        let backup = Preferences {
+            last_document: Some(recent.clone()),
+            theme: Some(ThemePreference::Dark),
+            locale: Some(LocalePreference::Es),
+        };
+        fs::write(
+            sibling(&path, ".bak"),
+            serde_json::to_string(&backup).unwrap(),
+        )
+        .unwrap();
+        let recovered = read_preferences_state(&path);
+        assert_eq!(recovered.preferences.last_document, Some(recent.clone()));
+        assert_eq!(recovered.preferences.theme, Some(ThemePreference::Dark));
+        assert_eq!(recovered.preferences.locale, Some(LocalePreference::Es));
+        assert_eq!(recovered.warning.unwrap().code, "preferences.recovered");
+
+        fs::remove_file(sibling(&path, ".bak")).unwrap();
+        fs::write(
+            &path,
+            serde_json::json!({
+                "lastDocument": recent,
+                "theme": "ultraviolet",
+                "locale": "fr"
+            })
+            .to_string(),
+        )
+        .unwrap();
+        let sanitized = read_preferences_state(&path);
+        assert_eq!(sanitized.preferences.last_document, Some(recent));
+        assert_eq!(sanitized.preferences.theme, None);
+        assert_eq!(sanitized.preferences.locale, None);
+        assert_eq!(sanitized.warning.unwrap().code, "preferences.recovered");
+    }
+
+    #[test]
+    fn recovered_valid_backup_survives_replacement_of_corrupt_primary() {
+        let fixture = Fixture::new();
+        let path = fixture.preferences();
+        fs::create_dir_all(path.parent().unwrap()).unwrap();
+        fs::write(&path, "{broken primary").unwrap();
+        let recent = fixture.0.join("recovered.peercanvas");
+        let valid = Preferences {
+            last_document: Some(recent.clone()),
+            theme: Some(ThemePreference::Light),
+            locale: Some(LocalePreference::En),
+        };
+        let valid_text = serde_json::to_string(&valid).unwrap();
+        fs::write(sibling(&path, ".bak"), &valid_text).unwrap();
+
+        let response = apply_preferences_patch(
+            &path,
+            PreferencesPatch {
+                theme: Some(ThemePreference::Dark),
+                locale: None,
+            },
+        );
+        assert_eq!(response.theme, ThemePreference::Dark);
+        assert_eq!(response.warning.unwrap().code, "preferences.recovered");
+        assert_eq!(
+            fs::read_to_string(sibling(&path, ".recovery.bak")).unwrap(),
+            valid_text
+        );
+
+        fs::write(&path, "{damaged again").unwrap();
+        fs::write(sibling(&path, ".bak"), "{also damaged").unwrap();
+        let recovered = read_preferences_state(&path);
+        assert_eq!(recovered.preferences.last_document, Some(recent));
+        assert_eq!(recovered.preferences.theme, Some(ThemePreference::Light));
+        assert_eq!(recovered.preferences.locale, Some(LocalePreference::En));
+        assert_eq!(recovered.warning.unwrap().code, "preferences.recovered");
+    }
+
+    #[test]
+    fn newest_backup_replaces_stale_recovery_before_primary_rotation() {
+        let fixture = Fixture::new();
+        let path = fixture.preferences();
+        fs::create_dir_all(path.parent().unwrap()).unwrap();
+        fs::write(&path, "{broken primary").unwrap();
+        let stale = Preferences {
+            last_document: Some(fixture.0.join("stale.peercanvas")),
+            theme: Some(ThemePreference::Light),
+            locale: Some(LocalePreference::En),
+        };
+        let newest = Preferences {
+            last_document: Some(fixture.0.join("newest.peercanvas")),
+            theme: Some(ThemePreference::Dark),
+            locale: Some(LocalePreference::Es),
+        };
+        fs::write(
+            sibling(&path, ".recovery.bak"),
+            serde_json::to_string(&stale).unwrap(),
+        )
+        .unwrap();
+        let newest_text = serde_json::to_string(&newest).unwrap();
+        fs::write(sibling(&path, ".bak"), &newest_text).unwrap();
+
+        apply_preferences_patch(
+            &path,
+            PreferencesPatch {
+                theme: Some(ThemePreference::System),
+                locale: None,
+            },
+        );
+
+        assert_eq!(
+            fs::read_to_string(sibling(&path, ".recovery.bak")).unwrap(),
+            newest_text
+        );
+        fs::write(&path, "{interrupted publication").unwrap();
+        fs::write(sibling(&path, ".bak"), "{corrupt rotated primary").unwrap();
+        let recovered = read_preferences_state(&path);
+        assert_eq!(recovered.preferences.last_document, newest.last_document);
+        assert_eq!(recovered.preferences.theme, Some(ThemePreference::Dark));
+        assert_eq!(recovered.preferences.locale, Some(LocalePreference::Es));
+    }
+
+    #[test]
+    fn preference_directory_sync_failure_is_returned_as_a_warning() {
+        let fixture = Fixture::new();
+        let path = fixture.preferences();
+        let result = write_preferences_with_sync(
+            &path,
+            &Preferences {
+                theme: Some(ThemePreference::Dark),
+                ..Preferences::default()
+            },
+            |_| Err(io::Error::other("simulated directory sync failure")),
+        )
+        .unwrap();
+        assert_eq!(
+            result.unwrap().code,
+            "file.directoryNotDurable",
+            "successful publication must retain its durability warning"
+        );
+        assert!(path.exists());
+    }
+
+    #[cfg(unix)]
+    #[test]
+    fn preference_migration_and_recovery_copies_keep_source_permissions() {
+        use std::os::unix::fs::PermissionsExt;
+
+        let fixture = Fixture::new();
+        let path = fixture.preferences();
+        fs::create_dir_all(path.parent().unwrap()).unwrap();
+        let recent = fixture.0.join("old.peercanvas");
+        fs::write(
+            &path,
+            serde_json::json!({ "lastDocument": recent }).to_string(),
+        )
+        .unwrap();
+        fs::set_permissions(&path, fs::Permissions::from_mode(0o600)).unwrap();
+        apply_preferences_patch(
+            &path,
+            PreferencesPatch {
+                theme: Some(ThemePreference::Dark),
+                locale: None,
+            },
+        );
+        assert_eq!(
+            fs::metadata(sibling(&path, ".migration.bak"))
+                .unwrap()
+                .permissions()
+                .mode()
+                & 0o777,
+            0o600
+        );
+
+        fs::write(&path, "{corrupt primary").unwrap();
+        let backup = sibling(&path, ".bak");
+        fs::set_permissions(&backup, fs::Permissions::from_mode(0o600)).unwrap();
+        apply_preferences_patch(
+            &path,
+            PreferencesPatch {
+                theme: Some(ThemePreference::Light),
+                locale: None,
+            },
+        );
+        assert_eq!(
+            fs::metadata(sibling(&path, ".recovery.bak"))
+                .unwrap()
+                .permissions()
+                .mode()
+                & 0o777,
+            0o600
+        );
+    }
+
+    #[test]
+    fn consecutive_preference_and_recent_document_updates_are_serialized() {
+        let fixture = Fixture::new();
+        let path = fixture.preferences();
+        let recent = fixture.0.join("recent.peercanvas");
+        let state = std::sync::Arc::new(Mutex::new(Store::default()));
+        let mut workers = Vec::new();
+        for index in 0..24 {
+            let path = path.clone();
+            let recent = recent.clone();
+            let state = state.clone();
+            workers.push(std::thread::spawn(move || {
+                let _guard = state.lock().unwrap();
+                if index % 3 == 0 {
+                    remember(&path, Some(recent)).unwrap();
+                } else if index % 2 == 0 {
+                    apply_preferences_patch(
+                        &path,
+                        PreferencesPatch {
+                            theme: Some(ThemePreference::Dark),
+                            locale: None,
+                        },
+                    );
+                } else {
+                    apply_preferences_patch(
+                        &path,
+                        PreferencesPatch {
+                            theme: None,
+                            locale: Some(LocalePreference::Es),
+                        },
+                    );
+                }
+            }));
+        }
+        for worker in workers {
+            worker.join().unwrap();
+        }
+        let saved: Preferences = serde_json::from_str(&fs::read_to_string(path).unwrap()).unwrap();
+        assert_eq!(saved.last_document, Some(recent));
+        assert_eq!(saved.theme, Some(ThemePreference::Dark));
+        assert_eq!(saved.locale, Some(LocalePreference::Es));
+    }
+
+    #[test]
+    fn failed_preference_write_returns_the_session_choice_and_warning() {
+        let fixture = Fixture::new();
+        let blocked_parent = fixture.0.join("not-a-directory");
+        fs::write(&blocked_parent, "blocked").unwrap();
+        let response = apply_preferences_patch(
+            &blocked_parent.join("preferences.json"),
+            PreferencesPatch {
+                theme: Some(ThemePreference::Light),
+                locale: Some(LocalePreference::Es),
+            },
+        );
+        assert_eq!(response.theme, ThemePreference::Light);
+        assert_eq!(response.locale, Some(LocalePreference::Es));
+        assert_eq!(response.warning.unwrap().code, "preferences.writeFailed");
     }
 
     #[test]

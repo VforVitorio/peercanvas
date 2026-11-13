@@ -1,3 +1,4 @@
+use crate::messages::{self, NativeMessage};
 use crate::{drawio, persistence};
 use serde::Serialize;
 use std::{
@@ -24,7 +25,7 @@ struct PendingExport {
 pub struct DrawioImportResult {
     pub display_name: String,
     pub document: serde_json::Value,
-    pub losses: Vec<String>,
+    pub losses: Vec<NativeMessage>,
     pub preserved_fragment_count: usize,
 }
 
@@ -32,7 +33,7 @@ pub struct DrawioImportResult {
 #[serde(rename_all = "camelCase")]
 pub struct DrawioExportReview {
     pub token: String,
-    pub losses: Vec<String>,
+    pub losses: Vec<NativeMessage>,
     pub preserved_fragment_count: usize,
 }
 
@@ -77,7 +78,7 @@ fn read_bounded_file(path: &Path) -> Result<Vec<u8>> {
 pub async fn import_drawio(
     app: tauri::AppHandle,
     now: String,
-) -> Result<Option<DrawioImportResult>> {
+) -> persistence::NativeResult<Option<DrawioImportResult>> {
     tauri::async_runtime::spawn_blocking(move || {
         let selected = app
             .dialog()
@@ -107,34 +108,47 @@ pub async fn import_drawio(
         Ok(Some(DrawioImportResult {
             display_name,
             document: candidate.document,
-            losses: candidate.losses,
+            losses: candidate
+                .losses
+                .iter()
+                .map(|loss| messages::drawio_loss(loss))
+                .collect(),
             preserved_fragment_count: candidate.preserved_fragment_count,
         }))
     })
     .await
-    .map_err(|_| "The draw.io import could not finish.".to_string())?
+    .map_err(|_| "The draw.io import could not finish.".to_string())
+    .map_err(persistence::native_error)?
+    .map_err(persistence::native_error)
 }
 
 #[tauri::command]
 pub async fn prepare_drawio_export(
     state: State<'_, InterchangeState>,
     contents: String,
-) -> Result<DrawioExportReview> {
+) -> persistence::NativeResult<DrawioExportReview> {
     let state = state.inner().clone();
     let candidate =
         tauri::async_runtime::spawn_blocking(move || drawio::prepare_drawio_export(&contents))
             .await
-            .map_err(|_| "The draw.io export review could not finish.".to_string())??;
+            .map_err(|_| "The draw.io export review could not finish.".to_string())
+            .map_err(persistence::native_error)?
+            .map_err(persistence::native_error)?;
     let token = uuid::Uuid::new_v4().to_string();
     let review = DrawioExportReview {
         token: token.clone(),
-        losses: candidate.losses.clone(),
+        losses: candidate
+            .losses
+            .iter()
+            .map(|loss| messages::drawio_loss(loss))
+            .collect(),
         preserved_fragment_count: candidate.preserved_fragment_count,
     };
     let mut pending = state
         .0
         .lock()
-        .map_err(|_| "The draw.io export is unavailable. Restart PeerCanvas.".to_string())?;
+        .map_err(|_| "The draw.io export is unavailable. Restart PeerCanvas.".to_string())
+        .map_err(persistence::native_error)?;
     *pending = Some(PendingExport { token, candidate });
     Ok(review)
 }
@@ -145,38 +159,51 @@ pub async fn export_drawio(
     state: State<'_, InterchangeState>,
     token: String,
     confirm_losses: bool,
-) -> Result<Option<persistence::DrawioSaveOutcome>> {
+    locale: persistence::LocalePreference,
+) -> persistence::NativeResult<Option<persistence::DrawioSaveOutcome>> {
     let state = state.inner().clone();
     let candidate = {
         let mut pending = state
             .0
             .lock()
-            .map_err(|_| "The draw.io export is unavailable. Restart PeerCanvas.".to_string())?;
+            .map_err(|_| "The draw.io export is unavailable. Restart PeerCanvas.".to_string())
+            .map_err(persistence::native_error)?;
         let current = pending
             .as_ref()
             .filter(|candidate| candidate.token == token)
-            .ok_or("The draw.io export preview is no longer available. Prepare it again.")?;
+            .ok_or_else(|| {
+                "The draw.io export preview is no longer available. Prepare it again.".to_owned()
+            })
+            .map_err(persistence::native_error)?;
         if !current.candidate.losses.is_empty() && !confirm_losses {
-            return Err("Review and confirm the reported losses before export.".into());
+            return Err(messages::from_text(
+                "Review and confirm the reported losses before export.",
+            ));
         }
         pending
             .take()
             .map(|candidate| candidate.candidate)
-            .ok_or("The draw.io export preview is no longer available. Prepare it again.")?
+            .ok_or_else(|| {
+                "The draw.io export preview is no longer available. Prepare it again.".to_owned()
+            })
+            .map_err(persistence::native_error)?
     };
-    persistence::export_drawio_file(app, candidate.xml).await
+    persistence::export_drawio_file(app, candidate.xml, locale)
+        .await
+        .map_err(persistence::native_error)
 }
 
 #[tauri::command]
 pub async fn discard_drawio_export(
     state: State<'_, InterchangeState>,
     token: String,
-) -> Result<()> {
+) -> persistence::NativeResult<()> {
     let state = state.inner().clone();
     let mut pending = state
         .0
         .lock()
-        .map_err(|_| "The draw.io export is unavailable. Restart PeerCanvas.".to_string())?;
+        .map_err(|_| "The draw.io export is unavailable. Restart PeerCanvas.".to_string())
+        .map_err(persistence::native_error)?;
     if pending
         .as_ref()
         .is_some_and(|candidate| candidate.token == token)

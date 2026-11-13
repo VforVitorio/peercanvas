@@ -324,12 +324,14 @@ describe("keyboard, dialogs, and preferences", () => {
     harness.failNextStart = "simulated renderer failure";
     render(<App />);
     fireEvent.click(screen.getByRole("button", { name: "Open Product architecture" }));
-    const alert = await screen.findByText(/simulated renderer failure/, undefined, SLOW);
+    const alert = await screen.findByRole("alert", undefined, SLOW);
+    expect(alert.textContent).toMatch(/CANVAS_(START|INIT)/);
+    expect(alert.textContent).not.toContain("simulated renderer failure");
     expect(alert.closest('[role="alert"]')).toBeTruthy();
     // The accessible outline remains usable while the renderer is down.
     expect(outline().getByRole("button", { name: "Rectangle “Web client”" })).toBeTruthy();
     fireEvent.click(screen.getByRole("button", { name: "Retry canvas" }));
-    await waitFor(() => expect(screen.queryByText(/simulated renderer failure/)).toBeNull());
+    await waitFor(() => expect(screen.queryByRole("alert")).toBeNull());
     cleanup();
     await waitFor(() =>
       expect(harness.instances.every((instance) => instance.destroyed)).toBe(true),

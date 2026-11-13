@@ -41,15 +41,17 @@ const runtimeEnvironment = Object.fromEntries(
   ),
 );
 
-async function assertProductionIsolation(directory) {
-  let editorFound = false;
+async function assertProductionIsolation(
+  directory,
+  editorMarkers = { workspace: false, canvas: false },
+) {
   for (const entry of await readdir(directory, { withFileTypes: true })) {
     const file = path.join(directory, entry.name);
-    if (entry.isDirectory()) editorFound = (await assertProductionIsolation(file)) || editorFound;
+    if (entry.isDirectory()) await assertProductionIsolation(file, editorMarkers);
     else {
       const content = await readFile(file, "utf8");
-      editorFound ||=
-        content.includes("Diagram canvas") && content.includes("Document file actions");
+      editorMarkers.workspace ||= content.includes("pc-workspace");
+      editorMarkers.canvas ||= content.includes("pc-canvas-region");
       assert(
         !content.includes("Engineering scaffold. Diagram editing is not implemented yet."),
         `Stale scaffold in ${file}`,
@@ -71,7 +73,7 @@ async function assertProductionIsolation(directory) {
       assert(!content.includes("Native canvas compatibility probe"), `Smoke entry in ${file}`);
     }
   }
-  return editorFound;
+  return editorMarkers.workspace && editorMarkers.canvas;
 }
 
 if (process.argv[2] === "--check-production") {

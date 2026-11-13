@@ -2,11 +2,22 @@ import { act, cleanup, fireEvent, render, screen, waitFor } from "@testing-libra
 import { useState } from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { createDocument, executeCommand, type Document, type Geometry } from "../document";
+import { createTranslator } from "../i18n/translator";
 import { harness } from "../ui-mock/ui/test/weaveMock";
 import { InteractiveWeave, RectangleNode, SelectionPlugin } from "./weaveTestHarness";
 import WeaveCanvas from "./WeaveCanvas";
 
-vi.mock("@inditextech/weave-sdk", async () => (await import("./weaveTestHarness")).interactiveSdk);
+vi.mock("@inditextech/weave-sdk", async () => {
+  const { interactiveSdk } = await import("./weaveTestHarness");
+  const actual =
+    await vi.importActual<typeof import("@inditextech/weave-sdk")>("@inditextech/weave-sdk");
+  class ArrowWithPinnedDefault extends interactiveSdk.WeaveArrowNode {
+    static defaultState(id: string) {
+      return actual.WeaveArrowNode.defaultState(id);
+    }
+  }
+  return { ...interactiveSdk, WeaveArrowNode: ArrowWithPinnedDefault };
+});
 vi.mock(
   "@inditextech/weave-renderer-konva-base",
   async () => (await import("../ui-mock/ui/test/weaveMock")).renderer,
@@ -16,6 +27,8 @@ vi.mock(
   async () => (await import("../ui-mock/ui/test/weaveMock")).store,
 );
 
+// Outside a provider the canvas uses the English resources.
+const startingText = createTranslator("en").t("editor.canvas.starting");
 const nodeId = "40000000-0000-4000-8000-000000000000";
 const geometry: Geometry = { x: 10, y: 20, width: 120, height: 80, rotation: 0 };
 let doc: Document;
@@ -60,7 +73,7 @@ async function mount(onCommitGeometry?: (id: string, geometry: Geometry) => bool
       onCommitGeometry={onCommitGeometry}
     />,
   );
-  await waitFor(() => expect(screen.queryByText("Starting Weave canvas…")).toBeNull());
+  await waitFor(() => expect(screen.queryByText(startingText, { exact: false })).toBeNull());
   return { ...view, instance: harness.latest() as InteractiveWeave, onSelect };
 }
 
@@ -68,6 +81,14 @@ const pluginOf = (instance: InteractiveWeave) =>
   instance.options.plugins.find((entry) => entry instanceof SelectionPlugin) as SelectionPlugin;
 
 describe("canonical geometry gesture boundary", () => {
+  it("confirms the pinned arrow default is not self-identifying", async () => {
+    const actual =
+      await vi.importActual<typeof import("@inditextech/weave-sdk")>("@inditextech/weave-sdk");
+    const state = actual.WeaveArrowNode.defaultState("real-sdk-arrow-default");
+    expect(state.type).toBe("unknown");
+    expect(state.props.nodeType).toBe("unknown");
+  });
+
   it.each(
     ["drag", "transform"].flatMap((gesture) =>
       ["node", "transformer"].map((source) => ({ gesture, source })),
@@ -163,7 +184,7 @@ describe("canonical geometry gesture boundary", () => {
       );
     }
     render(<Editor />);
-    await waitFor(() => expect(screen.queryByText("Starting Weave canvas…")).toBeNull());
+    await waitFor(() => expect(screen.queryByText(startingText, { exact: false })).toBeNull());
     const original = harness.latest() as InteractiveWeave;
     await act(async () => {
       const node = original.nodes.get(nodeId)!;
@@ -377,11 +398,47 @@ describe("canonical geometry gesture boundary", () => {
         onZoomChange={() => undefined}
       />,
     );
-    await waitFor(() => expect(screen.queryByText("Starting Weave canvas…")).toBeNull());
+    await waitFor(() => expect(screen.queryByText(startingText, { exact: false })).toBeNull());
     const arrow = harness
       .latest()
       .elements.find((value) => value.key === `pc-connection-${connectionId}`);
+    expect(arrow?.type).toBe("arrow");
+    expect(arrow?.props.nodeType).toBe("arrow");
+    expect(arrow?.props.points).toEqual([130, 60, 300, 60]);
     expect(arrow?.props.stroke).toBe("#005CBA");
     expect(JSON.stringify(doc)).toBe(before);
+  });
+});
+
+describe("renderer failure presentation", () => {
+  it("shows a translated failure with a stable code, never the raw exception, and retries", async () => {
+    const { t } = createTranslator("en");
+    const raw = "EACCES /Users/private/secret";
+    harness.failNextStart = raw;
+    const onStatusChange = vi.fn();
+    render(
+      <WeaveCanvas
+        document={doc}
+        pageId={doc.pages[0].pageId}
+        layerId={doc.pages[0].layers[0].layerId}
+        selection={null}
+        zoom={1}
+        fitRequest={0}
+        onSelect={() => undefined}
+        onZoomChange={() => undefined}
+        onCommitGeometry={() => true}
+        onStatusChange={onStatusChange}
+      />,
+    );
+    const alert = await screen.findByRole("alert");
+    expect(alert.textContent).toContain(t("editor.canvas.failed"));
+    expect(alert.textContent).toContain(t("editor.canvas.failedCode", { code: "CANVAS_START" }));
+    expect(alert.textContent).not.toContain(raw);
+    // The internal diagnostic shape is unchanged for callers.
+    expect(onStatusChange).toHaveBeenCalledWith({ state: "error", message: raw });
+
+    fireEvent.click(screen.getByRole("button", { name: t("editor.canvas.retry") }));
+    await waitFor(() => expect(screen.queryByRole("alert")).toBeNull());
+    expect(onStatusChange).toHaveBeenLastCalledWith({ state: "ready" });
   });
 });

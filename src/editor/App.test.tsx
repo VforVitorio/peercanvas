@@ -1,9 +1,10 @@
-import { act, cleanup, fireEvent, render, screen, within } from "@testing-library/react";
+import { act, cleanup, fireEvent, render, screen } from "@testing-library/react";
 import type { ComponentProps } from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import App from "../App";
 import type WeaveCanvas from "../canvas/WeaveCanvas";
 import * as core from "../document";
+import { createTranslator } from "../i18n/translator";
 
 type CanvasProps = ComponentProps<typeof WeaveCanvas>;
 const canvas = vi.hoisted(() => ({ props: null as CanvasProps | null }));
@@ -34,6 +35,11 @@ vi.mock("../canvas/WeaveCanvas", () => ({
   },
 }));
 
+// Accessible names come from the English resources (the jsdom system language), so the same
+// assertions can run against another locale's translator.
+const { t } = createTranslator("en");
+const rectangle = () => t("editor.shapes.add", { name: t("editor.defaults.rectangle") });
+
 function snapshot() {
   return canvas.props!.document!;
 }
@@ -41,11 +47,24 @@ function nodes() {
   return snapshot().pages[0].layers[0].nodes;
 }
 function revision() {
-  return screen.getByText(/Revision \d+ · unsaved/).textContent;
+  return document.querySelector("[data-revision]")!.getAttribute("data-revision");
+}
+function showTab(name: "shapes" | "structure") {
+  fireEvent.click(
+    screen.getByRole("tab", {
+      name: t(name === "shapes" ? "editor.tabs.shapes" : "editor.tabs.structure"),
+    }),
+  );
+}
+function addRectangle() {
+  showTab("shapes");
+  fireEvent.click(screen.getByRole("button", { name: rectangle() }));
 }
 function selectIdea() {
+  showTab("structure");
   fireEvent.click(screen.getByRole("button", { name: /Idea/ }));
 }
+const field = (key: string) => screen.getByLabelText(t(key), { exact: true });
 
 beforeEach(() => {
   canvas.props = null;
@@ -65,27 +84,24 @@ describe("in-memory model-backed editor", () => {
     render(<App />);
     const initial = JSON.stringify(snapshot());
     const initialRevision = revision();
-    expect(
-      screen.getByText(/Document files are available in the PeerCanvas desktop app/),
-    ).toBeTruthy();
-    const fileActions = within(screen.getByRole("group", { name: "Document file actions" }));
-    expect((fileActions.getByRole("button", { name: "Open" }) as HTMLButtonElement).disabled).toBe(
-      true,
-    );
-    expect((fileActions.getByRole("button", { name: "Save" }) as HTMLButtonElement).disabled).toBe(
-      true,
-    );
-    expect(
-      (fileActions.getByRole("button", { name: "Import draw.io" }) as HTMLButtonElement).disabled,
-    ).toBe(true);
-    expect(
-      (fileActions.getByRole("button", { name: "Export draw.io" }) as HTMLButtonElement).disabled,
-    ).toBe(true);
+    expect(screen.getByText(t("documents.notice.desktopOnly"))).toBeTruthy();
+    fireEvent.click(screen.getByRole("button", { name: t("documents.menu.file") }));
+    for (const key of [
+      "documents.menu.open",
+      "documents.menu.save",
+      "documents.menu.importDrawio",
+      "documents.menu.exportDrawio",
+    ]) {
+      expect((screen.getByRole("menuitem", { name: t(key) }) as HTMLButtonElement).disabled).toBe(
+        true,
+      );
+    }
+    fireEvent.keyDown(screen.getByRole("menu"), { key: "Escape" });
     selectIdea();
     expect(screen.getByRole("button", { name: /Idea/ }).getAttribute("aria-pressed")).toBe("true");
     expect(canvas.props!.selection).toBe(nodes()[0].nodeId);
-    fireEvent.click(screen.getByRole("button", { name: "Zoom in" }));
-    fireEvent.click(screen.getByRole("button", { name: "Fit to content" }));
+    fireEvent.click(screen.getByRole("button", { name: t("editor.canvas.zoomIn") }));
+    fireEvent.click(screen.getByRole("button", { name: t("editor.canvas.fit") }));
     expect(canvas.props!.zoom).toBeCloseTo(1.1);
     expect(canvas.props!.fitRequest).toBe(1);
     expect(JSON.stringify(snapshot())).toBe(initial);
@@ -95,7 +111,7 @@ describe("in-memory model-backed editor", () => {
   it("places added rectangles in free cells without overlapping existing elements", () => {
     render(<App />);
     const existing = [...nodes()];
-    fireEvent.click(screen.getByRole("button", { name: "Add rectangle" }));
+    addRectangle();
     const added = nodes().at(-1)!;
     expect(canvas.props!.fitRequest).toBe(1);
     expect(
@@ -111,38 +127,39 @@ describe("in-memory model-backed editor", () => {
 
   it("searches the approved local catalog and adds a stable shape reference", () => {
     render(<App />);
-    const search = screen.getByRole("searchbox", { name: "Search shapes" });
+    const search = screen.getByRole("searchbox", { name: t("editor.shapes.search") });
     fireEvent.change(search, { target: { value: "  RECTANGLE " } });
-    const addShape = screen.getByRole("button", { name: "Add rectangle" });
-    expect(screen.getByText("Source and license")).toBeTruthy();
+    const addShape = screen.getByRole("button", { name: rectangle() });
+    expect(screen.getByText(t("editor.shapes.source"))).toBeTruthy();
     fireEvent.click(addShape);
 
     expect(nodes().at(-1)?.catalogReference).toEqual({
       shapeId: "basic-rectangle",
       version: "1.0.0",
     });
+    expect(nodes().at(-1)?.text).toBe(t("editor.defaults.rectangle"));
     fireEvent.change(search, { target: { value: "no such shape" } });
-    expect(screen.getByText("No approved shapes match this search.")).toBeTruthy();
+    expect(screen.getByText(t("editor.shapes.noMatches"))).toBeTruthy();
   });
 
   it("routes add, move, resize and delete through canonical commands", () => {
     const commands = vi.spyOn(core, "executeCommand");
     render(<App />);
     selectIdea();
-    fireEvent.click(screen.getByRole("button", { name: "Move right 10 units" }));
+    fireEvent.click(screen.getByRole("button", { name: t("editor.inspector.moveRight") }));
     expect(nodes()[0].geometry.x).toBe(90);
-    fireEvent.change(screen.getByLabelText("Width"), { target: { value: "220" } });
-    fireEvent.change(screen.getByLabelText("Height"), { target: { value: "130" } });
-    const applyGeometry = screen.getByRole("button", { name: "Apply geometry" });
+    fireEvent.change(field("editor.inspector.width"), { target: { value: "220" } });
+    fireEvent.change(field("editor.inspector.height"), { target: { value: "130" } });
+    const applyGeometry = screen.getByRole("button", { name: t("editor.inspector.applyGeometry") });
     applyGeometry.focus();
     fireEvent.click(applyGeometry);
     expect(nodes()[0].geometry).toMatchObject({ x: 90, y: 100, width: 220, height: 130 });
     expect(document.activeElement).toBe(applyGeometry);
-    fireEvent.click(screen.getByRole("button", { name: "Delete element" }));
+    fireEvent.click(screen.getByRole("button", { name: t("editor.inspector.deleteElement") }));
     expect(nodes()).toHaveLength(2);
     expect(canvas.props!.selection).toBeNull();
-    expect(document.activeElement).toBe(screen.getByRole("heading", { name: "Elements" }));
-    fireEvent.click(screen.getByRole("button", { name: "Add rectangle" }));
+    expect(document.activeElement).toBe(screen.getByRole("heading", { name: /Elements/ }));
+    addRectangle();
     expect(nodes()).toHaveLength(3);
     expect(nodes()[2].nodeId).toBe(canvas.props!.selection);
     for (const type of ["node.update", "node.remove", "node.add"]) {
@@ -152,18 +169,28 @@ describe("in-memory model-backed editor", () => {
     }
   });
 
+  it("moves focus to the canvas after an inspector delete when Elements is not visible", () => {
+    render(<App />);
+    selectIdea();
+    showTab("shapes");
+    fireEvent.click(screen.getByRole("button", { name: t("editor.inspector.deleteElement") }));
+    expect(document.activeElement).toBe(
+      screen.getByRole("region", { name: t("editor.canvas.region") }),
+    );
+  });
+
   it("provides keyboard selection, move, resize, clear and delete without hijacking fields", () => {
     render(<App />);
     selectIdea();
-    const region = screen.getByRole("region", { name: "Diagram canvas" });
+    const region = screen.getByRole("region", { name: t("editor.canvas.region") });
     region.focus();
     fireEvent.keyDown(region, { key: "ArrowRight" });
     fireEvent.keyDown(region, { key: "ArrowDown", shiftKey: true });
     fireEvent.keyDown(region, { key: "ArrowRight", altKey: true, shiftKey: true });
     expect(nodes()[0].geometry).toMatchObject({ x: 81, y: 110, width: 190, height: 90 });
     const currentRevision = revision();
-    fireEvent.keyDown(screen.getByLabelText("Width"), { key: "ArrowRight" });
-    fireEvent.keyDown(screen.getByLabelText("Width"), { key: "Delete" });
+    fireEvent.keyDown(field("editor.inspector.width"), { key: "ArrowRight" });
+    fireEvent.keyDown(field("editor.inspector.width"), { key: "Delete" });
     expect(revision()).toBe(currentRevision);
     expect(nodes()).toHaveLength(3);
     fireEvent.keyDown(region, { key: "Escape" });
@@ -175,9 +202,11 @@ describe("in-memory model-backed editor", () => {
     fireEvent.keyDown(projection, { key: "Delete" });
     expect(nodes()).toHaveLength(2);
     expect(rendererEffects.deleteKeyEvents).toBe(0);
-    expect(screen.getByRole("status", { name: "Editing status" }).textContent).toBe(
-      "Idea deleted.",
+    expect(screen.getByRole("status", { name: t("editor.status.label") }).textContent).toBe(
+      t("editor.feedback.deleted", { name: "Idea" }),
     );
+    // Keyboard deletion keeps the keyboard user on the canvas.
+    expect(document.activeElement).toBe(projection);
   });
 
   it("blocks Weave's renderer-only Alt-drag clone before pointer handlers run", () => {
@@ -207,11 +236,11 @@ describe("in-memory model-backed editor", () => {
     const original = JSON.stringify(snapshot());
     const originalRevision = revision();
     for (const control of [
-      screen.getByRole("button", { name: "Zoom in" }),
-      screen.getByRole("button", { name: "Fit to content" }),
+      screen.getByRole("button", { name: t("editor.canvas.zoomIn") }),
+      screen.getByRole("button", { name: t("editor.canvas.fit") }),
       screen.getByRole("button", { name: /Idea/ }),
-      screen.getByRole("button", { name: "Move right 10 units" }),
-      screen.getByLabelText("Width"),
+      screen.getByRole("button", { name: t("editor.inspector.moveRight") }),
+      field("editor.inspector.width"),
     ]) {
       control.focus();
       fireEvent.keyDown(control, { key: "ArrowRight" });
@@ -219,7 +248,7 @@ describe("in-memory model-backed editor", () => {
     }
     expect(JSON.stringify(snapshot())).toBe(original);
     expect(revision()).toBe(originalRevision);
-    const region = screen.getByRole("region", { name: "Diagram canvas" });
+    const region = screen.getByRole("region", { name: t("editor.canvas.region") });
     fireEvent.keyDown(region, { key: "ArrowRight" });
     expect(JSON.stringify(snapshot())).toBe(original);
     region.focus();
@@ -229,9 +258,7 @@ describe("in-memory model-backed editor", () => {
 
   it("places added rectangles in free grid cells without overlapping existing elements", () => {
     render(<App />);
-    for (let index = 0; index < 8; index += 1) {
-      fireEvent.click(screen.getByRole("button", { name: "Add rectangle" }));
-    }
+    for (let index = 0; index < 8; index += 1) addRectangle();
     const placed = nodes();
     expect(placed).toHaveLength(11);
     for (let index = 0; index < placed.length; index += 1) {
@@ -263,30 +290,34 @@ describe("in-memory model-backed editor", () => {
     });
     expect(JSON.stringify(snapshot())).toBe(accepted);
     expect(revision()).toBe(acceptedRevision);
-    expect(screen.getByRole("alert").textContent).toMatch(/Geometry/);
+    expect(screen.getByRole("alert").textContent).toBe(t("editor.diagnostics.invalidGeometry"));
     act(() => {
       expect(canvas.props!.onCommitGeometry!("missing-node", idea.geometry)).toBe(false);
     });
     expect(JSON.stringify(snapshot())).toBe(accepted);
+    expect(screen.getByRole("alert").textContent).toBe(t("editor.errors.elementGone"));
   });
 
   it("shows rejected geometry and supports an empty document without trapping focus", () => {
     render(<App />);
     selectIdea();
     const accepted = JSON.stringify(snapshot());
-    fireEvent.change(screen.getByLabelText("Width"), { target: { value: "0" } });
-    fireEvent.click(screen.getByRole("button", { name: "Apply geometry" }));
+    fireEvent.change(field("editor.inspector.width"), { target: { value: "0" } });
+    fireEvent.click(screen.getByRole("button", { name: t("editor.inspector.applyGeometry") }));
     expect(JSON.stringify(snapshot())).toBe(accepted);
-    expect(screen.getByRole("alert").textContent).toMatch(/Geometry/);
-    expect(screen.getByLabelText("Width").getAttribute("aria-invalid")).toBe("true");
+    const alert = screen.getByRole("alert");
+    expect(alert.textContent).toBe(t("editor.diagnostics.invalidGeometry"));
+    const width = field("editor.inspector.width");
+    expect(width.getAttribute("aria-invalid")).toBe("true");
+    expect(width.getAttribute("aria-describedby")).toBe(alert.id);
     for (const label of ["Idea", "Draft", "Review"]) {
       fireEvent.click(screen.getByRole("button", { name: new RegExp(label) }));
-      fireEvent.click(screen.getByRole("button", { name: "Delete element" }));
+      fireEvent.click(screen.getByRole("button", { name: t("editor.inspector.deleteElement") }));
     }
     expect(nodes()).toHaveLength(0);
-    expect(screen.getByText("No elements. Add a rectangle to begin.")).toBeTruthy();
-    expect(document.activeElement).toBe(screen.getByRole("heading", { name: "Elements" }));
-    fireEvent.click(screen.getByRole("button", { name: "Add rectangle" }));
+    expect(screen.getByText(t("editor.structure.noElements"))).toBeTruthy();
+    expect(document.activeElement).toBe(screen.getByRole("heading", { name: /Elements/ }));
+    addRectangle();
     expect(nodes()).toHaveLength(1);
     expect(canvas.props!.selection).toBe(nodes()[0].nodeId);
     expect(screen.queryByRole("alert")).toBeNull();
@@ -296,37 +327,46 @@ describe("in-memory model-backed editor", () => {
     render(<App />);
     selectIdea();
     const original = JSON.stringify(snapshot());
-    fireEvent.change(screen.getByLabelText("Width"), { target: { value: "999" } });
+    fireEvent.change(field("editor.inspector.width"), { target: { value: "999" } });
     expect(JSON.stringify(snapshot())).toBe(original);
     fireEvent.click(screen.getByRole("button", { name: /Draft/ }));
     selectIdea();
-    expect((screen.getByLabelText("Width") as HTMLInputElement).value).toBe("180");
+    expect((field("editor.inspector.width") as HTMLInputElement).value).toBe("180");
     expect(JSON.stringify(snapshot())).toBe(original);
   });
+
   it("creates, updates, deletes and restores connectors through canonical history", () => {
     render(<App />);
     const initial = snapshot().pages[0].layers[0].connections.length;
-    fireEvent.change(screen.getByLabelText("Connector label"), { target: { value: "Decision" } });
-    fireEvent.click(screen.getByRole("button", { name: "Add connector" }));
+    fireEvent.change(field("editor.connector.label"), { target: { value: "Decision" } });
+    fireEvent.click(screen.getByRole("button", { name: t("editor.connector.add") }));
     expect(snapshot().pages[0].layers[0].connections).toHaveLength(initial + 1);
     const created = snapshot().pages[0].layers[0].connections.at(-1)!;
     expect(created.label).toBe("Decision");
-    fireEvent.change(screen.getByLabelText("Connector label"), { target: { value: "Accepted" } });
-    fireEvent.click(screen.getByRole("button", { name: "Apply connector" }));
+    fireEvent.change(field("editor.connector.label"), { target: { value: "Accepted" } });
+    fireEvent.click(screen.getByRole("button", { name: t("editor.connector.apply") }));
     expect(snapshot().pages[0].layers[0].connections.at(-1)!.label).toBe("Accepted");
-    fireEvent.click(screen.getByRole("button", { name: "Delete connector" }));
+    fireEvent.click(screen.getByRole("button", { name: t("editor.connector.delete") }));
     expect(snapshot().pages[0].layers[0].connections).toHaveLength(initial);
-    fireEvent.click(screen.getByRole("button", { name: "Undo" }));
+    fireEvent.click(screen.getByRole("button", { name: t("editor.header.undo") }));
     expect(snapshot().pages[0].layers[0].connections.at(-1)!.connectionId).toBe(
       created.connectionId,
     );
-    fireEvent.click(screen.getByRole("button", { name: "Redo" }));
+    fireEvent.click(screen.getByRole("button", { name: t("editor.header.redo") }));
     expect(snapshot().pages[0].layers[0].connections).toHaveLength(initial);
     const before = JSON.stringify(snapshot());
-    fireEvent.change(screen.getByLabelText("Target"), { target: { value: nodes()[0].nodeId } });
-    fireEvent.click(screen.getByRole("button", { name: "Add connector" }));
+    fireEvent.change(field("editor.connector.target"), { target: { value: nodes()[0].nodeId } });
+    fireEvent.click(screen.getByRole("button", { name: t("editor.connector.add") }));
     expect(JSON.stringify(snapshot())).toBe(before);
-    expect(screen.getByRole("alert").textContent).toMatch(/differ/);
+    expect(screen.getByRole("alert").textContent).toBe(t("editor.diagnostics.endpointsMustDiffer"));
+  });
+
+  it("discards an unsubmitted new-connector draft when New connector is chosen", () => {
+    render(<App />);
+    fireEvent.change(field("editor.connector.label"), { target: { value: "Draft label" } });
+    showTab("structure");
+    fireEvent.click(screen.getByRole("button", { name: t("editor.structure.newConnector") }));
+    expect((field("editor.connector.label") as HTMLInputElement).value).toBe("");
   });
 
   it("replaces connector selection when adding a rectangle before keyboard deletion", () => {
@@ -334,15 +374,16 @@ describe("in-memory model-backed editor", () => {
     render(<App />);
     const connections = JSON.stringify(snapshot().pages[0].layers[0].connections);
     const initialNodes = nodes().length;
+    showTab("structure");
     fireEvent.click(screen.getByRole("button", { name: "Refine" }));
     expect(canvas.props!.connectionSelection).toBe(
       snapshot().pages[0].layers[0].connections[0].connectionId,
     );
-    fireEvent.click(screen.getByRole("button", { name: "Add rectangle" }));
+    addRectangle();
     const addedId = nodes().at(-1)!.nodeId;
     expect(canvas.props!.selection).toBe(addedId);
     expect(canvas.props!.connectionSelection).toBeNull();
-    const region = screen.getByRole("region", { name: "Diagram canvas" });
+    const region = screen.getByRole("region", { name: t("editor.canvas.region") });
     region.focus();
     fireEvent.keyDown(region, { key: "Delete" });
     expect(nodes()).toHaveLength(initialNodes);
@@ -360,24 +401,28 @@ describe("in-memory model-backed editor", () => {
     render(<App />);
     selectIdea();
     const initialPages = snapshot().pages.length;
-    fireEvent.click(screen.getByRole("button", { name: "Add page" }));
+    fireEvent.click(screen.getByRole("button", { name: t("editor.structure.addPage") }));
     expect(snapshot().pages).toHaveLength(initialPages + 1);
+    expect(snapshot().pages.at(-1)!.name).toBe(
+      t("editor.defaults.page", { number: initialPages + 1 }),
+    );
     expect(canvas.props!.selection).toBeNull();
     expect(canvas.props!.pageId).toBe(snapshot().pages.at(-1)!.pageId);
-    fireEvent.change(screen.getByLabelText("Page name"), { target: { value: "Details" } });
-    fireEvent.click(screen.getByRole("button", { name: "Rename page" }));
+    fireEvent.change(field("editor.structure.pageName"), { target: { value: "Details" } });
+    fireEvent.click(screen.getByRole("button", { name: t("editor.structure.renamePage") }));
     expect(snapshot().pages.at(-1)!.name).toBe("Details");
-    fireEvent.click(screen.getByRole("button", { name: "Add layer" }));
+    fireEvent.click(screen.getByRole("button", { name: t("editor.structure.addLayer") }));
     const addedPage = snapshot().pages.at(-1)!;
     expect(addedPage.layers).toHaveLength(2);
-    fireEvent.change(screen.getByLabelText("Layer name"), { target: { value: "Annotations" } });
-    fireEvent.click(screen.getByRole("button", { name: "Rename layer" }));
+    fireEvent.change(field("editor.structure.layerName"), { target: { value: "Annotations" } });
+    fireEvent.click(screen.getByRole("button", { name: t("editor.structure.renameLayer") }));
     expect(snapshot().pages.at(-1)!.layers[1].name).toBe("Annotations");
-    fireEvent.click(screen.getByRole("button", { name: "Add rectangle" }));
+    addRectangle();
     expect(snapshot().pages.at(-1)!.layers[1].nodes).toHaveLength(1);
-    fireEvent.click(screen.getByRole("button", { name: "Undo" }));
+    fireEvent.click(screen.getByRole("button", { name: t("editor.header.undo") }));
     expect(canvas.props!.selection).toBeNull();
-    fireEvent.change(screen.getByLabelText("Page", { exact: true }), {
+    showTab("structure");
+    fireEvent.change(field("editor.structure.page"), {
       target: { value: snapshot().pages[0].pageId },
     });
     expect(canvas.props!.layerId).toBe(snapshot().pages[0].layers[0].layerId);
@@ -392,15 +437,13 @@ describe("in-memory model-backed editor", () => {
     expect(canvas.props!.layerId).toBe(notes.layerId);
     act(() => canvas.props!.onCommitGeometry!(node.nodeId, { ...node.geometry, x: 300 }));
     expect(snapshot().pages[0].layers[1].nodes[0].geometry.x).toBe(300);
-    fireEvent.change(screen.getByLabelText("Text", { exact: true }), {
-      target: { value: "New note" },
-    });
-    fireEvent.click(screen.getByRole("button", { name: "Apply text" }));
+    fireEvent.change(field("editor.inspector.text"), { target: { value: "New note" } });
+    fireEvent.click(screen.getByRole("button", { name: t("editor.inspector.applyText") }));
     expect(snapshot().pages[0].layers[1].nodes[0].text).toBe("New note");
     const current = revision();
-    fireEvent.keyDown(screen.getByLabelText("Text", { exact: true }), { key: "z", ctrlKey: true });
+    fireEvent.keyDown(field("editor.inspector.text"), { key: "z", ctrlKey: true });
     expect(revision()).toBe(current);
-    const region = screen.getByRole("region", { name: "Diagram canvas" });
+    const region = screen.getByRole("region", { name: t("editor.canvas.region") });
     region.focus();
     fireEvent.keyDown(region, { key: "z", ctrlKey: true });
     expect(snapshot().pages[0].layers[1].nodes[0].text).toBe(node.text);

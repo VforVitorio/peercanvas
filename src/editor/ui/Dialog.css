@@ -1,0 +1,65 @@
+/* Colors come from the theme tokens defined on :root in App.css; fallbacks keep the dialog legible alone. */
+.pc-dialog {
+  width: min(var(--pc-dialog-width, 480px), calc(100vw - 32px));
+  max-height: calc(100vh - 48px);
+  padding: 0;
+  overflow: hidden;
+  border: 1px solid var(--pc-border, #d5dde2);
+  border-radius: 8px;
+  color: var(--pc-text, #17232d);
+  background: var(--pc-surface, #fff);
+  box-shadow: 0 16px 48px rgb(0 0 0 / 28%);
+}
+.pc-dialog--sm {
+  --pc-dialog-width: 420px;
+}
+.pc-dialog--md {
+  --pc-dialog-width: 520px;
+}
+.pc-dialog--lg {
+  --pc-dialog-width: 680px;
+}
+.pc-dialog:not([open]) {
+  display: none;
+}
+.pc-dialog::backdrop {
+  background: rgb(10 18 26 / 55%);
+}
+.pc-dialog:focus {
+  outline: none;
+}
+.pc-dialog-surface {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-height: calc(100vh - 48px);
+  padding: 24px;
+  overflow-y: auto;
+}
+.pc-dialog-title {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 650;
+  line-height: 1.3;
+}
+.pc-dialog-description,
+.pc-dialog p {
+  margin: 0;
+  line-height: 1.5;
+}
+.pc-dialog-body {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-height: 0;
+}
+.pc-dialog-body:empty {
+  display: none;
+}
+.pc-dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 8px;
+}

@@ -182,13 +182,17 @@ Effort ranges are initial engineering estimates. They exclude release administra
 
 ### WP-13: Desktop appearance and language preferences
 
-- **Scope:** add persistent light/dark application appearance and English/Spanish interface language, separate from document content and history.
+- **Scope:** add persistent System/Light/Dark application appearance and English/Spanish interface language, separate from document content and history. The maintainer's 2026-11-13 implementation request advances this selected S8 work ahead of S4, together with the production editor workspace refresh.
 - **Requirements/spec:** FR-050..051 and UC-11; OpenSpec `desktop-preferences` (`user-preferences`, `localization`).
 - **Dependencies/components:** WP-03/#4; app preferences, theme tokens, language resources, accessibility labels.
 - **Acceptance:** appearance and language survive restart; theme switching leaves diagram paper, explicit styles, document revision, dirty state, and history unchanged; EN/ES resources are complete and Spanish copy is reviewed; transitions respect reduced motion.
 - **Tests/DoD:** preference migration, key/parameter parity, localized errors and labels, theme/locale checks on supported platforms.
 - **Effort/risk:** 5-8 PD; preserve `last_document` in the existing preference record and keep the canvas paper independent from theme.
 - **Issue / PR:** parent [#93](https://github.com/furancho-labs/Peer2Canvas/issues/93), children #95, #96, #100, and #101; milestone S8.
+
+**Current status:** PR #132 carries the workspace refresh and WP-13 preference implementation into the `dev` integration stream under the approved sequencing exception. Its branch is being updated to `dev=80a9cde`; the updated CI must pass before merge. OpenSpec 1.1/contracts, `editor-workspace-refresh` tasks 1.1–4.1, appearance implementation, and automated locale checks are represented. Keep #95 open for native restore/immediate-quit acceptance, #100 for fluent human Spanish, and #101 for cross-platform native interactions and clearing stale durability warnings after successful retries; parent #93 remains open.
+
+The accompanying OpenSpec `editor-workspace-refresh` composes existing S3 features into a compact header/File menu, Shapes/Structure navigation, contextual inspector, and responsive drawers. It adds no collaboration, invitations, AI, MCP, grouping, onboarding, document schema, dependencies, or demo services. The maintainer has authorized syncing PR #132 to current `dev` and merging there after CI passes; no promotion to `main` is included. Keep #95, #100, #101, and parent #93 open until the immediate-quit preference race, stale warning behavior, cross-platform native evidence, and human Spanish review are resolved.
 
 ### WP-14: Diagram grouping
 
@@ -236,7 +240,9 @@ S1 and S2 are complete on `main`. Promotion PR [#106](https://github.com/furanch
 | S9     | Diagram grouping                       | WP-14        | reviewed grouping contract, validated group operations, persistence and undo/redo evidence                                                |
 | S10    | PMV onboarding                         | WP-15        | audited journey inventory and localized, accessible tours for verified PMV workflows                                                      |
 
-S1, S2, and S3 are complete on `main`; S4 is the active implementation sprint for WP-07. Grouping is outside S2 and belongs to S9/WP-14, with discovery child #89; it did not block S2 closure. WP-08/S5 and later work remain planning only.
+**Approved sequencing exception, 2026-11-13:** implement the bounded WP-13 appearance/language scope and `editor-workspace-refresh` locally after S3 and before S4. The sprint table retains the original milestone identities; this exception does not authorize other S8–S10 behavior or mark any acceptance gate complete.
+
+S1, S2, and S3 are complete on `main`; PR #133 delivered WP-07.1/#35 and WP-07.2/#36 to `dev`, and WP-07.3/#37 remains in progress. Grouping is outside S2 and belongs to S9/WP-14, with discovery child #89; it did not block S2 closure. The WP-13 sequencing exception authorizes only the bounded appearance/language and workspace-refresh scope described above; other S8–S10 work remains planning only.
 
 ### Critical path and parallel work
 
