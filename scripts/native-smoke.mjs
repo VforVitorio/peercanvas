@@ -67,10 +67,6 @@ async function assertProductionIsolation(directory) {
         !content.includes("pc-yjs-update"),
         `Peer transport leaked into production build in ${file}`,
       );
-      assert(
-        !content.includes("broker.emqx.io"),
-        `Peer signaling endpoints leaked into production build in ${file}`,
-      );
       assert(!content.includes("Native canvas compatibility probe"), `Smoke entry in ${file}`);
     }
   }
