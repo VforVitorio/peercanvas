@@ -250,7 +250,7 @@ class NativePeerSmokeHarness {
 
   private async createPeerFrame(): Promise<NativePeerApi> {
     const frame = document.createElement("iframe");
-    frame.title = "Native smoke peer context";
+    frame.title = "Native smoke peer iframe context";
     frame.setAttribute("aria-hidden", "true");
     frame.style.cssText =
       "position:fixed;width:1px;height:1px;left:-2px;top:-2px;opacity:0;border:0;";
@@ -262,7 +262,7 @@ class NativePeerSmokeHarness {
     document.body.append(frame);
     await this.waitFor(
       () => frame.contentWindow?.__PEERCANVAS_NATIVE_PEER__ ?? null,
-      "peer WebView context",
+      "peer iframe context",
     );
     const api = frame.contentWindow?.__PEERCANVAS_NATIVE_PEER__;
     if (!api) throw new Error("Native smoke peer context did not initialize.");
