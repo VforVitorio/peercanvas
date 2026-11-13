@@ -13,6 +13,15 @@ export type NativeDataChannelDiagnostic = {
   readyState: RTCDataChannelState;
   opened: boolean;
   closed: boolean;
+  sendObserved: boolean;
+  sendCount: number;
+  sendErrors: number;
+  lastSendError: string | null;
+  onopenHandlerAssigned: boolean | null;
+  openConnectionState: RTCPeerConnectionState | null;
+  openIceConnectionState: RTCIceConnectionState | null;
+  openSignalingState: RTCSignalingState | null;
+  openRemoteDescriptionType: RTCSdpType | null;
   messageCount: number;
   samples: Array<{
     isArrayBuffer: boolean;
@@ -41,12 +50,42 @@ function trackDataChannel(connection: (typeof connections)[number], channel: RTC
     readyState: channel.readyState,
     opened: channel.readyState === "open",
     closed: channel.readyState === "closed",
+    sendObserved: false,
+    sendCount: 0,
+    sendErrors: 0,
+    lastSendError: null,
+    onopenHandlerAssigned: null,
+    openConnectionState: null,
+    openIceConnectionState: null,
+    openSignalingState: null,
+    openRemoteDescriptionType: null,
     messageCount: 0,
     samples: [],
   };
   connection.dataChannels.push({ channel, diagnostic });
+  try {
+    const send = channel.send;
+    channel.send = (data) => {
+      diagnostic.sendCount += 1;
+      try {
+        Reflect.apply(send, channel, [data]);
+      } catch (error) {
+        diagnostic.sendErrors += 1;
+        diagnostic.lastSendError = error instanceof Error ? error.name : "UnknownError";
+        throw error;
+      }
+    };
+    diagnostic.sendObserved = true;
+  } catch {
+    diagnostic.sendObserved = false;
+  }
   channel.addEventListener("open", () => {
     diagnostic.opened = true;
+    diagnostic.onopenHandlerAssigned = typeof channel.onopen === "function";
+    diagnostic.openConnectionState = connection.connection.connectionState;
+    diagnostic.openIceConnectionState = connection.connection.iceConnectionState;
+    diagnostic.openSignalingState = connection.connection.signalingState;
+    diagnostic.openRemoteDescriptionType = connection.connection.remoteDescription?.type ?? null;
   });
   channel.addEventListener("close", () => {
     diagnostic.closed = true;
