@@ -440,6 +440,15 @@ async function runNativeSmoke({ runPeers, usePublicRelay, useLocalTurn = false }
         "Participant became ready before validated sync",
       );
       assert.equal(peerInitial.sameDocument, true, "Initial peer snapshot did not converge");
+      if (usePublicRelay && process.platform === "linux") {
+        assert(
+          peerInitial.normalizedMessages.peer > 0,
+          "Linux peer smoke did not exercise the test-only cross-realm ArrayBuffer adapter",
+        );
+        report.checks.push(
+          `test-only Linux adapter normalized ${peerInitial.normalizedMessages.peer} iframe DataChannel messages`,
+        );
+      }
 
       const peerEdit = await executeAsync("window.__PEERCANVAS_NATIVE_SMOKE__?.submitPeerEdit()");
       assert.equal(peerEdit.reply.status, "accepted", "Host rejected a valid peer edit");
@@ -498,6 +507,7 @@ async function runNativeSmoke({ runPeers, usePublicRelay, useLocalTurn = false }
           hostStatus: peerInitial.host.status,
           peerStatus: peerInitial.peer.status,
           converged: peerInitial.sameDocument,
+          normalizedMessages: peerInitial.normalizedMessages,
         },
         acceptedCommand: {
           status: peerEdit.reply.status,

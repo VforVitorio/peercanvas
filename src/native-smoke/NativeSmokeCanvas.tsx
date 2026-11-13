@@ -30,7 +30,11 @@ import { createTrysteroPeerTransport } from "../collaboration/trystero-peer-tran
 import type { RoomFactory } from "../collaboration/trystero-peer-transport";
 import { PeerDocumentSession } from "../collaboration/peer-document-session";
 import type { PeerNetworkDiagnostic, PeerTransportError } from "../collaboration/types";
-import { installNativeIceDiagnostics, readNativeIceDiagnostics } from "./ice-diagnostics";
+import {
+  installNativeIceDiagnostics,
+  readNativeIceDiagnostics,
+  type NativeIceDiagnostic,
+} from "./ice-diagnostics";
 import { serializeDocument, type ModelState } from "../document";
 import { createSample } from "../editor/sample";
 import type {
@@ -50,7 +54,12 @@ type PeerSmokeSummary = {
 };
 
 type PeerSmokeReport = {
-  initial: { host: PeerSmokeSummary; peer: NativePeerSnapshot; sameDocument: boolean };
+  initial: {
+    host: PeerSmokeSummary;
+    peer: NativePeerSnapshot;
+    sameDocument: boolean;
+    normalizedMessages: { host: number; peer: number };
+  };
   afterEdit: {
     reply: unknown;
     host: PeerSmokeSummary;
@@ -143,7 +152,16 @@ class NativePeerSmokeHarness {
       this.peerApi = await this.createPeerFrame();
       const peer = await this.peerApi.connect(this.peerOptions);
       const host = this.hostSummary();
-      return { host, peer, sameDocument: host.document === peer.document };
+      const peerDebug = await this.peerApi.debug();
+      return {
+        host,
+        peer,
+        sameDocument: host.document === peer.document,
+        normalizedMessages: {
+          host: countNormalizedMessages(readNativeIceDiagnostics()),
+          peer: countNormalizedMessages(peerDebug.ice),
+        },
+      };
     } catch (error) {
       const hostSnapshot = this.hostSession?.getSnapshot();
       const peerDebug = await this.peerApi?.debug().catch(() => null);
@@ -301,6 +319,15 @@ function summarizeLinks(diagnostics: PeerNetworkDiagnostic[]): PeerLinkSummary[]
       localCandidateType,
       remoteCandidateType,
     }),
+  );
+}
+
+function countNormalizedMessages(diagnostics: NativeIceDiagnostic[]): number {
+  return diagnostics.reduce(
+    (total, connection) =>
+      total +
+      connection.dataChannels.reduce((count, channel) => count + channel.normalizedMessageCount, 0),
+    0,
   );
 }
 

@@ -25,6 +25,7 @@ export type NativeDataChannelDiagnostic = {
   openSignalingState: RTCSignalingState | null;
   openRemoteDescriptionType: RTCSdpType | null;
   messageCount: number;
+  normalizedMessageCount: number;
   samples: Array<{
     isArrayBuffer: boolean;
     isArrayBufferView: boolean;
@@ -35,6 +36,7 @@ export type NativeDataChannelDiagnostic = {
 
 const MAX_TRACKED_DATA_CHANNELS = 16;
 const MAX_MESSAGE_SAMPLES_PER_CHANNEL = 8;
+const MAX_REALM_NORMALIZATION_BYTES = 256 * 1024;
 
 const connections: Array<{
   connection: RTCPeerConnection;
@@ -64,9 +66,11 @@ function trackDataChannel(connection: (typeof connections)[number], channel: RTC
     openSignalingState: null,
     openRemoteDescriptionType: null,
     messageCount: 0,
+    normalizedMessageCount: 0,
     samples: [],
   };
   connection.dataChannels.push({ channel, diagnostic });
+  let redispatchingNormalizedMessage = false;
   try {
     const send = channel.send;
     channel.send = (data) => {
@@ -99,6 +103,7 @@ function trackDataChannel(connection: (typeof connections)[number], channel: RTC
     diagnostic.lastChannelError = (event as RTCErrorEvent).error?.name ?? "RTCDataChannelError";
   });
   channel.addEventListener("message", ({ data }: MessageEvent<unknown>) => {
+    if (redispatchingNormalizedMessage) return;
     diagnostic.messageCount += 1;
     if (diagnostic.samples.length >= MAX_MESSAGE_SAMPLES_PER_CHANNEL) return;
     const isArrayBuffer = data instanceof ArrayBuffer;
@@ -116,6 +121,28 @@ function trackDataChannel(connection: (typeof connections)[number], channel: RTC
       tag: Object.prototype.toString.call(data),
       byteLength,
     });
+  });
+  channel.addEventListener("message", (event) => {
+    if (redispatchingNormalizedMessage) return;
+    const { data } = event;
+    if (
+      data instanceof ArrayBuffer ||
+      ArrayBuffer.isView(data) ||
+      Object.prototype.toString.call(data) !== "[object ArrayBuffer]" ||
+      (data as ArrayBuffer).byteLength > MAX_REALM_NORMALIZATION_BYTES
+    )
+      return;
+
+    // The smoke plugin can deliver a parent-realm ArrayBuffer into this iframe.
+    diagnostic.normalizedMessageCount += 1;
+    event.stopImmediatePropagation();
+    redispatchingNormalizedMessage = true;
+    try {
+      const localBuffer = Uint8Array.from(new Uint8Array(data as ArrayBuffer)).buffer;
+      channel.dispatchEvent(new MessageEvent("message", { data: localBuffer }));
+    } finally {
+      redispatchingNormalizedMessage = false;
+    }
   });
 }
 
