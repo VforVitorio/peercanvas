@@ -21,6 +21,12 @@
           "identifier": "native-smoke",
           "windows": ["main"],
           "permissions": ["wdio-webdriver:default"]
+        },
+        {
+          "identifier": "native-smoke-webrtc",
+          "windows": ["main"],
+          "platforms": ["linux"],
+          "permissions": ["webrtc:allow-peer", "webrtc:allow-data"]
         }
       ]
     }
