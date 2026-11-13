@@ -138,6 +138,8 @@ export async function createTrysteroPeerTransport(
     throw new Error("A session secret of at least 32 UTF-8 bytes is required.");
   const localPeerId = options.peerId ?? selfId;
   if (localPeerId.trim().length === 0) throw new Error("A peer identity is required.");
+  if (typeof globalThis.RTCPeerConnection !== "function")
+    throw new Error("WebRTC is unavailable in this WebView.");
 
   const updateListeners = new Set<(update: Uint8Array, peerId: string) => void>();
   const peerJoinListeners = new Set<(peerId: string) => void>();
