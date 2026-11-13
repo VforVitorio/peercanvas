@@ -14,9 +14,11 @@ export type NativeDataChannelDiagnostic = {
   opened: boolean;
   closed: boolean;
   sendObserved: boolean;
-  sendCount: number;
-  sendErrors: number;
-  lastSendError: string | null;
+  sendAttempts: number;
+  synchronousSendErrors: number;
+  lastSynchronousSendError: string | null;
+  channelErrors: number;
+  lastChannelError: string | null;
   onopenHandlerAssigned: boolean | null;
   openConnectionState: RTCPeerConnectionState | null;
   openIceConnectionState: RTCIceConnectionState | null;
@@ -51,9 +53,11 @@ function trackDataChannel(connection: (typeof connections)[number], channel: RTC
     opened: channel.readyState === "open",
     closed: channel.readyState === "closed",
     sendObserved: false,
-    sendCount: 0,
-    sendErrors: 0,
-    lastSendError: null,
+    sendAttempts: 0,
+    synchronousSendErrors: 0,
+    lastSynchronousSendError: null,
+    channelErrors: 0,
+    lastChannelError: null,
     onopenHandlerAssigned: null,
     openConnectionState: null,
     openIceConnectionState: null,
@@ -66,12 +70,12 @@ function trackDataChannel(connection: (typeof connections)[number], channel: RTC
   try {
     const send = channel.send;
     channel.send = (data) => {
-      diagnostic.sendCount += 1;
+      diagnostic.sendAttempts += 1;
       try {
         Reflect.apply(send, channel, [data]);
       } catch (error) {
-        diagnostic.sendErrors += 1;
-        diagnostic.lastSendError = error instanceof Error ? error.name : "UnknownError";
+        diagnostic.synchronousSendErrors += 1;
+        diagnostic.lastSynchronousSendError = error instanceof Error ? error.name : "UnknownError";
         throw error;
       }
     };
@@ -89,6 +93,10 @@ function trackDataChannel(connection: (typeof connections)[number], channel: RTC
   });
   channel.addEventListener("close", () => {
     diagnostic.closed = true;
+  });
+  channel.addEventListener("error", (event) => {
+    diagnostic.channelErrors += 1;
+    diagnostic.lastChannelError = (event as RTCErrorEvent).error?.name ?? "RTCDataChannelError";
   });
   channel.addEventListener("message", ({ data }: MessageEvent<unknown>) => {
     diagnostic.messageCount += 1;
