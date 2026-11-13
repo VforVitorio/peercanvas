@@ -1,0 +1,21 @@
+{
+  "common.close": "Cerrar",
+  "common.error.generic": "Algo salió mal. Inténtalo de nuevo.",
+  "common.preferences.title": "Preferencias",
+  "common.preferences.description": "La apariencia y el idioma se guardan en este equipo, separados de tus diagramas.",
+  "common.preferences.theme.legend": "Tema",
+  "common.preferences.theme.system": "Sistema",
+  "common.preferences.theme.light": "Claro",
+  "common.preferences.theme.dark": "Oscuro",
+  "common.preferences.theme.systemHint": "Sigue la apariencia de tu sistema operativo hasta que elijas Claro u Oscuro.",
+  "common.preferences.theme.activeLight": "Se está usando el tema claro.",
+  "common.preferences.theme.activeDark": "Se está usando el tema oscuro.",
+  "common.preferences.theme.paperNote": "El papel del diagrama y los colores explícitos del diagrama no cambian con el tema.",
+  "common.preferences.language.legend": "Idioma",
+  "common.preferences.language.en": "English",
+  "common.preferences.language.es": "Español",
+  "common.preferences.language.hint": "Se aplica al instante. El texto que escribes en un diagrama nunca se traduce.",
+  "common.preferences.loading": "Cargando las preferencias guardadas…",
+  "common.preferences.sessionOnly": "Las preferencias solo se guardan en la aplicación de escritorio. Aquí duran hasta que se cierre esta ventana.",
+  "common.preferences.dismissWarning": "Ocultar el aviso sobre las preferencias"
+}

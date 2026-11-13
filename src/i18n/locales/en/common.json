@@ -1,0 +1,21 @@
+{
+  "common.close": "Close",
+  "common.error.generic": "Something went wrong. Try again.",
+  "common.preferences.title": "Preferences",
+  "common.preferences.description": "Appearance and language are saved on this computer, separately from your diagrams.",
+  "common.preferences.theme.legend": "Theme",
+  "common.preferences.theme.system": "System",
+  "common.preferences.theme.light": "Light",
+  "common.preferences.theme.dark": "Dark",
+  "common.preferences.theme.systemHint": "Follows your operating system appearance until you choose Light or Dark.",
+  "common.preferences.theme.activeLight": "The light theme is in use.",
+  "common.preferences.theme.activeDark": "The dark theme is in use.",
+  "common.preferences.theme.paperNote": "The diagram paper and explicit diagram colors stay the same in every theme.",
+  "common.preferences.language.legend": "Language",
+  "common.preferences.language.en": "English",
+  "common.preferences.language.es": "Español",
+  "common.preferences.language.hint": "Applies immediately. Text you write in a diagram is never translated.",
+  "common.preferences.loading": "Loading saved preferences…",
+  "common.preferences.sessionOnly": "Preferences are saved only in the desktop app. Here they last until this window closes.",
+  "common.preferences.dismissWarning": "Dismiss preference notice"
+}
