@@ -23,3 +23,9 @@ The normal application remains the engineering scaffold. The probe did not selec
 ## Limits
 
 GitHub runner labels move over time. Re-run the probe and update this table when a runner image or pinned renderer package changes. The table records compatibility on the listed images only; WP-11 still needs the release support floor, manual accessibility review, and native user-workflow checks.
+
+## Peer WebRTC evidence (WP-07.3)
+
+Manual run [43426758968](https://github.com/furancho-labs/Peer2Canvas/actions/runs/43426758968) passed the iframe peer smoke on GitHub macOS and Windows runners; the selected ICE candidates were `host`/`host`. On the Linux runner, WebKitGTK 2.52.6 did not expose `RTCPeerConnection`. Setting `WebKitSettings.enable-webrtc` in the smoke-only binary did not add the API in run [43429007418](https://github.com/furancho-labs/Peer2Canvas/actions/runs/43429007418). WebKitGTK 2.54.2 disables WebRTC in its stable build while replacing the backend ([release notes](https://webkitgtk.org/2026/09/16/webkitgtk-2.54-highlights.html)).
+
+The peer smoke runs two JavaScript contexts in one Tauri WebView, not two app processes or devices. It does not establish support across Linux distributions, separate networks, NAT/firewalls, STUN failure, TURN, or host crashes. Linux peer support and the other #37 scenarios remain unverified; this runner matrix is not a product support declaration.

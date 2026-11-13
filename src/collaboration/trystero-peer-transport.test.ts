@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { JoinRoomCallbacks, JoinRoomConfig, Room } from "@trystero-p2p/mqtt";
 import {
   createTrysteroPeerTransport,
@@ -68,6 +68,12 @@ const validOptions = {
 };
 
 describe("Trystero peer transport", () => {
+  beforeEach(() => {
+    vi.stubGlobal("RTCPeerConnection", class RTCPeerConnection {});
+  });
+
+  afterEach(() => vi.unstubAllGlobals());
+
   it("rejects invalid room credentials before joining", async () => {
     const { room } = makeRoom();
     const factory = roomFactory(room);
@@ -90,6 +96,16 @@ describe("Trystero peer transport", () => {
       }),
     ).rejects.toThrow("A peer identity is required.");
     expect(factory.getCalls()).toBe(0);
+  });
+
+  it("reports a WebView without WebRTC before creating a room", async () => {
+    const joinRoom = vi.fn(() => makeRoom().room);
+    vi.stubGlobal("RTCPeerConnection", undefined);
+
+    await expect(
+      createTrysteroPeerTransport({ ...validOptions, joinRoom: joinRoom as RoomFactory }),
+    ).rejects.toThrow("WebRTC is unavailable in this WebView.");
+    expect(joinRoom).not.toHaveBeenCalled();
   });
 
   it("uses the identity associated with an injected Trystero strategy", async () => {

@@ -472,7 +472,7 @@ async function runNativeSmoke({ runPeers, usePublicRelay }) {
         },
       };
       report.checks.push(
-        `two Tauri WebView contexts synchronized through Trystero/Yjs over ${usePublicRelay ? "public MQTT brokers" : "a loopback relay"}`,
+        `host and peer iframe contexts synchronized inside one Tauri WebView through Trystero/Yjs over ${usePublicRelay ? "public MQTT brokers" : "a loopback relay"}`,
         "host-sequenced remote command converged in both canonical models",
         "reconnect restored the current host checkpoint before ready",
         "host loss preserved the participant's validated in-memory snapshot",

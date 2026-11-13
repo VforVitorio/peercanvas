@@ -5,6 +5,12 @@ on:
   pull_request:
     branches: [main, dev]
   workflow_dispatch:
+    inputs:
+      peer_smoke:
+        description: Run the public-signaling WebRTC smoke in each native WebView
+        required: false
+        default: false
+        type: boolean
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.run_id }}
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
@@ -162,6 +168,12 @@ jobs:
       - name: Run native canvas smoke (macOS and Windows)
         if: ${{ !cancelled() && runner.os != 'Linux' && (needs.native-scope.result != 'success' || (success() && needs.native-scope.outputs.smoke == 'true')) }}
         run: npm run native-smoke
+      - name: Run public peer smoke (Linux)
+        if: ${{ inputs.peer_smoke && runner.os == 'Linux' }}
+        run: xvfb-run -a -s "-screen 0 1280x800x24" npm run native-smoke:public
+      - name: Run public peer smoke (macOS and Windows)
+        if: ${{ inputs.peer_smoke && runner.os != 'Linux' }}
+        run: npm run native-smoke:public
       - name: Reject native-smoke feature in release builds
         if: ${{ !cancelled() && runner.os == 'Linux' && (needs.native-scope.result != 'success' || (success() && needs.native-scope.outputs.smoke == 'true')) }}
         shell: bash

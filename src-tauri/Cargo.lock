@@ -2368,6 +2368,7 @@ dependencies = [
  "tauri-plugin-dialog",
  "tauri-plugin-wdio-webdriver",
  "uuid",
+ "webkit2gtk",
 ]
 
 [[package]]

@@ -17,6 +17,9 @@ let installed = false;
 export function installNativeIceDiagnostics(): void {
   if (installed) return;
   const NativeRTCPeerConnection = window.RTCPeerConnection;
+  if (typeof NativeRTCPeerConnection !== "function") {
+    throw new Error("RTCPeerConnection is unavailable in this native WebView.");
+  }
 
   class TrackedRTCPeerConnection extends NativeRTCPeerConnection {
     constructor(configuration?: RTCConfiguration) {
