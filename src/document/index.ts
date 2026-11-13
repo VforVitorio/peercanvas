@@ -98,6 +98,9 @@ export interface CreateDocumentInput {
   pageId: Id;
   layerId: Id;
   title: string;
+  /** Initial names are document content; callers may supply their localized defaults. */
+  pageName?: string;
+  layerName?: string;
   now: Timestamp;
 }
 export interface CommandContext {
@@ -1005,13 +1008,27 @@ export function createDocument(input: CreateDocumentInput): Result<ModelState> {
   try {
     if (!isObject(input)) return failure("INVALID_SCHEMA", "", "Expected creation input.");
     const inputErrors: Diagnostic[] = [];
-    keys(input as Obj, ["documentId", "pageId", "layerId", "title", "now"], "", inputErrors);
+    keys(
+      input as Obj,
+      [
+        "documentId",
+        "pageId",
+        "layerId",
+        "title",
+        "now",
+        ...["pageName", "layerName"].filter((key) => own(input as Obj, key)),
+      ],
+      "",
+      inputErrors,
+    );
     if (inputErrors.length) return { ok: false, errors: inputErrors };
     if (
       !validId(input.documentId) ||
       !validId(input.pageId) ||
       !validId(input.layerId) ||
       !string(input.title, 1, 256) ||
+      (input.pageName !== undefined && !string(input.pageName, 1, 256)) ||
+      (input.layerName !== undefined && !string(input.layerName, 1, 256)) ||
       !validTimestamp(input.now)
     )
       return failure("INVALID_SCHEMA", "", "Creation values are invalid.");
@@ -1022,8 +1039,15 @@ export function createDocument(input: CreateDocumentInput): Result<ModelState> {
       pages: [
         {
           pageId: input.pageId,
-          name: "Page 1",
-          layers: [{ layerId: input.layerId, name: "Layer 1", nodes: [], connections: [] }],
+          name: input.pageName ?? "Page 1",
+          layers: [
+            {
+              layerId: input.layerId,
+              name: input.layerName ?? "Layer 1",
+              nodes: [],
+              connections: [],
+            },
+          ],
         },
       ],
       styles: [],

@@ -8,6 +8,8 @@ Source: S1 draft `s1-document-persistence-contract.md` from its separate worktre
 
 Export `Document`, `Page`, `Layer`, `Node`, `Connection`, `Style`, `ModelState`, `Diagnostic`, `Result`, `createDocument({documentId,pageId,layerId,title,now})`, `validateDocument`, `parseDocument`, `serializeDocument`, and `executeCommand` from the index. Creation returns `Result<ModelState>` at revision 0. `validateDocument(unknown)` returns a detached `Result<Document>`. Commands accept unknown runtime payloads and return the result specified below. The demo implements inverse-command undo/redo using this same executor, never direct semantic snapshot replacement. Do not add native or React/Weave dependencies.
 
+The 2026-11-13 workspace/localization extension permits optional `pageName` and `layerName` creation inputs, validated with the existing 1–256 Unicode-code-point name bounds. Omitted inputs retain `Page 1` and `Layer 1` for existing callers. The editor supplies its current localized defaults only when creating a new document; these names then become ordinary document content and are never rewritten when preferences change. Creation still starts at revision 0 and changes no serialized schema.
+
 ## Schema v2 semantic snapshot
 
 ### Synthetic version 0 migration
