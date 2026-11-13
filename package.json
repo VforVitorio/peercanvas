@@ -18,6 +18,7 @@
     "native-smoke": "node scripts/native-smoke.mjs",
     "native-smoke:peers": "node scripts/native-smoke.mjs peers-local",
     "native-smoke:public": "node scripts/native-smoke.mjs peers-public",
+    "native-smoke:turn-local": "node scripts/native-smoke.mjs peers-turn-local",
     "preview": "vite preview",
     "tauri": "tauri",
     "typecheck": "tsc --noEmit",
