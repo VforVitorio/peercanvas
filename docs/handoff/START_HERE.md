@@ -12,6 +12,8 @@ Recorded branch evidence: 333 TypeScript tests and 43 Rust tests passed; typeche
 
 See [workspace evidence and limitations](../development/editor-workspace.md). The native executable compiled and launched using an isolated QA identifier, but the UI controller could not inspect the unbundled application. Native file dialogs, preference restart/menu behavior, Windows/Linux native verification, CI, screen-reader review, and fluent human Spanish sign-off remain unverified. The existing icon-packaging issue #90 remains open. Browser checks are not native UI evidence. Keep WP-13/#93 and its children open until cross-platform and human-language acceptance passes.
 
+The S4/dev synchronization leaves the PR #132 product frontend and Rust files unchanged. Its production-isolation smoke assertion now checks stable workspace/canvas class markers instead of translated English copy; rerun the native checks before merging the preference/workspace PR.
+
 ## Current checkpoint
 
 - The repository is [furancho-labs/Peer2Canvas](https://github.com/furancho-labs/Peer2Canvas). Its move to the organization was intentional. The GitHub Project remains under the personal account `VforVitorio`.
