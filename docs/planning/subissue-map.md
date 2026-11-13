@@ -49,15 +49,17 @@ Each child issue is attached to its WP parent as a native GitHub sub-issue. The 
 
 ## Future experience work
 
-| OpenSpec task           | WP parent                                                              | Sub-issue                                                       | Task                                                       |
-| ----------------------- | ---------------------------------------------------------------------- | --------------------------------------------------------------- | ---------------------------------------------------------- |
-| desktop-preferences/1.1 | [WP issue #93](https://github.com/furancho-labs/Peer2Canvas/issues/93) | [#96](https://github.com/furancho-labs/Peer2Canvas/issues/96)   | Define appearance and localization contracts               |
-| desktop-preferences/2.1 | [WP issue #93](https://github.com/furancho-labs/Peer2Canvas/issues/93) | [#95](https://github.com/furancho-labs/Peer2Canvas/issues/95)   | Add a persistent light and dark theme toggle               |
-| desktop-preferences/3.1 | [WP issue #93](https://github.com/furancho-labs/Peer2Canvas/issues/93) | [#100](https://github.com/furancho-labs/Peer2Canvas/issues/100) | Add English and natural Spanish language resources         |
-| desktop-preferences/4.1 | [WP issue #93](https://github.com/furancho-labs/Peer2Canvas/issues/93) | [#101](https://github.com/furancho-labs/Peer2Canvas/issues/101) | Verify desktop preferences across supported platforms      |
-| guided-onboarding/1.1   | [WP issue #92](https://github.com/furancho-labs/Peer2Canvas/issues/92) | [#102](https://github.com/furancho-labs/Peer2Canvas/issues/102) | Audit implemented workflows and approve the tour inventory |
-| guided-onboarding/2.1   | [WP issue #92](https://github.com/furancho-labs/Peer2Canvas/issues/92) | [#103](https://github.com/furancho-labs/Peer2Canvas/issues/103) | Add an accessible spotlight and callout tour shell         |
-| guided-onboarding/3.1   | [WP issue #92](https://github.com/furancho-labs/Peer2Canvas/issues/92) | [#97](https://github.com/furancho-labs/Peer2Canvas/issues/97)   | Author English and Spanish tours for verified workflows    |
-| guided-onboarding/4.1   | [WP issue #92](https://github.com/furancho-labs/Peer2Canvas/issues/92) | [#94](https://github.com/furancho-labs/Peer2Canvas/issues/94)   | Verify onboarding isolation, keyboard access, and layout   |
+| OpenSpec task           | WP parent                                                              | Sub-issue                                                       | Task                                                  |
+| ----------------------- | ---------------------------------------------------------------------- | --------------------------------------------------------------- | ----------------------------------------------------- |
+| desktop-preferences/1.1 | [WP issue #93](https://github.com/furancho-labs/Peer2Canvas/issues/93) | [#96](https://github.com/furancho-labs/Peer2Canvas/issues/96)   | Define appearance and localization contracts          |
+| desktop-preferences/2.1 | [WP issue #93](https://github.com/furancho-labs/Peer2Canvas/issues/93) | [#95](https://github.com/furancho-labs/Peer2Canvas/issues/95)   | Add a persistent light and dark theme toggle          |
+| desktop-preferences/3.1 | [WP issue #93](https://github.com/furancho-labs/Peer2Canvas/issues/93) | [#100](https://github.com/furancho-labs/Peer2Canvas/issues/100) | Add English and natural Spanish language resources    |
+| desktop-preferences/4.1 | [WP issue #93](https://github.com/furancho-labs/Peer2Canvas/issues/93) | [#101](https://github.com/furancho-labs/Peer2Canvas/issues/101) | Verify desktop preferences across supported platforms |
+
+The maintainer approved local implementation of `desktop-preferences` with `editor-workspace-refresh` on 2026-11-13, advancing this bounded S8 scope ahead of S4. The workspace change supports the existing S3 editing/file/catalog/interchange requirements and the four WP-13 children above; it is not a new sprint or backlog. Issue bodies were read on that date and remain the external acceptance record. No issue/status/PR mutation is authorized in this local session. Cross-platform #101 and fluent human Spanish review in #100 must not be inferred from automated local tests.
+| guided-onboarding/1.1 | [WP issue #92](https://github.com/furancho-labs/Peer2Canvas/issues/92) | [#102](https://github.com/furancho-labs/Peer2Canvas/issues/102) | Audit implemented workflows and approve the tour inventory |
+| guided-onboarding/2.1 | [WP issue #92](https://github.com/furancho-labs/Peer2Canvas/issues/92) | [#103](https://github.com/furancho-labs/Peer2Canvas/issues/103) | Add an accessible spotlight and callout tour shell |
+| guided-onboarding/3.1 | [WP issue #92](https://github.com/furancho-labs/Peer2Canvas/issues/92) | [#97](https://github.com/furancho-labs/Peer2Canvas/issues/97) | Author English and Spanish tours for verified workflows |
+| guided-onboarding/4.1 | [WP issue #92](https://github.com/furancho-labs/Peer2Canvas/issues/92) | [#94](https://github.com/furancho-labs/Peer2Canvas/issues/94) | Verify onboarding isolation, keyboard access, and layout |
 
 Grouping discovery [#89](https://github.com/furancho-labs/Peer2Canvas/issues/89) is a child of WP-14/#91 in S9. It intentionally has no OpenSpec task mapping until the maintainer reviews its discovery output and approves the grouping contract.

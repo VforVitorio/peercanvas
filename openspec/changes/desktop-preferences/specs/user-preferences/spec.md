@@ -20,9 +20,19 @@ The system SHALL store the user's appearance and language choices separately fro
 - **WHEN** a supported application preference file lacks the new fields
 - **THEN** the application preserves existing fields, applies defaults for missing fields, and leaves diagram files unchanged
 
+#### Scenario: Save and update preferences concurrently
+
+- **WHEN** the last-document record and appearance/language choices are updated consecutively or concurrently
+- **THEN** serialized partial updates preserve all fields and a pre-migration backup remains available
+
+#### Scenario: A preference write fails
+
+- **WHEN** a selected preference cannot be persisted
+- **THEN** it applies for the current session with an accessible warning and no change to document content, revision, dirty state, or history
+
 ### Requirement: Let the user choose the editor theme
 
-The system SHALL provide an accessible control for choosing light or dark application chrome and SHALL keep diagram appearance independent from that choice.
+The system SHALL provide accessible System, Light, and Dark choices for application chrome and SHALL keep diagram appearance independent from that choice.
 
 #### Scenario: Switch from light to dark
 
@@ -33,6 +43,11 @@ The system SHALL provide an accessible control for choosing light or dark applic
 
 - **WHEN** no saved theme choice exists
 - **THEN** the application follows the operating-system appearance preference
+
+#### Scenario: Load saved preferences
+
+- **WHEN** native preference loading finishes after system appearance was initially displayed
+- **THEN** the saved preference takes effect without an initial animation or second persistent cache
 
 ### Requirement: Respect reduced motion during theme changes
 

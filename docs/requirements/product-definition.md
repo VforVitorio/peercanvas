@@ -130,12 +130,12 @@ The OpenSpec capability names below are the planned canonical capability contrac
 | FR-047 | User-facing Codex skills shall be authored only after the referenced tools are implemented and verified.               | User-Facing Codex Skills       |
 | FR-048 | The Codex integration shall be removable/disableable without disabling local editing.                                  | User-Facing Codex Skills       |
 | FR-049 | Published skills shall document required tools, permissions, installation, limits, and examples.                       | User-Facing Codex Skills       |
-| FR-050 | Users shall choose a light or dark application theme that persists separately from diagram content.                    | User Preferences               |
+| FR-050 | Users shall choose System, Light, or Dark application appearance that persists separately from diagram content.        | User Preferences               |
 | FR-051 | Users shall choose English or Spanish interface resources with locale-aware formatting and a defined fallback.         | Localization                   |
 | FR-052 | Users shall start, navigate, and close optional guided tours for verified PMV workflows without changing active work.  | Guided Onboarding              |
 | FR-053 | Users shall group and ungroup eligible diagram elements through validated document commands.                           | Document Model, Canvas Editing |
 
-FR-050..FR-052 have planned OpenSpec changes in `desktop-preferences` and `guided-onboarding`. FR-053 is proposed for S9; its membership rules and full contract remain pending discovery in WP-14.1/#89. These entries do not authorize implementation.
+FR-050..FR-051 are authorized for local implementation by the maintainer's 2026-11-13 request, together with `editor-workspace-refresh`. This advances the selected S8/WP-13 scope ahead of S4 and preserves FR-016 and the S3 document contracts. FR-052 remains planned in `guided-onboarding`; FR-053 remains proposed for S9 pending WP-14.1/#89. Their entries do not authorize implementation.
 
 ## Non-functional requirements
 
@@ -177,7 +177,7 @@ Targets below are proposed acceptance goals, not measured results. WP-01 and WP-
 | UC-12 | Onboarding        | Use a guided tour for a verified PMV workflow   | Local user       |
 | UC-13 | Canvas editing    | Group and ungroup eligible diagram elements     | Local user       |
 
-UC-11 and UC-12 are planned for S8 and S10. UC-13 remains proposed until WP-14.1/#89 defines the grouping behavior.
+UC-11 is authorized for local implementation ahead of S4 under the 2026-11-13 workspace refresh. UC-12 remains planned for S10. UC-13 remains proposed until WP-14.1/#89 defines the grouping behavior.
 
 ### UC-01: Create, open, edit, and save a local diagram
 
@@ -294,11 +294,13 @@ UC-11 and UC-12 are planned for S8 and S10. UC-13 remains proposed until WP-14.1
 - **Actors/roles:** local user.
 - **Preconditions:** the desktop application is open.
 - **Trigger/input:** the user changes the theme control or interface-language setting.
-- **Main flow:** select Light or Dark and English or Spanish; the application applies the choice and persists it separately from diagrams.
+- **Main flow:** select System, Light, or Dark and English or Spanish in Preferences; the application applies the choice and persists it separately from diagrams.
 - **Alternatives:** when no preference exists, a supported OS locale/appearance is used; unsupported language falls back to English.
-- **Errors:** a preference write failure leaves the active diagram unchanged and reports the problem.
+- **Errors:** a preference write failure applies the choice during the session, leaves the active diagram unchanged, and reports the problem. Invalid/missing preferences fall back safely and preserve the previous supported record before migration.
 - **Postconditions:** the chosen appearance and interface language are available after restart; document content and history are unchanged.
 - **Acceptance:** FR-050..FR-051, FR-016, and accessibility/reduced-motion checks.
+
+The accompanying `editor-workspace` contract reorganizes the implemented UC-01..UC-04 and UC-07 flows into a compact header, Shapes/Structure navigation, canvas, contextual inspector, and responsive drawers. It preserves the command boundary, existing shortcuts, recovery and draw.io confirmation guards. `html.lang`, accessible names, dialogs, help, status, errors, and formatting follow the selected interface locale; user-authored document text remains unchanged. Theme and language must leave document bytes, revision, dirty state, and history unchanged. Native/CI acceptance and fluent human Spanish review remain separate evidence gates.
 
 ### UC-12: Use guided onboarding for a verified PMV workflow
 

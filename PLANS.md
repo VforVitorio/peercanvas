@@ -180,13 +180,15 @@ Effort ranges are initial engineering estimates. They exclude release administra
 
 ### WP-13: Desktop appearance and language preferences
 
-- **Scope:** add persistent light/dark application appearance and English/Spanish interface language, separate from document content and history.
+- **Scope:** add persistent System/Light/Dark application appearance and English/Spanish interface language, separate from document content and history. The maintainer's 2026-11-13 implementation request advances this selected S8 work ahead of S4, together with the production editor workspace refresh.
 - **Requirements/spec:** FR-050..051 and UC-11; OpenSpec `desktop-preferences` (`user-preferences`, `localization`).
 - **Dependencies/components:** WP-03/#4; app preferences, theme tokens, language resources, accessibility labels.
 - **Acceptance:** appearance and language survive restart; theme switching leaves diagram paper, explicit styles, document revision, dirty state, and history unchanged; EN/ES resources are complete and Spanish copy is reviewed; transitions respect reduced motion.
 - **Tests/DoD:** preference migration, key/parameter parity, localized errors and labels, theme/locale checks on supported platforms.
 - **Effort/risk:** 5-8 PD; preserve `last_document` in the existing preference record and keep the canvas paper independent from theme.
 - **Issue / PR:** parent [#93](https://github.com/furancho-labs/Peer2Canvas/issues/93), children #95, #96, #100, and #101; milestone S8.
+
+The accompanying OpenSpec `editor-workspace-refresh` composes existing S3 features into a compact header/File menu, Shapes/Structure navigation, contextual inspector, and responsive drawers. It adds no collaboration, invitations, AI, MCP, grouping, onboarding, document schema, dependencies, or demo services. After implementation and verification, the maintainer separately authorized focused commits and a push of `feature/wp13-editor-preferences`. PR creation, merges, releases, and GitHub issue changes remain outside that authorization. Keep #101 and parent #93 open until cross-platform evidence is complete; #100 additionally requires fluent human Spanish review before closure.
 
 ### WP-14: Diagram grouping
 
@@ -233,6 +235,8 @@ S1 and S2 are complete on `main`. Promotion PR [#106](https://github.com/furanch
 | S8     | Desktop experience preferences         | WP-13        | persistent light/dark theme, English/Spanish resources, cross-platform preference evidence                                                |
 | S9     | Diagram grouping                       | WP-14        | reviewed grouping contract, validated group operations, persistence and undo/redo evidence                                                |
 | S10    | PMV onboarding                         | WP-15        | audited journey inventory and localized, accessible tours for verified PMV workflows                                                      |
+
+**Approved sequencing exception, 2026-11-13:** implement the bounded WP-13 appearance/language scope and `editor-workspace-refresh` locally after S3 and before S4. The sprint table retains the original milestone identities; this exception does not authorize other S8–S10 behavior or mark any acceptance gate complete.
 
 S1 and S2 are complete on `main`; PR #106 promoted the S1 persistence and S2 editor work and closed their issues and milestones. The eight required CI checks passed, and a macOS Tauri flow saved, closed, and reopened an edited diagram. Grouping is outside S2 and belongs to S9/WP-14, with discovery child #89; it did not block S2 closure. No product implementation for S3 or later is authorized by this planning update.
 

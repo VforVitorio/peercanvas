@@ -14,6 +14,12 @@ The system SHALL provide English and Spanish resources for all user-visible inte
 
 - **WHEN** the user selects English or Spanish
 - **THEN** the visible interface and its accessible names use the selected language
+- **AND** the document language attribute matches the selection while user-authored content stays unchanged
+
+#### Scenario: Translate a native error or loss report
+
+- **WHEN** native storage or draw.io interchange returns a stable message identifier with named parameters
+- **THEN** the interface renders its complete translated phrase without weakening validation, confirmations, or source-preservation guarantees
 
 #### Scenario: A translation is missing
 

@@ -1,6 +1,16 @@
 # PeerCanvas session handoff
 
-Last updated: 2026-11-12.
+Last updated: 2026-11-13.
+
+## Local workspace refresh checkpoint
+
+The maintainer authorized the production editor refresh and selected S8/WP-13 preferences ahead of S4. The implementation contains the compact header/File menu, Shapes/Structure navigation, contextual inspector, responsive drawers, shortcut help, and independent persistent System/Light/Dark and English/Spanish preferences. After verification, the maintainer authorized focused commits and a push of `feature/wp13-editor-preferences`. PR creation, merges, releases, issue mutations, and OpenSpec archive remain outside this authorization.
+
+Final local evidence: 333 TypeScript tests and 43 Rust tests pass; typecheck, lint, formatting, frontend build, Rust formatting, Clippy with warnings denied, and strict validation of all five OpenSpec changes pass. Chromium 153 checked 16 theme/language/window combinations and five keyboard/focus/draft/history scenarios. Real-package regression and rendered review also fixed a pre-existing invisible-connector adapter defect. The data format is unchanged; optional validated initial page/layer names localize newly created documents without rewriting existing content.
+
+See [workspace evidence and limitations](../development/editor-workspace.md). The native executable compiled and launched using an isolated QA identifier, but the UI controller could not inspect the unbundled application. Native file dialogs, preference restart/menu behavior, Windows/Linux native verification, CI, screen-reader review, and fluent human Spanish sign-off remain unverified. The existing icon-packaging issue #90 remains open. The browser checks are not native UI evidence.
+
+`editor-workspace-refresh` records the workspace implementation. `desktop-preferences` retains open human-language review and cross-platform acceptance tasks under #100/#101; do not close parent WP-13/#93 or describe this work as released. Collaboration, invitations, AI/provider/MCP, grouping, and onboarding remain unimplemented. The next acceptance work is the human Spanish review and native platform matrix. Current delivery authorization covers the focused commits and feature-branch push only.
 
 ## Current checkpoint
 
@@ -31,17 +41,17 @@ This was a source promotion. It did not publish an installer, declare minimum su
 
 ## Not implemented
 
-The product still lacks grouping, peer collaboration, invitations, real assistant/provider calls, and MCP. Delivered S3 behavior includes one reviewed first-party rectangle preview, offline search, safe SVG rendering, schema-v2 references, the asset/dependency license inventory, and the declared draw.io subset. Check live branch and board state before describing release availability. The app does not render connection labels on the canvas or support page/layer deletion and reordering. Icon packaging remains open under WP-11.6/#90. Do not describe planned S4–S10 work as implemented.
+The product still lacks grouping, peer collaboration, invitations, real assistant/provider calls, and MCP. Delivered S3 behavior includes one reviewed first-party rectangle preview, offline search, safe SVG rendering, schema-v2 references, the asset/dependency license inventory, and the declared draw.io subset. Check live branch and board state before describing release availability. The app does not render connection labels on the canvas or support page/layer deletion and reordering. Icon packaging remains open under WP-11.6/#90. Apart from the explicitly authorized local WP-13 checkpoint above, do not describe planned S4–S10 work as implemented.
 
 ## Roadmap after S2
 
 - S3 covers WP-05 (shape catalog) and WP-06 (draw.io interoperability). Both work packages, all child issues, and milestone #4 are complete on `main`.
 - S7: native icon packaging, WP-11.6/#90.
-- S8: desktop preferences and English/Spanish resources, WP-13/#93.
+- S8: desktop preferences and English/Spanish resources, WP-13/#93, locally implemented ahead of S4 by the 2026-11-13 authorization; human/native acceptance remains open.
 - S9: grouping, WP-14/#91; discovery issue #89 defines the semantics before implementation tasks are opened.
 - S10: PMV onboarding, WP-15/#92; the full user journey should determine how many tours are needed.
 
-The S7–S10 issues and OpenSpec proposals are planning only. No product implementation for them is approved by this handoff.
+The bounded WP-13 exception above is approved and locally implemented. Other S7–S10 issues and proposals remain planning only; their existence grants no implementation or publication permission.
 
 ## Repository workflow
 
@@ -62,4 +72,4 @@ The S7–S10 issues and OpenSpec proposals are planning only. No product impleme
 
 ## Next step
 
-Release PR #118 remains open for maintainer review; do not merge it without maintainer approval. PR #131 is the main-to-dev history sync after S3 promotion; verify its merged status and that protected `main` is an ancestor of `dev` before resuming. Do not start a later sprint without maintainer direction.
+Complete the outstanding WP-13 human Spanish and native platform acceptance from the checkpoint above. The maintainer authorized focused commits and the feature-branch push; further delivery steps require separate direction. This session did not recheck unrelated release PR #118 or authorize its merge. The branch starts from `origin/dev` at `b41362b`, including the S3 main-to-dev history sync through PR #131. Do not open a PR, merge, release, change issue status, or start another sprint without maintainer direction.
