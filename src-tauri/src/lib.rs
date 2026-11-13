@@ -89,7 +89,22 @@ pub fn run() {
     #[cfg(all(feature = "native-smoke", debug_assertions))]
     let builder = builder
         .plugin(tauri_plugin_wdio_webdriver::init())
-        .setup(|_app| {
+        .setup(|app| {
+            #[cfg(target_os = "linux")]
+            {
+                use tauri::Manager;
+                use webkit2gtk::{SettingsExt, WebViewExt};
+
+                let webview = app
+                    .get_webview_window("main")
+                    .ok_or_else(|| std::io::Error::other("main smoke window was not found"))?;
+                webview.with_webview(|webview| {
+                    if let Some(settings) = webview.inner().settings() {
+                        settings.set_enable_webrtc(true);
+                    }
+                })?;
+            }
+
             let report_path = std::env::var("PEERCANVAS_NATIVE_SMOKE_ENV_FILE")?;
             std::fs::write(report_path, tauri::webview_version()?)?;
             Ok(())
