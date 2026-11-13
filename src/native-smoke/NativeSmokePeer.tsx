@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// Test-only second WebView peer for the cross-platform collaboration smoke.
+// Test-only peer iframe inside the same native WebView as the smoke host.
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { getRelaySockets as getMqttRelaySockets } from "@trystero-p2p/mqtt";

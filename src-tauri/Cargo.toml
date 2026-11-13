@@ -18,7 +18,7 @@ crate-type = ["staticlib", "cdylib", "rlib"]
 tauri-build = { version = "2.7.2", features = [] }
 
 [features]
-native-smoke = ["dep:tauri-plugin-wdio-webdriver"]
+native-smoke = ["dep:tauri-plugin-wdio-webdriver", "dep:webkit2gtk"]
 
 [dependencies]
 base64 = "=0.23.1"
@@ -31,6 +31,9 @@ serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 tauri-plugin-wdio-webdriver = { version = "=1.5.1", optional = true }
 uuid = { version = "=1.29.1", features = ["v4"] }
+
+[target.'cfg(target_os = "linux")'.dependencies]
+webkit2gtk = { version = "=2.0.2", features = ["v2_38"], optional = true }
 
 # Read the optimization guideline for more details: https://tauri.app/concept/size/#cargo-configuration
 [profile.release]
