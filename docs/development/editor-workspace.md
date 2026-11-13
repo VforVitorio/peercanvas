@@ -1,6 +1,6 @@
 # Production editor workspace and preferences
 
-Status: implemented on the open `feature/wp13-editor-preferences` PR, 2026-11-13. Automated and browser checks below pass. The maintainer authorized focused commits and a source-branch push. Fluent human Spanish review and native platform integration remain open acceptance gates; this work is not merged or released.
+Status: implemented on open PR #132 (`feature/wp13-editor-preferences`), synchronized with current `dev` on 2026-11-13. All 15 CI checks, including native Linux/macOS/Windows, pass on head `4b5915f`. Fluent human Spanish review and native product interactions remain open acceptance gates; this work is not merged or released.
 
 ## Contract and scope
 
@@ -75,7 +75,7 @@ Code Review Graph was rebuilt with this repository's explicit absolute root and 
 
 The isolated native QA configuration used identifier `org.peercanvas.editor-refresh-qa` and the existing Vite server. `npm run tauri -- dev --no-watch --config /private/tmp/peercanvas-editor-refresh/native-qa.conf.json` compiled and launched the native executable. The computer-use controller could not select that unbundled app by name or executable path, so native file-dialog, preference-restart, menu, and WebView interactions were **not verified**. The QA child processes were stopped. No new installer/package claim is made, and the earlier icon-packaging issue remains under #90.
 
-The initial PR #132 CI run passed typecheck, lint, formatting, tests, frontend build, CodeQL, OSV, and Gitleaks, but its native-linux, native-macos, and native-windows checks failed. This branch is being synchronized with the S4 `dev` changes while preserving its frontend; rerun the native checks before merging. A screen-reader audit and fluent human Spanish sign-off were not performed. Keep #100, #101, and parent #93 open until those external acceptance requirements are satisfied. No OpenSpec change was archived.
+The initial PR #132 CI run failed its production-isolation check because it searched for English UI labels that the new locale resources no longer emit. The smoke now checks stable workspace/canvas class markers, and the synchronized branch passes all 15 CI checks. This verifies compilation and canvas smoke, not native file dialogs or preference-restart/menu interactions. A screen-reader audit and fluent human Spanish sign-off were not performed. Keep #100, #101, and parent #93 open until those acceptance requirements are satisfied. No OpenSpec change was archived.
 
 ## Traceability
 
