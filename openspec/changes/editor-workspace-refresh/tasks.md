@@ -21,6 +21,7 @@
 
 ## Workflow follow-up
 
-- The maintainer explicitly requested syncing Santiago's branch with current `dev` and merging PR #132 into `dev` after CI passes. This does not authorize promotion to `main`.
-- Native verification on Windows, macOS, and Linux remains tracked by desktop-preferences/4.1 and #101 until each platform has evidence.
+- All seven tasks in this change are complete and were delivered in Santiago's PR [#132](https://github.com/furancho-labs/Peer2Canvas/pull/132), merged into `dev` as `07a0662`; all 15 checks passed on the updated head. No promotion to `main` occurred.
+- This workspace refresh is part of the approved WP-13/#93 sequencing exception, not a separate work package. It composes existing S3 capabilities and does not complete S4 or close WP-13.
+- Native preference verification on Windows, macOS, and Linux remains tracked by `desktop-preferences/4.1` and #101 until each platform has evidence.
 - Archive only after the full contract and review gates are satisfied.

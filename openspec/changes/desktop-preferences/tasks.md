@@ -6,11 +6,12 @@
 
 ## 2. Appearance preference
 
-- [x] 2.1 Add the persistent light/dark control and theme tokens for production application chrome. Verify preference persistence, keyboard and accessible labels, paper/styled-diagram invariance, and reduced-motion behavior. — GitHub Issue [#95](https://github.com/furancho-labs/Peer2Canvas/issues/95)
+- [x] 2.1 Implement the persistent System/Light/Dark control and theme tokens for production application chrome. Automated checks cover keyboard access, accessible labels, paper/styled-diagram invariance, and reduced-motion behavior; native restore and immediate-quit evidence remains in task 4.1. — GitHub Issue [#95](https://github.com/furancho-labs/Peer2Canvas/issues/95)
 
 ## 3. English and Spanish resources
 
-- [ ] 3.1 Add complete English and Spanish resource files for implemented UI domains, wire them to the locale preference, and review Spanish copy for natural phrasing. Verify key/parameter parity, accessible labels, errors, formatting, and fallback behavior. — GitHub Issue [#100](https://github.com/furancho-labs/Peer2Canvas/issues/100)
+- [x] 3.1 Add complete English and Spanish resource files for implemented UI domains and wire them to the locale preference. Automated checks cover key/parameter parity, accessible labels, errors, formatting, and fallback behavior. — GitHub Issue [#100](https://github.com/furancho-labs/Peer2Canvas/issues/100)
+- [ ] 3.2 Have a fluent Spanish reviewer assess the shipped copy for natural phrasing and consistency against the glossary; record the reviewer and outcome. — GitHub Issue [#100](https://github.com/furancho-labs/Peer2Canvas/issues/100)
 
 ## 4. Platform integration
 
@@ -18,8 +19,7 @@
 
 ## Workflow follow-up
 
-- The maintainer explicitly authorized syncing and merging PR #132 into `dev` on 2026-11-13. This does not authorize promotion to `main`.
-- Task 2.1's theme control and automated behavior checks are implemented in PR #132. Keep #95 open until native restore and immediate-quit persistence are verified through #101.
-- Task 3.1 implementation and automated resource/copy checks are complete; fluent human Spanish sign-off required by #100 remains open.
+- PR [#132](https://github.com/furancho-labs/Peer2Canvas/pull/132) merged these implementation changes into `dev` as `07a0662` on 2026-11-13; all 15 checks passed on the updated head. `main` was not changed.
+- Tasks 1.1, 2.1, and 3.1 are implemented. Keep #95 open until native restore and immediate-quit persistence are verified through task 4.1/#101; keep #100 open until task 3.2 receives fluent human Spanish sign-off.
 - Task 4.1 remains open: local tests and native compilation/launch do not verify preference restart/dialog behavior on Windows, macOS, or Linux. Static review found an immediate-quit race and a durability warning that may remain after a successful retry; track both here.
 - Archive the change only after implementation, review, and acceptance evidence are complete.
