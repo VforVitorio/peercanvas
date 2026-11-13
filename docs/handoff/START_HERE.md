@@ -23,10 +23,10 @@ Last updated: 2026-11-13.
 - WP-06 CI passed all eight required contexts, CodeQL, OSV, Gitleaks, and the native jobs on Linux, macOS, and Windows. Local evidence: 231 TypeScript tests, 33 Rust tests, typecheck, lint, formatting, Clippy, strict OpenSpec validation, and optimized Rust compile passed. The Vite build succeeds with a JavaScript chunk over 500 kB.
 - A local macOS Tauri bundle attempt failed while generating the configured app icon (`No matching IconType`); native file-dialog UI smoke was not completed. Keep icon packaging in WP-11.6/#90.
 - S3 promotion PR [#130](https://github.com/furancho-labs/Peer2Canvas/pull/130) merged into `main` as `3940a07`. The required checks, CodeQL, OSV, and native jobs passed; milestone #4 is closed with all 10 S3 issues closed and Done on Project #4.
-- S4 milestone #5 is open; WP-07/#8 and children #35–#37 are In Progress on Project #4. WP-07.1/#35's contract is recorded; WP-07.2/#36 implementation and deterministic tests are on local branch `feature/s4-wp07-traceability`, not yet merged to `dev`. Release PR #118 remains open for maintainer review; do not merge it as part of S4.
+- S4 milestone #5 is open; WP-07/#8 and children #35–#37 are In Progress on Project #4. WP-07.1/#35's contract and WP-07.2/#36 implementation are in PR [#133](https://github.com/furancho-labs/Peer2Canvas/pull/133), open from `feature/s4-wp07-traceability` to `dev`. Its required checks are pending. Release PR #118 remains open for maintainer review; do not merge it as part of S4.
 - WP-07.2 now contains host-sequenced validated commands, initial checkpoint/commit-tail synchronization, reconnect handling, transient awareness, and a replaceable Trystero 0.26 transport. `npm test` passed 246 tests; typecheck, lint, formatting, strict OpenSpec validation, and runtime dependency audit passed. The normal Vite build passes with the existing 927 kB chunk warning.
 - On macOS 27.2.1 arm64 / WebKit 22625.2.8.11.9, the canvas-only native smoke passed. The optional loopback and public-MQTT peer modes gathered `host` and `srflx` candidates, but ICE stayed `checking` and neither same-Mac peer became ready. The public mode negotiated MQTT WebSocket subprotocols with all three brokers; separate Node MQTT CONNECT checks also passed. These results do not establish LAN, cross-device, NAT, or TURN connectivity. No TURN credentials are available; #37 stays open for a second device/network and a valid TURN test.
-- S4 code has not been pushed and no S4 issue is closed. The collaboration code is not wired into the product UI; sharing/invitation, admission, roles, and participant management remain WP-08/S5.
+- PR #133 is pushed; no S4 issue is closed before merge. The collaboration code is not wired into the product UI; sharing/invitation, admission, roles, and participant management remain WP-08/S5.
 
 ## Delivered product behavior
 
@@ -41,7 +41,7 @@ The product on `main`/`dev` still lacks peer collaboration, invitations, groupin
 ## Roadmap after S3
 
 - S3 covers WP-05 (shape catalog) and WP-06 (draw.io interoperability). Both work packages, all child issues, and milestone #4 are complete on `main`.
-- S4 covers WP-07 (validated Yjs synchronization and replaceable transport). The #35 contract is recorded; #36 has implementation and deterministic-test evidence on the local feature branch; #37's real network matrix is still open. Do not start WP-08/S5 until S4 is closed.
+- S4 covers WP-07 (validated Yjs synchronization and replaceable transport). PR #133 delivers #35/#36 after checks pass; #37's real network matrix is still open. Do not start WP-08/S5 until S4 is closed.
 - S5 covers WP-08 (secure invitations, admission, roles, participant presence, and revocation) and depends on WP-07.
 - S6 covers WP-09 and WP-10 (optional Codex assistant and MCP tools); both remain planned work.
 - S7: native icon packaging, WP-11.6/#90.
@@ -71,4 +71,4 @@ The S7–S10 issues and OpenSpec proposals are planning only. No product impleme
 
 ## Next step
 
-Finish WP-07.3/#37 with an independent device/network and valid TURN test credentials if required, then reconcile the evidence with ADR-0002 and close S4 only after the acceptance matrix passes. Refresh `main`, `dev`, PRs, issues, milestone, and Project Board before integration. Release PR #118 remains open for maintainer review and is unrelated to S4.
+Wait for PR #133's required checks; merge it into `dev` only if they pass, then mark #35/#36 Done. Finish WP-07.3/#37 with an independent device/network and valid TURN test credentials if required, then reconcile the evidence with ADR-0002 and promote S4 to `main` only after the acceptance matrix passes. Refresh refs, PRs, issues, milestone, and Project Board before each integration. Release PR #118 remains open for maintainer review and is unrelated to S4.
