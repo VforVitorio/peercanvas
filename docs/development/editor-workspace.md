@@ -1,6 +1,6 @@
 # Production editor workspace and preferences
 
-Status: implemented on open PR #132 (`feature/wp13-editor-preferences`), synchronized with current `dev` on 2026-11-13. All 15 CI checks, including native Linux/macOS/Windows, pass on head `4b5915f`. Fluent human Spanish review and native product interactions remain open acceptance gates; this work is not merged or released.
+Status: PR #132 carries the WP-13 workspace/preferences implementation into the `dev` integration branch. This work is not promoted to `main` or released. The PR has been synchronized with the current `dev` lineage; see its live checks for CI status. Fluent human Spanish review and native product interactions remain open acceptance gates.
 
 ## Contract and scope
 
@@ -75,7 +75,7 @@ Code Review Graph was rebuilt with this repository's explicit absolute root and 
 
 The isolated native QA configuration used identifier `org.peercanvas.editor-refresh-qa` and the existing Vite server. `npm run tauri -- dev --no-watch --config /private/tmp/peercanvas-editor-refresh/native-qa.conf.json` compiled and launched the native executable. The computer-use controller could not select that unbundled app by name or executable path, so native file-dialog, preference-restart, menu, and WebView interactions were **not verified**. The QA child processes were stopped. No new installer/package claim is made, and the earlier icon-packaging issue remains under #90.
 
-The initial PR #132 CI run failed its production-isolation check because it searched for English UI labels that the new locale resources no longer emit. The smoke now checks stable workspace/canvas class markers, and the synchronized branch passes all 15 CI checks. This verifies compilation and canvas smoke, not native file dialogs or preference-restart/menu interactions. A screen-reader audit and fluent human Spanish sign-off were not performed. Keep #100, #101, and parent #93 open until those acceptance requirements are satisfied. No OpenSpec change was archived.
+The initial PR #132 CI run failed its production-isolation check because it searched for English UI labels that the new locale resources no longer emit. The smoke now checks stable workspace/canvas class markers. CI verifies compilation and canvas smoke, not native file dialogs or preference-restart/menu interactions. A screen-reader audit and fluent human Spanish sign-off were not performed. Static review found an immediate-quit race (the UI can exit before the queued preference `drain()` finishes) and a durability warning that may stay visible after a successful retry. Keep #95, #100, #101, and parent #93 open until these issues and acceptance requirements are resolved. No OpenSpec change was archived.
 
 ## Traceability
 
@@ -83,4 +83,4 @@ The initial PR #132 CI run failed its production-isolation check because it sear
 - Contracts: `openspec/changes/editor-workspace-refresh` and `openspec/changes/desktop-preferences`.
 - Work package: WP-13/#93; children #96 (contracts), #95 (appearance), #100 (localization), #101 (platform integration).
 - Data decisions: ADR-0003, ADR-0006, ADR-0007. Risks: R-14, R-19, R-20 and native evidence risk R-11.
-- The maintainer subsequently authorized focused commits and a push of `feature/wp13-editor-preferences`. PR creation, issue mutations, merges, and releases are outside that authorization.
+- The maintainer explicitly requested syncing Santiago's branch with current `dev` and merging PR #132 into `dev` after the updated CI passes; no promotion to `main` is authorized here.

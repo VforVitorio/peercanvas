@@ -21,6 +21,6 @@
 
 ## Workflow follow-up
 
-- The maintainer separately authorized focused commits and a push of `feature/wp13-editor-preferences` after implementation. PR creation, merges, releases, and issue mutations remain outside that authorization.
+- The maintainer explicitly requested syncing Santiago's branch with current `dev` and merging PR #132 into `dev` after CI passes. This does not authorize promotion to `main`.
 - Native verification on Windows, macOS, and Linux remains tracked by desktop-preferences/4.1 and #101 until each platform has evidence.
 - Archive only after the full contract and review gates are satisfied.

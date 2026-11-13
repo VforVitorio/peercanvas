@@ -14,11 +14,12 @@
 
 ## 4. Platform integration
 
-- [ ] 4.1 Verify preference restore and switching across Windows, macOS, and Linux. Confirm that theme and language changes do not mutate document bytes, revision, dirty state, or undo history; record native and automated evidence separately. — GitHub Issue [#101](https://github.com/furancho-labs/Peer2Canvas/issues/101)
+- [ ] 4.1 Verify preference restore and switching across Windows, macOS, and Linux. Confirm that theme and language changes do not mutate document bytes, revision, dirty state, or undo history; verify an immediate app exit drains queued preference writes or reports a failed save, and that a successful retry clears stale durability warnings; record native and automated evidence separately. — GitHub Issue [#101](https://github.com/furancho-labs/Peer2Canvas/issues/101)
 
 ## Workflow follow-up
 
-- The maintainer approved implementation and final corrections on 2026-11-13, then separately authorized focused commits and a feature-branch push. Merges and releases remain outside that authorization.
+- The maintainer explicitly authorized syncing and merging PR #132 into `dev` on 2026-11-13. This does not authorize promotion to `main`.
+- Task 2.1's theme control and automated behavior checks are implemented in PR #132. Keep #95 open until native restore and immediate-quit persistence are verified through #101.
 - Task 3.1 implementation and automated resource/copy checks are complete; fluent human Spanish sign-off required by #100 remains open.
-- Task 4.1 remains open: local macOS Rust tests and native compilation/launch do not prove native preference restart/dialog behavior on Windows, macOS, or Linux.
+- Task 4.1 remains open: local tests and native compilation/launch do not verify preference restart/dialog behavior on Windows, macOS, or Linux. Static review found an immediate-quit race and a durability warning that may remain after a successful retry; track both here.
 - Archive the change only after implementation, review, and acceptance evidence are complete.

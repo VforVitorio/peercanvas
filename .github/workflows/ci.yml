@@ -11,6 +11,11 @@ on:
         required: false
         default: false
         type: boolean
+      turn_smoke:
+        description: Run a forced local TURN smoke on macOS with ephemeral credentials
+        required: false
+        default: false
+        type: boolean
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.run_id }}
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
@@ -174,6 +179,12 @@ jobs:
       - name: Run public peer smoke (macOS and Windows)
         if: ${{ inputs.peer_smoke && runner.os != 'Linux' }}
         run: npm run native-smoke:public
+      - name: Install coturn for forced local TURN smoke
+        if: ${{ inputs.turn_smoke && runner.os == 'macOS' }}
+        run: brew install coturn
+      - name: Run forced local TURN peer smoke (macOS)
+        if: ${{ inputs.turn_smoke && runner.os == 'macOS' }}
+        run: npm run native-smoke:turn-local
       - name: Reject native-smoke feature in release builds
         if: ${{ !cancelled() && runner.os == 'Linux' && (needs.native-scope.result != 'success' || (success() && needs.native-scope.outputs.smoke == 'true')) }}
         shell: bash
@@ -186,7 +197,7 @@ jobs:
           test "$result" -ne 0
           grep -F "native-smoke feature cannot be used in a release build" src-tauri/target/native-smoke/release-guard.log
       - name: Upload native compatibility evidence
-        if: ${{ always() && (needs.native-scope.outputs.smoke == 'true' || needs.native-scope.result != 'success') }}
+        if: ${{ always() && (inputs.turn_smoke || needs.native-scope.outputs.smoke == 'true' || needs.native-scope.result != 'success') }}
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: native-smoke-${{ runner.os }}

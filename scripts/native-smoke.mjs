@@ -2,9 +2,10 @@ import assert from "node:assert/strict";
 import { Buffer } from "node:buffer";
 import { spawn, execFileSync } from "node:child_process";
 import console from "node:console";
+import { randomBytes } from "node:crypto";
 import { once } from "node:events";
-import { mkdir, readFile, readdir, rm, writeFile } from "node:fs/promises";
-import { createServer } from "node:net";
+import { mkdir, mkdtemp, readFile, readdir, rm, writeFile } from "node:fs/promises";
+import { createConnection, createServer } from "node:net";
 import os from "node:os";
 import path from "node:path";
 import process from "node:process";
@@ -88,14 +89,24 @@ if (process.argv[2] === "--check-production") {
     canvas: { runPeers: false, usePublicRelay: false },
     "peers-local": { runPeers: true, usePublicRelay: false },
     "peers-public": { runPeers: true, usePublicRelay: true },
+    "peers-turn-local": { runPeers: true, usePublicRelay: false, useLocalTurn: true },
   };
   const mode = process.argv[2] ?? "canvas";
-  assert(modes[mode], "Use canvas, peers-local, or peers-public native-smoke mode");
+  assert(
+    modes[mode],
+    "Use canvas, peers-local, peers-public, or peers-turn-local native-smoke mode",
+  );
   await runNativeSmoke(modes[mode]);
 }
 
-async function runNativeSmoke({ runPeers, usePublicRelay }) {
-  const artifactSuffix = !runPeers ? "" : usePublicRelay ? "-public" : "-peers";
+async function runNativeSmoke({ runPeers, usePublicRelay, useLocalTurn = false }) {
+  const artifactSuffix = !runPeers
+    ? ""
+    : useLocalTurn
+      ? "-turn"
+      : usePublicRelay
+        ? "-public"
+        : "-peers";
   const artifactPlatform = `${process.platform}${artifactSuffix}`;
   const artifacts = path.join(root, "src-tauri", "target", "native-smoke", artifactPlatform);
   await rm(artifacts, { recursive: true, force: true });
@@ -109,6 +120,7 @@ async function runNativeSmoke({ runPeers, usePublicRelay }) {
   );
 
   let relay = null;
+  let localTurnService = null;
   let relayUrl = "public";
   const relayMessageCounts = { subscribe: 0, publish: 0, unsubscribe: 0, malformed: 0, other: 0 };
   const relayTopicActivity = new Map();
@@ -182,9 +194,11 @@ async function runNativeSmoke({ runPeers, usePublicRelay }) {
     fixture: "two rectangles and one arrow; memory only",
     networkCondition: !runPeers
       ? "The canvas-only native smoke does not start peer networking"
-      : usePublicRelay
-        ? "Collaboration smoke uses the configured public MQTT signaling allowlist and Trystero's public Google/Cloudflare STUN defaults"
-        : "External renderer endpoints denied; collaboration smoke uses an ephemeral loopback WebSocket relay and Trystero's public Google/Cloudflare STUN defaults",
+      : useLocalTurn
+        ? "Forced local TURN through an ephemeral loopback coturn server; no public STUN/TURN service"
+        : usePublicRelay
+          ? "Collaboration smoke uses the configured public MQTT signaling allowlist and Trystero's public Google/Cloudflare STUN defaults"
+          : "External renderer endpoints denied; collaboration smoke uses an ephemeral loopback WebSocket relay and Trystero's public Google/Cloudflare STUN defaults",
     inputMethod:
       "Embedded WebDriver synthetic pointer/mouse events; trusted host input isolated in the test window",
     checks: [],
@@ -326,6 +340,7 @@ async function runNativeSmoke({ runPeers, usePublicRelay }) {
   }
 
   try {
+    if (useLocalTurn) localTurnService = await startLocalTurnServer();
     await waitFor(() => request("/status").catch(() => null), "embedded WebDriver startup");
     const created = await waitFor(
       () =>
@@ -413,8 +428,8 @@ async function runNativeSmoke({ runPeers, usePublicRelay }) {
 
     if (runPeers) {
       const peerInitial = await executeAsync(
-        "window.__PEERCANVAS_NATIVE_SMOKE__?.startPeerTest(arguments[0])",
-        [relayUrl],
+        "window.__PEERCANVAS_NATIVE_SMOKE__?.startPeerTest(arguments[0], arguments[1])",
+        localTurnService ? [relayUrl, localTurnService.rtcConfig] : [relayUrl],
       );
       assert.equal(
         peerInitial.host.status,
@@ -431,6 +446,21 @@ async function runNativeSmoke({ runPeers, usePublicRelay }) {
       const peerEdit = await executeAsync("window.__PEERCANVAS_NATIVE_SMOKE__?.submitPeerEdit()");
       assert.equal(peerEdit.reply.status, "accepted", "Host rejected a valid peer edit");
       assert.equal(peerEdit.sameDocument, true, "Host and participant diverged after a peer edit");
+      if (useLocalTurn) {
+        const links = [...peerEdit.hostLinks, ...peerEdit.peerLinks];
+        assert(
+          links.length > 0 &&
+            links.every(
+              (link) =>
+                link.connectionState === "connected" &&
+                ["connected", "completed"].includes(link.iceConnectionState) &&
+                link.localCandidateType === "relay" &&
+                link.remoteCandidateType === "relay",
+            ),
+          "Peer connection did not use a confirmed TURN relay candidate pair",
+        );
+        report.checks.push("host and participant selected a connected TURN relay candidate pair");
+      }
 
       const peerReconnect = await executeAsync(
         "window.__PEERCANVAS_NATIVE_SMOKE__?.reconnectPeer()",
@@ -453,7 +483,19 @@ async function runNativeSmoke({ runPeers, usePublicRelay }) {
         signaling: usePublicRelay
           ? "Trystero MQTT over the configured public broker allowlist"
           : "Trystero WebSocket relay on loopback",
-        iceConfiguration: "Trystero public Google/Cloudflare STUN defaults; no TURN credentials",
+        iceConfiguration: useLocalTurn
+          ? "Forced relay through an ephemeral loopback coturn server with random in-memory test credentials"
+          : "Trystero public Google/Cloudflare STUN defaults; no TURN credentials",
+        ...(useLocalTurn
+          ? {
+              turnServer: {
+                implementation: "coturn",
+                version: localTurnService.version,
+                listenAddress: "127.0.0.1",
+                credentials: "random and temporary; never included in the report",
+              },
+            }
+          : {}),
         initialSync: {
           hostStatus: peerInitial.host.status,
           peerStatus: peerInitial.peer.status,
@@ -552,6 +594,16 @@ async function runNativeSmoke({ runPeers, usePublicRelay }) {
     }
     process.removeListener("SIGINT", terminate);
     process.removeListener("SIGTERM", terminate);
+    try {
+      if (localTurnService) {
+        await localTurnService.stop();
+        report.checks.push("ephemeral TURN process and temporary credential file cleaned up");
+      }
+    } catch (error) {
+      report.status = "failed";
+      report.cleanupError = `Local TURN server did not stop cleanly: ${String(error)}`;
+      process.exitCode = 1;
+    }
     await relay?.close().catch((error) => {
       report.status = "failed";
       report.cleanupError = `Local signaling relay did not stop cleanly: ${String(error)}`;
@@ -586,5 +638,124 @@ async function runNativeSmoke({ runPeers, usePublicRelay }) {
         2,
       ),
     );
+  }
+}
+
+async function startLocalTurnServer() {
+  assert.equal(process.platform, "darwin", "The local TURN smoke is limited to macOS runners.");
+
+  const portProbe = createServer();
+  portProbe.listen(0, "127.0.0.1");
+  await once(portProbe, "listening");
+  const address = portProbe.address();
+  assert(typeof address === "object" && address, "Could not reserve a loopback TURN port.");
+  await new Promise((resolve, reject) =>
+    portProbe.close((error) => (error ? reject(error) : resolve())),
+  );
+
+  const version = execFileSync("turnserver", ["--version"], {
+    encoding: "utf8",
+    timeout: 5000,
+  }).trim();
+  const temporaryDirectory = await mkdtemp(path.join(os.tmpdir(), "peercanvas-turn-"));
+  const configPath = path.join(temporaryDirectory, "turnserver.conf");
+  const username = randomBytes(16).toString("hex");
+  const credential = randomBytes(32).toString("hex");
+  const configuration = [
+    "listening-ip=127.0.0.1",
+    "relay-ip=127.0.0.1",
+    `listening-port=${address.port}`,
+    "min-port=49160",
+    "max-port=49180",
+    "realm=peercanvas.test",
+    "lt-cred-mech",
+    `user=${username}:${credential}`,
+    "allow-loopback-peers",
+    "no-cli",
+    "no-tls",
+    "no-dtls",
+    "no-multicast-peers",
+    "no-stdout-log",
+    "log-file=/dev/null",
+  ].join("\n");
+  try {
+    await writeFile(configPath, `${configuration}\n`, { mode: 0o600 });
+  } catch (error) {
+    await rm(temporaryDirectory, { recursive: true, force: true });
+    throw error;
+  }
+
+  const server = spawn("turnserver", ["-f", "-c", configPath], {
+    stdio: "ignore",
+    windowsHide: true,
+  });
+  let launchError;
+  server.on("error", (error) => {
+    launchError = error;
+  });
+
+  const stop = async () => {
+    try {
+      if (server.exitCode === null && server.signalCode === null) {
+        const stopped = once(server, "exit").catch(() => {});
+        server.kill("SIGTERM");
+        await Promise.race([stopped, delay(3000)]);
+      }
+      if (server.exitCode === null && server.signalCode === null) {
+        const stopped = once(server, "exit").catch(() => {});
+        server.kill("SIGKILL");
+        await Promise.race([stopped, delay(3000)]);
+      }
+      assert(
+        server.exitCode !== null || server.signalCode !== null,
+        "Local TURN process did not exit after termination.",
+      );
+    } finally {
+      await rm(temporaryDirectory, { recursive: true, force: true });
+    }
+  };
+
+  try {
+    const deadline = Date.now() + 10_000;
+    let ready = false;
+    while (Date.now() < deadline && !ready) {
+      if (launchError) throw launchError;
+      if (server.exitCode !== null || server.signalCode !== null)
+        throw new Error("Local TURN process exited before accepting connections.");
+      try {
+        await new Promise((resolve, reject) => {
+          const socket = createConnection({ host: "127.0.0.1", port: address.port });
+          socket.once("connect", () => {
+            socket.destroy();
+            resolve();
+          });
+          socket.once("error", (error) => {
+            socket.destroy();
+            reject(error);
+          });
+        });
+        ready = true;
+      } catch {
+        await delay(100);
+      }
+    }
+    assert(ready, "Local TURN server did not start listening.");
+    return {
+      rtcConfig: {
+        iceServers: [
+          {
+            urls: `turn:127.0.0.1:${address.port}?transport=udp`,
+            username,
+            credential,
+          },
+        ],
+        iceTransportPolicy: "relay",
+      },
+      version,
+      stop,
+    };
+  } catch {
+    await stop().catch(() => {});
+    throw new Error("Could not start the isolated local TURN smoke service.");
   }
 }

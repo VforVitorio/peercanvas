@@ -24,6 +24,7 @@ export type NativePeerConnectionOptions = {
   password: string;
   relayUrl: string;
   hostPeerId: string;
+  rtcConfig?: RTCConfiguration;
 };
 
 export type NativePeerSnapshot = {
@@ -94,6 +95,7 @@ export default function NativeSmokePeer() {
           roomId: options.roomId,
           password: options.password,
           ...localRelayOptions,
+          ...(options.rtcConfig ? { rtcConfig: options.rtcConfig } : {}),
         });
         identityMatchesHost.current = nextTransport.peerId === options.hostPeerId;
         const nextSession = new PeerDocumentSession({
