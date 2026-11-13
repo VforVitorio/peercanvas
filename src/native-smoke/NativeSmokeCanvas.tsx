@@ -70,7 +70,7 @@ declare global {
   interface Window {
     __PEERCANVAS_NATIVE_SMOKE__?: {
       snapshot: () => unknown;
-      startPeerTest: (relayUrl: string) => Promise<PeerSmokeInitial>;
+      startPeerTest: (relayUrl: string, rtcConfig?: RTCConfiguration) => Promise<PeerSmokeInitial>;
       submitPeerEdit: () => Promise<PeerSmokeReport["afterEdit"]>;
       reconnectPeer: () => Promise<PeerSmokeReport["afterReconnect"]>;
       stopHost: () => Promise<PeerSmokeReport["afterHostLoss"]>;
@@ -106,7 +106,7 @@ class NativePeerSmokeHarness {
   private peerApi: NativePeerApi | null = null;
   private peerOptions: NativePeerConnectionOptions | null = null;
 
-  async start(relayUrl: string): Promise<PeerSmokeInitial> {
+  async start(relayUrl: string, rtcConfig?: RTCConfiguration): Promise<PeerSmokeInitial> {
     await this.close();
     try {
       installNativeIceDiagnostics();
@@ -116,7 +116,7 @@ class NativePeerSmokeHarness {
       const password = Array.from(crypto.getRandomValues(new Uint8Array(32)), (byte) =>
         byte.toString(16).padStart(2, "0"),
       ).join("");
-      this.peerOptions = { roomId, password, relayUrl, hostPeerId: "" };
+      this.peerOptions = { roomId, password, relayUrl, hostPeerId: "", rtcConfig };
       const localRelayOptions =
         relayUrl === "public"
           ? {}
@@ -129,6 +129,7 @@ class NativePeerSmokeHarness {
         roomId,
         password,
         ...localRelayOptions,
+        ...(rtcConfig ? { rtcConfig } : {}),
       });
       this.hostTransportErrors = [];
       this.hostTransport.onError((error) => this.hostTransportErrors.push(error));
@@ -420,7 +421,7 @@ export default function NativeSmokeCanvas() {
     });
 
     window.__PEERCANVAS_NATIVE_SMOKE__ = {
-      startPeerTest: (relayUrl) => peerHarness.start(relayUrl),
+      startPeerTest: (relayUrl, rtcConfig) => peerHarness.start(relayUrl, rtcConfig),
       submitPeerEdit: () => peerHarness.submitPeerEdit(),
       reconnectPeer: () => peerHarness.reconnectPeer(),
       stopHost: () => peerHarness.stopHost(),
