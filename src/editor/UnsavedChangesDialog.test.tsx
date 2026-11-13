@@ -1,5 +1,6 @@
 import { cleanup, fireEvent, render, screen, within } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { I18nProvider } from "../i18n";
 import UnsavedChangesDialog from "./UnsavedChangesDialog";
 
 const handlers = () => ({
@@ -87,5 +88,51 @@ describe("UnsavedChangesDialog", () => {
     rerender(<UnsavedChangesDialog {...props} />);
     fireEvent.click(screen.getByRole("button", { name: "Save" }));
     expect(props.onSave).toHaveBeenCalledOnce();
+  });
+
+  it("parks focus on the dialog while saving and returns it to Cancel afterwards", () => {
+    const props = handlers();
+    const { rerender } = render(<UnsavedChangesDialog {...props} />);
+    const dialog = screen.getByRole("alertdialog");
+    const cancel = within(dialog).getByRole("button", { name: "Cancel" });
+    expect(document.activeElement).toBe(cancel);
+    rerender(<UnsavedChangesDialog {...props} busy />);
+    expect(document.activeElement).toBe(dialog);
+    // Nothing is focusable while saving, so Tab cannot leave the prompt.
+    expect(fireEvent.keyDown(dialog, { key: "Tab" })).toBe(false);
+    expect(fireEvent.keyDown(dialog, { key: "Tab", shiftKey: true })).toBe(false);
+    rerender(<UnsavedChangesDialog {...props} error="Could not save." />);
+    expect(document.activeElement).toBe(cancel);
+  });
+
+  it("is fully translated and retranslates when the language changes", () => {
+    const props = handlers();
+    const { rerender } = render(
+      <I18nProvider locale="es">
+        <UnsavedChangesDialog {...props} busy error="No se pudo guardar el archivo." />
+      </I18nProvider>,
+    );
+    const dialog = screen.getByRole("alertdialog", { name: "Cambios pendientes" });
+    expect(
+      within(dialog).getByText("¿Quieres guardar los cambios antes de continuar?"),
+    ).toBeTruthy();
+    expect(within(dialog).getByRole("status").textContent).toBe("Guardando…");
+    // The owner's already-translated error text is shown untouched.
+    expect(within(dialog).getByRole("alert").textContent).toBe("No se pudo guardar el archivo.");
+    rerender(
+      <I18nProvider locale="es">
+        <UnsavedChangesDialog {...props} />
+      </I18nProvider>,
+    );
+    for (const name of ["Cancelar", "Descartar", "Guardar"]) {
+      expect(within(dialog).getByRole("button", { name })).toBeTruthy();
+    }
+    rerender(
+      <I18nProvider locale="en">
+        <UnsavedChangesDialog {...props} />
+      </I18nProvider>,
+    );
+    expect(screen.getByRole("alertdialog", { name: "Unsaved changes" })).toBe(dialog);
+    expect(within(dialog).getByRole("button", { name: "Discard" })).toBeTruthy();
   });
 });

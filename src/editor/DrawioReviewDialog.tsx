@@ -1,8 +1,13 @@
-import { useEffect, useRef, type KeyboardEvent } from "react";
+import { useRef } from "react";
+import { useI18n } from "../i18n";
+import Dialog from "./ui/Dialog";
+import "./UnsavedChangesDialog.css";
 
 export type DrawioReview = {
   kind: "import" | "export";
+  /** The user's file name, shown untouched. */
   displayName?: string;
+  /** Already translated by the owner, one entry per reported loss, in reported order. */
   losses: string[];
   preservedFragmentCount: number;
 };
@@ -15,82 +20,61 @@ type Props = {
 };
 
 export default function DrawioReviewDialog({ review, busy, onConfirm, onCancel }: Props) {
-  const dialog = useRef<HTMLDialogElement>(null);
+  const { t } = useI18n();
   const cancel = useRef<HTMLButtonElement>(null);
   const isImport = review.kind === "import";
-
-  useEffect(() => {
-    const previous = document.activeElement instanceof HTMLElement ? document.activeElement : null;
-    const element = dialog.current!;
-    element.showModal();
-    cancel.current?.focus();
-    return () => {
-      element.close();
-      previous?.focus();
-    };
-  }, []);
-
-  useEffect(() => {
-    if (busy) dialog.current?.focus();
-  }, [busy]);
-
-  function containFocus(event: KeyboardEvent<HTMLDialogElement>) {
-    if (event.key !== "Tab") return;
-    const buttons = Array.from(
-      event.currentTarget.querySelectorAll<HTMLButtonElement>("button:not(:disabled)"),
-    );
-    if (buttons.length === 0) {
-      event.preventDefault();
-      return;
-    }
-    const first = buttons[0];
-    const last = buttons[buttons.length - 1];
-    if (
-      event.shiftKey &&
-      (document.activeElement === first || document.activeElement === event.currentTarget)
-    ) {
-      event.preventDefault();
-      last.focus();
-    } else if (!event.shiftKey && document.activeElement === last) {
-      event.preventDefault();
-      first.focus();
-    }
-  }
+  const hasLosses = review.losses.length > 0;
 
   return (
-    <dialog
-      ref={dialog}
-      className="pc-unsaved-dialog"
-      role={review.losses.length > 0 ? "alertdialog" : "dialog"}
-      aria-labelledby="pc-drawio-title"
-      aria-describedby={
-        review.losses.length > 0
-          ? "pc-drawio-description pc-drawio-loss-list"
-          : "pc-drawio-description"
+    <Dialog
+      role={hasLosses ? "alertdialog" : "dialog"}
+      title={isImport ? t("documents.drawio.importTitle") : t("documents.drawio.exportTitle")}
+      description={
+        isImport
+          ? review.displayName
+            ? t("documents.drawio.importPrompt", { name: review.displayName })
+            : t("documents.drawio.importPromptUnnamed")
+          : t("documents.drawio.exportPrompt")
       }
-      aria-busy={busy}
-      tabIndex={-1}
-      onKeyDown={containFocus}
-      onCancel={(event) => {
-        event.preventDefault();
-        if (!busy) void onCancel();
-      }}
+      titleId="pc-drawio-title"
+      descriptionId="pc-drawio-description"
+      describedBy={
+        hasLosses ? "pc-drawio-description pc-drawio-loss-list" : "pc-drawio-description"
+      }
+      className="pc-unsaved-dialog"
+      busy={busy}
+      onClose={() => void onCancel()}
+      initialFocusRef={cancel}
+      footer={
+        <>
+          <button
+            className="pc-btn"
+            type="button"
+            ref={cancel}
+            disabled={busy}
+            onClick={() => void onCancel()}
+          >
+            {t("documents.drawio.cancel")}
+          </button>
+          <button
+            className="pc-btn pc-primary"
+            type="button"
+            disabled={busy}
+            onClick={() => void onConfirm()}
+          >
+            {isImport ? t("documents.drawio.confirmImport") : t("documents.drawio.confirmExport")}
+          </button>
+        </>
+      }
     >
-      <h2 id="pc-drawio-title">{isImport ? "Review draw.io import" : "Review draw.io export"}</h2>
-      <p id="pc-drawio-description">
-        {isImport
-          ? `Import ${review.displayName ?? "this file"} as a new unsaved document? The source file will remain unchanged.`
-          : "Export the current diagram to a new draw.io file?"}
-      </p>
       {review.preservedFragmentCount > 0 && (
         <p className="pc-drawio-preserved" role="status">
-          {review.preservedFragmentCount} safe source fragments will be retained but not rendered in
-          PeerCanvas.
+          {t("documents.drawio.preserved", { count: review.preservedFragmentCount })}
         </p>
       )}
-      {review.losses.length > 0 ? (
+      {hasLosses ? (
         <section className="pc-drawio-losses" aria-labelledby="pc-drawio-losses-heading">
-          <h3 id="pc-drawio-losses-heading">Known compatibility losses</h3>
+          <h3 id="pc-drawio-losses-heading">{t("documents.drawio.lossesTitle")}</h3>
           <ul id="pc-drawio-loss-list">
             {review.losses.map((loss, index) => (
               <li key={`${index}-${loss}`}>{loss}</li>
@@ -98,28 +82,9 @@ export default function DrawioReviewDialog({ review, busy, onConfirm, onCancel }
           </ul>
         </section>
       ) : (
-        <p>No known compatibility losses.</p>
+        <p>{t("documents.drawio.noLosses")}</p>
       )}
-      {busy && <p role="status">Working…</p>}
-      <div className="pc-unsaved-dialog-actions">
-        <button
-          className="pc-btn"
-          type="button"
-          ref={cancel}
-          disabled={busy}
-          onClick={() => void onCancel()}
-        >
-          Cancel
-        </button>
-        <button
-          className="pc-btn pc-primary"
-          type="button"
-          disabled={busy}
-          onClick={() => void onConfirm()}
-        >
-          {isImport ? "Import diagram" : "Save draw.io"}
-        </button>
-      </div>
-    </dialog>
+      {busy && <p role="status">{t("documents.drawio.working")}</p>}
+    </Dialog>
   );
 }
