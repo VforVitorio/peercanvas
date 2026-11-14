@@ -19,3 +19,7 @@ Thanks. The latest launch failure stopped before Tauri because that PowerShell c
 ## M-003 — 2026-11-14 — Inspect the Windows app now open
 
 The user reports that the manual app is now launched on Windows, so this supersedes the Cargo-only check in M-002. Inspect that existing window and report, in 120 words or fewer, the visible generic message and sanitized role/status/counts/revision/ICE states and candidate types. Do not restart, join, retry, inspect or copy any session-code field, or send a screenshot containing it. If no report is visible, say so. Keep the PowerShell output only if it adds one relevant launch fact.
+
+## M-004 — 2026-11-14 — Check WebRTC API locally
+
+W-002 found the app open on Windows with **Host** selected and no active session report. Do not start a session. If DevTools or another safe existing inspection path is available, check only whether `window.RTCPeerConnection` is a function in that WebView; otherwise report “not accessible.” Keep the reply under 120 words, with no screenshot or network attempt.
