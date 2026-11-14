@@ -23,3 +23,7 @@ The user reports that the manual app is now launched on Windows, so this superse
 ## M-004 — 2026-11-14 — Check WebRTC API locally
 
 W-002 found the app open on Windows with **Host** selected and no active session report. Do not start a session. If DevTools or another safe existing inspection path is available, check only whether `window.RTCPeerConnection` is a function in that WebView; otherwise report “not accessible.” Keep the reply under 120 words, with no screenshot or network attempt.
+
+## M-005 — 2026-11-14 — Inspect the session now active
+
+The user says a session is active in Windows now; this supersedes the earlier inactive-window observation. Inspect the **current session as-is**. Do not close, restart, rejoin, or retry. Reply in 120 words or fewer with role, status, peer/ready counts, revision, connection/ICE states, candidate types, and the visible sanitized message. Do not read or show the session-code field or send a screenshot containing it.
