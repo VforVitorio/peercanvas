@@ -44,3 +44,7 @@ export function readNativeIceDiagnostics(): NativeIceDiagnostic[] {
     candidateTypes: [...candidateTypes].sort(),
   }));
 }
+
+export function resetNativeIceDiagnostics(): void {
+  connections.length = 0;
+}

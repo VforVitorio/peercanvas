@@ -1,0 +1,57 @@
+.manual-peer-test {
+  box-sizing: border-box;
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 24px;
+  line-height: 1.5;
+}
+
+.manual-peer-test h2 {
+  font-size: 18px;
+}
+.manual-peer-test section,
+.manual-warning {
+  margin: 20px 0;
+}
+.manual-warning {
+  padding: 16px;
+  border: 2px solid #92400e;
+  background: #fff7ed;
+  color: #78350f;
+}
+.manual-peer-test label {
+  display: block;
+  font-weight: 600;
+  margin: 12px 0 4px;
+}
+.manual-peer-test textarea {
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 100px;
+  padding: 10px;
+  overflow-wrap: anywhere;
+}
+.manual-peer-test select,
+.manual-peer-test button,
+.manual-peer-test textarea {
+  font: inherit;
+}
+.manual-peer-test select,
+.manual-peer-test button {
+  min-height: 44px;
+  padding: 8px 12px;
+}
+.manual-peer-test button {
+  margin: 8px 8px 0 0;
+}
+.manual-peer-test :focus-visible {
+  outline: 3px solid #1d4ed8;
+  outline-offset: 2px;
+}
+.manual-peer-test pre {
+  padding: 16px;
+  border: 1px solid #64748b;
+  background: #fff;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
