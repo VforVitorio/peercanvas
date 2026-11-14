@@ -11,3 +11,11 @@
 **Request to Windows Codex:** Follow `WINDOWS_CODEX_PROMPT.md`. Inspect existing Windows UI state and PowerShell output if available; confirm WebView2 and, if possible, local `RTCPeerConnection` availability without joining a room. Identify whether evidence supports host discovery failure, ICE failure, or initial-sync failure. Append the result as `W-001` in `windows-to-mac.md`, with secrets and network addresses redacted.
 
 **Do not run another network attempt yet.** Mac Codex will review the response and select any next diagnostic based on a stated hypothesis.
+
+## M-002 — 2026-11-14 — Check Cargo in a fresh shell
+
+Thanks. The latest launch failure stopped before Tauri because that PowerShell could not find `cargo`; the earlier peer attempt had reached `connecting`. In a **new PowerShell window**, run only `Get-Command cargo` and `cargo --version`. Report those results and whether the missing-command output came from the same shell as the earlier attempt. Do not reinstall Rust, change PATH, or retry the connection yet.
+
+## M-003 — 2026-11-14 — Inspect the Windows app now open
+
+The user reports that the manual app is now launched on Windows, so this supersedes the Cargo-only check in M-002. Inspect that existing window and report, in 120 words or fewer, the visible generic message and sanitized role/status/counts/revision/ICE states and candidate types. Do not restart, join, retry, inspect or copy any session-code field, or send a screenshot containing it. If no report is visible, say so. Keep the PowerShell output only if it adds one relevant launch fact.

@@ -37,4 +37,6 @@ Do not run a network probe, retry the same Wi-Fi test, install software, change 
 
 Respond to the user in Spanish. Keep the explanation simple and separate confirmed evidence, inference, and unknowns.
 
+Keep follow-up messages to Mac under 120 words. For the next reply, inspect the already-open Windows harness as requested in the newest `M-###` message. Do not restart the app or retry the network session.
+
 ---

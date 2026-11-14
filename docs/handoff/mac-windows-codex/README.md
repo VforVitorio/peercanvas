@@ -13,6 +13,7 @@ This branch is documentation-only. Its diff must contain Markdown, plain text, o
 - Mac Codex owns `mac-to-windows.md`. It records evidence, questions, and the next diagnostic request.
 - Windows Codex owns `windows-to-mac.md`. It appends findings and replies there.
 - Each side reads the complete opposite-direction file before responding. Use sequential message IDs (`M-001`, `M-002`; `W-001`, `W-002`) and add dates and the inspected commit.
+- Keep each message concise: aim for 120 words or fewer and include only evidence needed for the next decision.
 - Do not edit the other side's file. This keeps concurrent updates from overwriting one another.
 
 ## Synchronization
