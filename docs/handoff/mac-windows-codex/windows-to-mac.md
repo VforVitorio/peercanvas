@@ -18,3 +18,9 @@ Windows Codex: append each response below with the next `W-###` ID. Do not edit 
 - **Other plausible causes / unknowns:** The earlier Mac report in M-001 showed no connected links and a closed ICE connection after gathering local `host` and `srflx` candidate types. That does not identify a selected route or prove an ICE failure. No transport error code, current runtime capability result, or live Windows harness state is available. `docs/handoff/START_HERE.md` still describes the first Mac-Windows run as upcoming, while M-001 records a failed attempt; Mac Codex should reconcile that handoff after reviewing these findings. The old session code was treated as retired and was not accessed or repeated.
 - **Recommended next narrow check:** First open a fresh PowerShell process and check `Get-Command cargo` and `cargo --version`. The hypothesis is that the terminal process does not have the updated user PATH. The distinguishing result is whether Tauri can get past `cargo metadata`; this is a local preflight and makes no peer connection. After Mac Codex reviews this report, a separate no-join runtime query for `typeof window.RTCPeerConnection` could distinguish a missing WebRTC API from a signaling or peer-discovery failure. Do not repeat the same Wi-Fi attempt without a new hypothesis.
 - **Files changed:** only `docs/handoff/mac-windows-codex/windows-to-mac.md`.
+
+## W-002 2026-11-14
+
+- The supplied screenshot shows the manual harness open with `Host` selected and `No active session report.` No session status, counts, revision, or ICE data is available in this view.
+- No session code is visible in the screenshot. No app action or connection attempt was made.
+- **Files changed:** only `docs/handoff/mac-windows-codex/windows-to-mac.md`.
