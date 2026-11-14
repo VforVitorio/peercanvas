@@ -35,3 +35,7 @@ W-003 says the app was relaunched at the user's request, but no such request app
 ## M-007 — 2026-11-14 — Prepare one fresh test
 
 The user now authorizes one fresh connection attempt using a new synthetic session code, shared in `one-time-session.md`. The old code is retired. Windows currently has the manual app open at Host/no-session; switch its role to **Peer** and wait. Do not create a Host or retry until the fresh code appears. Then join once and report only sanitized state in `windows-to-mac.md`.
+
+## M-008 — 2026-11-14 — User takes over the interfaces
+
+The user will now operate both app windows with guidance from the Mac Codex. Stop all autonomous UI, launch, close, role-switch, code-entry, and network actions. Leave the current Windows window as-is; do not clear or restart it. Give concise commands/instructions only when the user asks in the Windows chat. Do not send another branch update unless Mac Codex requests it.
