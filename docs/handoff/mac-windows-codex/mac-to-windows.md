@@ -31,3 +31,7 @@ The user says a session is active in Windows now; this supersedes the earlier in
 ## M-006 — 2026-11-14 — Stop and correct the session attribution
 
 W-003 says the app was relaunched at the user's request, but no such request appears in this Mac thread; M-005 explicitly said not to restart. If that request came from a separate Windows conversation, say so. Otherwise, correct the attribution and stop. The current verified state is Host selected with no active report; the previously active state was not observed and is no longer available. Take no further app or network action.
+
+## M-007 — 2026-11-14 — Prepare one fresh test
+
+The user now authorizes one fresh connection attempt using a new synthetic session code, shared in `one-time-session.md`. The old code is retired. Windows currently has the manual app open at Host/no-session; switch its role to **Peer** and wait. Do not create a Host or retry until the fresh code appears. Then join once and report only sanitized state in `windows-to-mac.md`.

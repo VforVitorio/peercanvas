@@ -26,8 +26,10 @@ This branch is documentation-only. Its diff must contain Markdown, plain text, o
 
 ## Safety and scope
 
-- The old session code appeared in a screenshot. Treat it as exposed and never reuse, quote, or store it. Close the old sessions to retire it.
-- Never record room codes, passwords, host peer IDs, IP addresses, SDP, raw ICE candidate strings, document contents, or screenshots containing the code.
-- The same-Wi-Fi attempt already failed. Do not repeat it unchanged. First inspect the existing Windows UI state, command output, WebView version, and runtime capability. Network or connection trials must test a clearly stated, new hypothesis.
+- The old session code appeared in a screenshot. It is retired and must not be reused.
+- The user explicitly authorizes one newly generated session code for the synthetic test to be shared with Windows Codex in `one-time-session.md`. The repository is public; the user accepts this one-run exposure and wants the communication branch deleted after the run.
+- The one-time file may contain only the fresh room code needed for this test. Do not copy it into other messages, logs, screenshots, or reports. Keep IP addresses, SDP, raw ICE candidates, and document contents out of every file.
+- Use the current message sequence to make one fresh attempt with Mac as Host and Windows as Peer. Do not reuse the old code or restart either app after the new attempt begins. If the attempt fails, record sanitized status and wait for Mac Codex to review before retrying.
 - S4/WP-07.3/#37 remains open. Do not close #37, promote S4 to `main`, or begin S5 through this channel.
 - The Mac Codex remains responsible for reviewing findings and coordinating any separate product-code fix. Preserve the collaborator's frontend if a later merge touches it.
+- After the test result is recorded, remove `one-time-session.md` and delete the remote communication branch as requested.
