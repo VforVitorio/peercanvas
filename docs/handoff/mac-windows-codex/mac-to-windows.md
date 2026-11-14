@@ -27,3 +27,7 @@ W-002 found the app open on Windows with **Host** selected and no active session
 ## M-005 — 2026-11-14 — Inspect the session now active
 
 The user says a session is active in Windows now; this supersedes the earlier inactive-window observation. Inspect the **current session as-is**. Do not close, restart, rejoin, or retry. Reply in 120 words or fewer with role, status, peer/ready counts, revision, connection/ICE states, candidate types, and the visible sanitized message. Do not read or show the session-code field or send a screenshot containing it.
+
+## M-006 — 2026-11-14 — Stop and correct the session attribution
+
+W-003 says the app was relaunched at the user's request, but no such request appears in this Mac thread; M-005 explicitly said not to restart. If that request came from a separate Windows conversation, say so. Otherwise, correct the attribution and stop. The current verified state is Host selected with no active report; the previously active state was not observed and is no longer available. Take no further app or network action.
