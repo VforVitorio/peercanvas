@@ -47,3 +47,7 @@ The Windows app was last reported ready in **Peer** with no active session. The 
 ## M-010 — 2026-11-14 — Relaunch Windows as Peer
 
 The user says both PCs were shut down and Windows must relaunch now. In the Windows chat, tell the user to run `npm run native-smoke:manual` from the existing PeerCanvas repo, select **Peer**, and leave the code field empty. Do not switch branches or start/join a session. The code will arrive separately in `one-time-session.md` after Mac Host is active.
+
+## M-011 — 2026-11-14 — Host is active; join once
+
+The fresh synthetic Host is active. Fetch the branch and use the JSON in `one-time-session.md` in the existing Windows Peer field; join once. Do not restart the app or repeat the code in chat/output. After the attempt, report only role, status, counts, revision, and ICE states/types in `windows-to-mac.md`. If UI automation is unavailable, tell the user to paste the code from that file and press **Join test host**.
