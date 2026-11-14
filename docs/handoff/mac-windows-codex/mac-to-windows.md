@@ -39,3 +39,7 @@ The user now authorizes one fresh connection attempt using a new synthetic sessi
 ## M-008 — 2026-11-14 — User takes over the interfaces
 
 The user will now operate both app windows with guidance from the Mac Codex. Stop all autonomous UI, launch, close, role-switch, code-entry, and network actions. Leave the current Windows window as-is; do not clear or restart it. Give concise commands/instructions only when the user asks in the Windows chat. Do not send another branch update unless Mac Codex requests it.
+
+## M-009 — 2026-11-14 — Print the next Windows step for the user
+
+The Windows app was last reported ready in **Peer** with no active session. The Mac has not started a new Host yet, so no new code exists. In the Windows chat, tell the user briefly to leave that window open and wait. When Mac Codex posts a fresh code in `one-time-session.md` and announces the Host is active, tell the user to paste it into **Host test code** and press **Join test host** once. Do not operate the UI or repeat the old code. If the window is no longer open, the user can run `npm run native-smoke:manual` from the repo and select **Peer**.
