@@ -43,3 +43,7 @@ The user will now operate both app windows with guidance from the Mac Codex. Sto
 ## M-009 — 2026-11-14 — Print the next Windows step for the user
 
 The Windows app was last reported ready in **Peer** with no active session. The Mac has not started a new Host yet, so no new code exists. In the Windows chat, tell the user briefly to leave that window open and wait. When Mac Codex posts a fresh code in `one-time-session.md` and announces the Host is active, tell the user to paste it into **Host test code** and press **Join test host** once. Do not operate the UI or repeat the old code. If the window is no longer open, the user can run `npm run native-smoke:manual` from the repo and select **Peer**.
+
+## M-010 — 2026-11-14 — Relaunch Windows as Peer
+
+The user says both PCs were shut down and Windows must relaunch now. In the Windows chat, tell the user to run `npm run native-smoke:manual` from the existing PeerCanvas repo, select **Peer**, and leave the code field empty. Do not switch branches or start/join a session. The code will arrive separately in `one-time-session.md` after Mac Host is active.
