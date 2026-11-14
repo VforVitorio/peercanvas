@@ -19,6 +19,8 @@
     "native-smoke:peers": "node scripts/native-smoke.mjs peers-local",
     "native-smoke:public": "node scripts/native-smoke.mjs peers-public",
     "native-smoke:turn-local": "node scripts/native-smoke.mjs peers-turn-local",
+    "native-smoke:manual": "tauri dev --config src-tauri/tauri.native-smoke-manual.conf.json",
+    "native-smoke:manual:build": "tauri build --debug --no-bundle --config src-tauri/tauri.native-smoke-manual.conf.json",
     "preview": "vite preview",
     "tauri": "tauri",
     "typecheck": "tsc --noEmit",

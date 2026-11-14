@@ -1,6 +1,7 @@
 import ReactDOM from "react-dom/client";
 import NativeSmokeCanvas from "./NativeSmokeCanvas";
 import NativeSmokePeer from "./NativeSmokePeer";
+import ManualPeerTest from "./ManualPeerTest";
 import "./styles.css";
 
 type NativeInputIsolation = {
@@ -18,6 +19,8 @@ declare global {
 const root = ReactDOM.createRoot(document.getElementById("root") as HTMLElement);
 if (new URLSearchParams(window.location.search).has("native-smoke-peer")) {
   root.render(<NativeSmokePeer />);
+} else if (new URLSearchParams(window.location.search).get("native-smoke-manual") === "1") {
+  root.render(<ManualPeerTest />);
 } else {
   const isolation: NativeInputIsolation = { enabled: true, suppressed: 0, examples: [] };
   window.__PEERCANVAS_NATIVE_INPUT_ISOLATION__ = isolation;

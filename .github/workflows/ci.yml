@@ -203,3 +203,6 @@ jobs:
           name: native-smoke-${{ runner.os }}
           path: src-tauri/target/native-smoke/
           retention-days: 14
+      - name: Build manual S4 cross-device test app
+        if: ${{ !cancelled() && (needs.native-scope.result != 'success' || (success() && needs.native-scope.outputs.smoke == 'true')) }}
+        run: npm run native-smoke:manual:build

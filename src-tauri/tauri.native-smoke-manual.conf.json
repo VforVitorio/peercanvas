@@ -1,0 +1,22 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "PeerCanvas S4 Test",
+  "identifier": "com.peercanvas.s4test",
+  "build": {
+    "beforeDevCommand": "npm run dev -- --mode native-smoke",
+    "devUrl": "http://localhost:1420/?native-smoke-manual=1",
+    "beforeBuildCommand": "npm run build:native-smoke"
+  },
+  "app": {
+    "windows": [
+      {
+        "label": "main",
+        "title": "PeerCanvas S4 connection test",
+        "url": "index.html?native-smoke-manual=1",
+        "width": 1040,
+        "height": 820,
+        "resizable": true
+      }
+    ]
+  }
+}

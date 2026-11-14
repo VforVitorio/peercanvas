@@ -65,6 +65,7 @@ async function assertProductionIsolation(
         !content.includes("__PEERCANVAS_NATIVE_INPUT_ISOLATION__"),
         `Smoke isolation in ${file}`,
       );
+      assert(!content.includes("__PEERCANVAS_NATIVE_MANUAL__"), `Manual smoke in ${file}`);
       assert(!content.includes("native-smoke-peer"), `Peer smoke entry in ${file}`);
       assert(
         !content.includes("pc-yjs-update"),
